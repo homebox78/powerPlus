@@ -3,3 +3,8 @@ php_flag engine off
 <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
   Require all denied
 </FilesMatch>
+
+# 애드인(다른 도메인)이 이미지를 fetch 해 슬라이드에 삽입할 수 있도록 CORS 허용
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>

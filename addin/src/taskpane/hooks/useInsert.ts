@@ -34,6 +34,19 @@ function svgToPngBase64(svg: string, size = 512): Promise<string> {
   });
 }
 
+/** 서버 업로드 이미지(PNG/JPG) URL → base64(헤더 제외). Office addImage 는 PNG/JPEG base64 를 받는다. */
+async function imageUrlToBase64(url: string): Promise<string> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("이미지 로드 실패");
+  const blob = await res.blob();
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1]);
+    reader.onerror = () => reject(new Error("이미지 변환 실패"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 const isPowerPoint = (): boolean =>
   typeof Office !== "undefined" &&
   Office.context?.host === Office.HostType.PowerPoint;
@@ -55,7 +68,10 @@ export function useInsert() {
   const insert = useCallback(async (asset: Asset, sizePt = 150): Promise<boolean> => {
     setState({ insertingId: asset.id, message: null, error: false });
     try {
-      const base64 = await svgToPngBase64(asset.svg);
+      // 업로드 자산이면 이미지 URL을, 구 mock이면 SVG를 base64(PNG)로 변환
+      const base64 = asset.image_url
+        ? await imageUrlToBase64(asset.image_url)
+        : await svgToPngBase64(asset.svg || "");
 
       if (!isPowerPoint()) {
         // 브라우저에서 미리보기 중 — 삽입은 PowerPoint에서만 가능
@@ -67,27 +83,26 @@ export function useInsert() {
         return false;
       }
 
-      await PowerPoint.run(async (context) => {
-        const selected = context.presentation.getSelectedSlides();
-        selected.load("items");
-        await context.sync();
-
-        const slide =
-          selected.items[0] ?? context.presentation.slides.getItemAt(0);
-
-        const image = slide.shapes.addImage(base64);
-        // 표준 16:9 슬라이드(960×540pt)의 중앙에 sizePt 크기로 배치
-        image.width = sizePt;
-        image.height = sizePt;
-        image.left = (960 - sizePt) / 2;
-        image.top = (540 - sizePt) / 2;
-
-        await context.sync();
+      // 현재 슬라이드에 이미지 삽입 (Common API — 모든 PowerPoint 버전에서 동작).
+      // PowerPoint.shapes.addImage 는 런타임에 없는 환경이 있어 setSelectedDataAsync 사용.
+      await new Promise<void>((resolve, reject) => {
+        Office.context.document.setSelectedDataAsync(
+          base64,
+          {
+            coercionType: Office.CoercionType.Image,
+            imageWidth: sizePt, // 단위 pt — 슬라이드 중앙에 배치됨
+            imageHeight: sizePt,
+          },
+          (res) => {
+            if (res.status === Office.AsyncResultStatus.Succeeded) resolve();
+            else reject(new Error(res.error?.message || "삽입에 실패했습니다."));
+          }
+        );
       });
 
       setState({
         insertingId: null,
-        message: `"${asset.name}" 삽입 완료`,
+        message: `"${asset.name || asset.tags?.[0] || asset.id}" 삽입 완료`,
         error: false,
       });
       return true;

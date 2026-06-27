@@ -9,6 +9,7 @@ require_once __DIR__ . '/src/AuthController.php';
 require_once __DIR__ . '/src/AuthService.php';
 require_once __DIR__ . '/src/AdminController.php';
 require_once __DIR__ . '/src/CategoryController.php';
+require_once __DIR__ . '/src/UsageController.php';
 
 // ── CORS (운영에서는 CORS_ORIGIN 으로 add-in 도메인만 허용) ──
 $origin = getenv('CORS_ORIGIN') ?: '*';
@@ -81,6 +82,28 @@ try {
     }
     if (preg_match('#/api/auth/logout$#', $path) && $method === 'POST') {
         (new AuthController())->logout(bearer_token());
+        exit;
+    }
+
+    // ── 사용 기록 (로그인 사용자) — 삽입 시 호출 ──
+    if (preg_match('#/api/usage$#', $path) && $method === 'POST') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        (new UsageController())->record(read_json_body(), $email);
+        exit;
+    }
+
+    // ── 사용 통계 (관리자만) ──
+    if (preg_match('#/api/admin/stats$#', $path) && $method === 'GET') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        (new UsageController())->stats();
         exit;
     }
 

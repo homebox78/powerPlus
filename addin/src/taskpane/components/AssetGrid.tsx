@@ -26,21 +26,28 @@ export default function AssetGrid({
     <div className="grid">
       {assets.map((a) => {
         const fav = isFavorite(a.id);
+        const label = a.name || a.tags?.[0] || a.id;
         return (
           <div key={a.id} className="card">
             <button
               className="card__btn"
-              title={`${a.name} — 클릭하면 슬라이드에 삽입`}
+              title={`${label} — 클릭하면 슬라이드에 삽입`}
               disabled={insertingId === a.id}
               onClick={() => onInsert(a)}
             >
-              <div
-                className="card__thumb"
-                // SVG 문자열을 그대로 렌더. 신뢰된 내부 자산만 사용.
-                dangerouslySetInnerHTML={{ __html: a.svg }}
-              />
+              {a.image_url ? (
+                <div className="card__thumb">
+                  <img src={a.image_url} alt={label} />
+                </div>
+              ) : (
+                <div
+                  className="card__thumb"
+                  // 구 mock: SVG 문자열 렌더 (신뢰된 내부 자산만)
+                  dangerouslySetInnerHTML={{ __html: a.svg || "" }}
+                />
+              )}
               <div className="card__name">
-                {insertingId === a.id ? "삽입 중…" : a.name}
+                {insertingId === a.id ? "삽입 중…" : label}
               </div>
             </button>
             <button

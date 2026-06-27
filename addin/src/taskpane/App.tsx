@@ -7,6 +7,7 @@ import { CATEGORIES } from "./data/mockAssets";
 import type { Asset, Category } from "./data/mockAssets";
 import { fetchAssets, AuthRequiredError } from "./api/assets";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
+import { recordUsage } from "./api/usage";
 import { useInsert } from "./hooks/useInsert";
 import { useFavorites } from "./hooks/useFavorites";
 import { useRecent } from "./hooks/useRecent";
@@ -81,7 +82,10 @@ export default function App() {
 
   async function handleInsert(asset: Asset) {
     const ok = await insert(asset, sizePt);
-    if (ok) pushRecent(asset.id); // 실제 삽입 성공 시에만 최근 기록
+    if (ok) {
+      pushRecent(asset.id); // 실제 삽입 성공 시에만 최근 기록
+      recordUsage(asset.id); // 사용 통계 기록 (실패해도 무시)
+    }
   }
 
   async function handleLogout() {

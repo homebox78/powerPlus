@@ -127,6 +127,7 @@
     <div class="tabs">
       <button class="tab tab--active" data-tab="assets">자산</button>
       <button class="tab" data-tab="cats">카테고리</button>
+      <button class="tab" data-tab="stats">통계</button>
     </div>
 
     <!-- 자산 탭 -->
@@ -138,6 +139,13 @@
         <button id="btn-new" class="btn">+ 새 자산</button>
       </div>
       <div id="asset-grid" class="grid"></div>
+    </section>
+
+    <!-- 통계 탭 -->
+    <section id="tab-stats" class="hidden">
+      <div id="stats-summary" style="display:flex;gap:12px;margin-bottom:12px"></div>
+      <table><thead><tr><th>순위</th><th>미리보기</th><th>카테고리</th><th>태그</th><th>사용 횟수</th></tr></thead>
+        <tbody id="stats-rows"></tbody></table>
     </section>
 
     <!-- 카테고리 탭 -->
@@ -235,8 +243,27 @@
       document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("tab--active", x === t));
       $("tab-assets").classList.toggle("hidden", t.dataset.tab !== "assets");
       $("tab-cats").classList.toggle("hidden", t.dataset.tab !== "cats");
+      $("tab-stats").classList.toggle("hidden", t.dataset.tab !== "stats");
       if (t.dataset.tab === "cats") renderCats();
+      if (t.dataset.tab === "stats") loadStats();
     });
+
+    async function loadStats() {
+      const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
+      try {
+        const r = await api("/admin/stats");
+        $("stats-summary").innerHTML =
+          `<div class="card" style="flex:1;text-align:center"><div class="card__cat">총 삽입 횟수</div><div style="font-size:26px;font-weight:700">${r.summary.total}</div></div>
+           <div class="card" style="flex:1;text-align:center"><div class="card__cat">사용된 자산 수</div><div style="font-size:26px;font-weight:700">${r.summary.unique}</div></div>`;
+        $("stats-rows").innerHTML = (r.top || []).length ? r.top.map((row, i) => {
+          const a = row.asset; if (!a) return "";
+          const thumb = a.image_url ? `<img src="${esc(a.image_url)}" style="height:48px;width:auto">`
+            : `<span style="display:inline-flex;height:48px;width:48px;align-items:center">${a.svg || ""}</span>`;
+          const tg = (a.tags || []).slice(0, 6).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
+          return `<tr><td>${i + 1}</td><td>${thumb}</td><td>${esc(catLabel(a.category))}</td><td>${tg}</td><td><b style="font-size:15px">${row.count}</b></td></tr>`;
+        }).join("") : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:36px">아직 사용(삽입) 기록이 없습니다.</td></tr>`;
+      } catch (e) { $("stats-rows").innerHTML = `<tr><td colspan="5" class="msg--err" style="padding:20px">${esc(e.message)}</td></tr>`; }
+    }
 
     /* ── 카테고리 ── */
     async function loadCategories() {

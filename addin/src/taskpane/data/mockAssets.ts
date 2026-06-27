@@ -7,10 +7,11 @@
 
 export interface Asset {
   id: string;
-  name: string;
-  category: string; // 'icon' | 'photo' | 'illust' | 'diagram'
+  name: string | null;
+  category: string; // 'icon' | 'photo' | 'illust' | 'diagram' 또는 동적 카테고리 key
   tags: string[];
-  svg: string;
+  svg?: string; // 구 mock 자산: 인라인 SVG
+  image_url?: string; // 서버 업로드 자산: PNG/JPG URL (있으면 이걸로 표시·삽입)
 }
 
 export interface Category {
@@ -207,7 +208,7 @@ export function filterAssets(category: string, query: string): Asset[] {
     if (!catOk) return false;
     if (!q) return true;
     return (
-      a.name.toLowerCase().includes(q) ||
+      (a.name || "").toLowerCase().includes(q) ||
       a.tags.some((t) => t.toLowerCase().includes(q))
     );
   });
