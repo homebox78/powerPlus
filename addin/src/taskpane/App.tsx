@@ -187,11 +187,11 @@ export default function App() {
       <SearchBar
         value={query}
         onChange={setQuery}
-        categories={[...cats, ...SPECIAL_TABS]}
+        categories={cats}
         category={category}
         onCategoryChange={setCategory}
       />
-      <CategoryTabs categories={[...cats, ...SPECIAL_TABS]} active={category} onChange={setCategory} />
+      <CategoryTabs categories={SPECIAL_TABS} active={category} onChange={setCategory} />
 
       <div className="app__count">
         {loading
