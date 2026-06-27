@@ -73,6 +73,15 @@ module.exports = async (env, options) => {
           ca: httpsOptions.ca,
         },
       },
+      // /api 요청을 PHP 서버로 프록시 (https 작업창 → http 서버 mixed-content 회피)
+      proxy: [
+        {
+          context: ["/api"],
+          target: "http://localhost:8000",
+          secure: false,
+          changeOrigin: true,
+        },
+      ],
       port: 3000,
     };
   }

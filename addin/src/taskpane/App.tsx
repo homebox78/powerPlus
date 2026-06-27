@@ -2,19 +2,38 @@ import * as React from "react";
 import CategoryTabs from "./components/CategoryTabs";
 import SearchBar from "./components/SearchBar";
 import AssetGrid from "./components/AssetGrid";
-import { CATEGORIES, filterAssets } from "./data/mockAssets";
+import { CATEGORIES } from "./data/mockAssets";
+import type { Asset } from "./data/mockAssets";
+import { fetchAssets } from "./api/assets";
 import { useInsert } from "./hooks/useInsert";
 
 export default function App() {
   const [category, setCategory] = React.useState("all");
   const [query, setQuery] = React.useState("");
+
+  const [assets, setAssets] = React.useState<Asset[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [offline, setOffline] = React.useState(false);
+
   const { insertingId, message, error, insert, clearMessage } = useInsert();
 
-  // 현재 카테고리 + 검색어 기준 결과 (mock). 추후 서버 fetch로 교체.
-  const assets = React.useMemo(
-    () => filterAssets(category, query),
-    [category, query]
-  );
+  // 카테고리/검색어 변경 시 서버에서 자산을 가져온다 (이전 요청은 취소).
+  React.useEffect(() => {
+    const ctrl = new AbortController();
+    setLoading(true);
+    fetchAssets(category, query, ctrl.signal)
+      .then((r) => {
+        setAssets(r.assets);
+        setOffline(r.offline);
+      })
+      .catch(() => {
+        // 취소된 요청 — 무시
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+    return () => ctrl.abort();
+  }, [category, query]);
 
   // 토스트 메시지 자동 사라짐
   React.useEffect(() => {
@@ -32,7 +51,10 @@ export default function App() {
       <SearchBar value={query} onChange={setQuery} />
       <CategoryTabs categories={CATEGORIES} active={category} onChange={setCategory} />
 
-      <div className="app__count">{assets.length}개 자산</div>
+      <div className="app__count">
+        {loading ? "불러오는 중…" : `${assets.length}개 자산`}
+        {offline && !loading && " · 오프라인(로컬 데이터)"}
+      </div>
 
       <main className="app__body">
         <AssetGrid assets={assets} insertingId={insertingId} onInsert={insert} />
