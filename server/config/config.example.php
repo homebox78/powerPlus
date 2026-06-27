@@ -19,7 +19,15 @@ return [
     'mail_from'      => 'noreply@hom2box.com',
     'mail_from_name' => 'powerPlus',
 
-    // 개발용: mail() 이 안 되는 로컬 환경에서 인증코드를 응답/로그로 확인.
+    // SMTP: smtp_host 가 비어있으면 PHP mail() 사용, 값이 있으면 SMTP(PHPMailer) 사용.
+    // 공유호스팅은 mail() 이 막힌 경우가 많으니 호스팅 메일계정 SMTP 정보를 채우세요.
+    'smtp_host'   => '',          // 예: mail.hom2box.com
+    'smtp_port'   => 587,         // 587(STARTTLS) 또는 465(SSL)
+    'smtp_user'   => '',          // 메일 계정 (예: noreply@hom2box.com)
+    'smtp_pass'   => '',          // 메일 계정 비밀번호
+    'smtp_secure' => 'tls',       // 'tls'(587) 또는 'ssl'(465)
+
+    // 개발용: mail()/SMTP 없이 인증코드를 응답/로그로 확인.
     // !!! 운영 서버에서는 반드시 false !!!
     'auth_debug'     => false,
 ];
