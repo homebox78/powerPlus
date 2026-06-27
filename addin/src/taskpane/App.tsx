@@ -184,7 +184,13 @@ export default function App() {
         </button>
       </header>
 
-      <SearchBar value={query} onChange={setQuery} />
+      <SearchBar
+        value={query}
+        onChange={setQuery}
+        categories={[...cats, ...SPECIAL_TABS]}
+        category={category}
+        onCategoryChange={setCategory}
+      />
       <CategoryTabs categories={[...cats, ...SPECIAL_TABS]} active={category} onChange={setCategory} />
 
       <div className="app__count">

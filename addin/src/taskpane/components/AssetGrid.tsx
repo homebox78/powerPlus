@@ -73,7 +73,7 @@ export default function AssetGrid({
                   </span>
                 )}
               </div>
-              <div className="card__name">{label}</div>
+              {a.name ? <div className="card__name">{a.name}</div> : null}
             </button>
             <button
               className={"card__fav" + (fav ? " card__fav--on" : "")}

@@ -202,9 +202,34 @@ body {
 
 /* 검색 */
 .search {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.search__cat {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  padding: 0 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.search__cat:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.search__field {
   position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .search__icon {
