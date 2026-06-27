@@ -184,13 +184,6 @@ export default function App() {
         </button>
       </header>
 
-      <SearchBar
-        value={query}
-        onChange={setQuery}
-        categories={cats}
-        category={category}
-        onCategoryChange={setCategory}
-      />
       <CategoryTabs categories={SPECIAL_TABS} active={category} onChange={setCategory} />
 
       <div className="app__count">
@@ -220,6 +213,15 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* 하단 고정 검색 (채팅 입력창 스타일) */}
+      <SearchBar
+        value={query}
+        onChange={setQuery}
+        categories={cats}
+        category={category}
+        onCategoryChange={setCategory}
+      />
 
       {message && (
         <div className={"toast" + (error ? " toast--error" : "")} role="status">

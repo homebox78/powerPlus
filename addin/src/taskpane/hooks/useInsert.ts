@@ -47,6 +47,36 @@ async function imageUrlToBase64(url: string): Promise<string> {
   });
 }
 
+/** 장표(pptx base64)를 선택한 슬라이드 뒤에 삽입. 선택이 없으면 맨 끝에. (실패 시 기본 위치로 폴백) */
+async function insertSlidesAfterSelection(base64: string): Promise<void> {
+  const run = (useTarget: boolean) =>
+    PowerPoint.run(async (context) => {
+      const pres = context.presentation;
+      const opts: PowerPoint.InsertSlideOptions = { formatting: "KeepSourceFormatting" };
+      if (useTarget) {
+        const sel = pres.getSelectedSlides();
+        sel.load("items/id");
+        const all = pres.slides;
+        all.load("items/id");
+        await context.sync();
+        const id = sel.items.length
+          ? sel.items[sel.items.length - 1].id // 선택한(마지막) 슬라이드 뒤
+          : all.items.length
+            ? all.items[all.items.length - 1].id // 선택 없으면 맨 끝
+            : undefined;
+        if (id) opts.targetSlideId = id;
+      }
+      pres.insertSlidesFromBase64(base64, opts);
+      await context.sync();
+    });
+  // targetSlideId 형식 문제(SlideNotFound) 등 → 타겟 없이 재시도
+  try {
+    await run(true);
+  } catch {
+    await run(false);
+  }
+}
+
 const isPowerPoint = (): boolean =>
   typeof Office !== "undefined" &&
   Office.context?.host === Office.HostType.PowerPoint;
@@ -82,12 +112,7 @@ export function useInsert() {
       // 장표(ppt) 자산 → 새 슬라이드로 추가 (이미지가 아니라 슬라이드 삽입)
       if (asset.slide_url) {
         const pptxB64 = await imageUrlToBase64(asset.slide_url); // 임의 바이너리 → base64
-        await PowerPoint.run(async (context) => {
-          context.presentation.insertSlidesFromBase64(pptxB64, {
-            formatting: "KeepSourceFormatting",
-          });
-          await context.sync();
-        });
+        await insertSlidesAfterSelection(pptxB64); // 선택 슬라이드 뒤(없으면 끝)에 추가
         setState({ insertingId: null, message: `"${label}" 장표 추가됨`, error: false });
         return true;
       }
