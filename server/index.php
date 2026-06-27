@@ -14,6 +14,7 @@ require_once __DIR__ . '/src/AuthService.php';
 require_once __DIR__ . '/src/AdminController.php';
 require_once __DIR__ . '/src/CategoryController.php';
 require_once __DIR__ . '/src/UsageController.php';
+require_once __DIR__ . '/src/PrefsController.php';
 
 // ── CORS: 알려진 출처만 허용 (운영 도메인 + 로컬 dev). 그 외엔 운영 도메인으로 고정 ──
 $allowedOrigins = array_filter([
@@ -93,6 +94,36 @@ try {
     }
     if (preg_match('#/api/auth/logout$#', $path) && $method === 'POST') {
         (new AuthController())->logout(bearer_token());
+        exit;
+    }
+
+    // ── 내 즐겨찾기 / 최근 (로그인 사용자 본인) ──
+    if (preg_match('#/api/me/(favorites|recent)(?:/([^/]+))?$#', $path, $m)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        $pc = new PrefsController();
+        $sub = $m[1];
+        $id = $m[2] ?? '';
+        if ($sub === 'favorites' && $method === 'GET' && $id === '') {
+            $pc->favorites($email);
+            exit;
+        }
+        if ($sub === 'favorites' && $method === 'POST' && $id === '') {
+            $pc->addFavorite($email, read_json_body());
+            exit;
+        }
+        if ($sub === 'favorites' && $method === 'DELETE' && $id !== '') {
+            $pc->removeFavorite($email, urldecode($id));
+            exit;
+        }
+        if ($sub === 'recent' && $method === 'GET') {
+            $pc->recent($email);
+            exit;
+        }
+        json_out(['error' => 'Not Found', 'code' => 404], 404);
         exit;
     }
 

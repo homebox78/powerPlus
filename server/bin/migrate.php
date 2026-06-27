@@ -35,6 +35,15 @@ if ($hasCol === 0) {
 $pdo->exec("ALTER TABLE assets MODIFY svg MEDIUMTEXT NULL");
 $pdo->exec("ALTER TABLE assets MODIFY name VARCHAR(255) NULL");
 
+// 사용자별 즐겨찾기 (이메일 + 자산). 최근은 usage_log 재활용하므로 별도 테이블 불필요.
+$pdo->exec("CREATE TABLE IF NOT EXISTS user_favorites (
+  email VARCHAR(255) NOT NULL,
+  asset_id VARCHAR(64) NOT NULL,
+  created_at DATETIME NOT NULL,
+  PRIMARY KEY (email, asset_id),
+  INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 // 국문/영문 분리 태그 컬럼
 foreach (['tags_ko', 'tags_en'] as $c) {
     $has = (int) $pdo->query(

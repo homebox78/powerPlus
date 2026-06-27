@@ -44,8 +44,8 @@ export default function App() {
   const [offline, setOffline] = React.useState(false);
 
   const { insertingId, message, error, insert, clearMessage } = useInsert();
-  const { favorites, toggleFavorite, isFavorite } = useFavorites();
-  const { recent, pushRecent } = useRecent();
+  const { favorites, toggleFavorite, isFavorite } = useFavorites(email);
+  const { recent, pushRecent } = useRecent(email);
 
   const [total, setTotal] = React.useState(0);
   const [loadingMore, setLoadingMore] = React.useState(false);
