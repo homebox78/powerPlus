@@ -5,33 +5,55 @@ interface Props {
   assets: Asset[];
   insertingId: string | null;
   onInsert: (asset: Asset) => void;
+  isFavorite: (id: string) => boolean;
+  onToggleFavorite: (id: string) => void;
+  emptyMessage?: string;
 }
 
-export default function AssetGrid({ assets, insertingId, onInsert }: Props) {
+export default function AssetGrid({
+  assets,
+  insertingId,
+  onInsert,
+  isFavorite,
+  onToggleFavorite,
+  emptyMessage = "결과가 없습니다.",
+}: Props) {
   if (assets.length === 0) {
-    return <div className="empty">결과가 없습니다.</div>;
+    return <div className="empty">{emptyMessage}</div>;
   }
 
   return (
     <div className="grid">
-      {assets.map((a) => (
-        <button
-          key={a.id}
-          className="card"
-          title={`${a.name} — 클릭하면 슬라이드에 삽입`}
-          disabled={insertingId === a.id}
-          onClick={() => onInsert(a)}
-        >
-          <div
-            className="card__thumb"
-            // SVG 문자열을 그대로 렌더 (mock 데이터). 신뢰된 내부 자산만 사용.
-            dangerouslySetInnerHTML={{ __html: a.svg }}
-          />
-          <div className="card__name">
-            {insertingId === a.id ? "삽입 중…" : a.name}
+      {assets.map((a) => {
+        const fav = isFavorite(a.id);
+        return (
+          <div key={a.id} className="card">
+            <button
+              className="card__btn"
+              title={`${a.name} — 클릭하면 슬라이드에 삽입`}
+              disabled={insertingId === a.id}
+              onClick={() => onInsert(a)}
+            >
+              <div
+                className="card__thumb"
+                // SVG 문자열을 그대로 렌더. 신뢰된 내부 자산만 사용.
+                dangerouslySetInnerHTML={{ __html: a.svg }}
+              />
+              <div className="card__name">
+                {insertingId === a.id ? "삽입 중…" : a.name}
+              </div>
+            </button>
+            <button
+              className={"card__fav" + (fav ? " card__fav--on" : "")}
+              title={fav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+              aria-pressed={fav}
+              onClick={() => onToggleFavorite(a.id)}
+            >
+              ★
+            </button>
           </div>
-        </button>
-      ))}
+        );
+      })}
     </div>
   );
 }

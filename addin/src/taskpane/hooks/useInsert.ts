@@ -51,7 +51,8 @@ export function useInsert() {
     error: false,
   });
 
-  const insert = useCallback(async (asset: Asset) => {
+  /** 자산을 현재 슬라이드에 삽입. 성공하면 true (최근 사용 기록용). sizePt 는 가로세로 크기(pt). */
+  const insert = useCallback(async (asset: Asset, sizePt = 150): Promise<boolean> => {
     setState({ insertingId: asset.id, message: null, error: false });
     try {
       const base64 = await svgToPngBase64(asset.svg);
@@ -63,7 +64,7 @@ export function useInsert() {
           message: "PowerPoint에서 열면 슬라이드에 삽입됩니다 (현재는 미리보기).",
           error: true,
         });
-        return;
+        return false;
       }
 
       await PowerPoint.run(async (context) => {
@@ -75,11 +76,11 @@ export function useInsert() {
           selected.items[0] ?? context.presentation.slides.getItemAt(0);
 
         const image = slide.shapes.addImage(base64);
-        // 기본 크기/위치: 가로세로 150pt, 슬라이드 중앙 근처
-        image.width = 150;
-        image.height = 150;
-        image.left = 285; // 표준 16:9(960pt 폭) 기준 대략 중앙
-        image.top = 160;
+        // 표준 16:9 슬라이드(960×540pt)의 중앙에 sizePt 크기로 배치
+        image.width = sizePt;
+        image.height = sizePt;
+        image.left = (960 - sizePt) / 2;
+        image.top = (540 - sizePt) / 2;
 
         await context.sync();
       });
@@ -89,9 +90,11 @@ export function useInsert() {
         message: `"${asset.name}" 삽입 완료`,
         error: false,
       });
+      return true;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setState({ insertingId: null, message: `삽입 실패: ${msg}`, error: true });
+      return false;
     }
   }, []);
 
