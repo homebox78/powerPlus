@@ -24,7 +24,8 @@ export default function SearchBar({ value, onChange }: Props) {
       <span className="search__icon" aria-hidden>🔍</span>
       <input
         className="search__input"
-        type="text"
+        type="search"
+        aria-label="자산 검색"
         placeholder="이름·태그로 검색 (예: 화살표)"
         value={local}
         onChange={(e) => handle(e.target.value)}

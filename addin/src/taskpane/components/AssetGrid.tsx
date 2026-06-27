@@ -37,7 +37,7 @@ export default function AssetGrid({
             >
               {a.image_url ? (
                 <div className="card__thumb">
-                  <img src={a.image_url} alt={label} />
+                  <img src={a.image_url} alt={label} loading="lazy" decoding="async" />
                 </div>
               ) : (
                 <div

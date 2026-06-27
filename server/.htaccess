@@ -21,3 +21,9 @@
 <FilesMatch "\.(sql|md|json)$">
   Require all denied
 </FilesMatch>
+
+# 보안 헤더 (X-Frame-Options 는 Office 웹 애드인 iframe 동작 위해 의도적으로 미설정)
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

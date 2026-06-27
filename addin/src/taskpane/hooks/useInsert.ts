@@ -100,13 +100,17 @@ export function useInsert() {
       }
 
       // 현재 슬라이드에 이미지 삽입 (Common API — 모든 PowerPoint 버전에서 동작).
-      // 크기는 지정하지 않음 → 원본 크기로 삽입, 이후 사용자가 자유롭게 조절.
+      // 가로 기준 합리적 기본 크기로 삽입(세로는 비율 자동) → 원본이 너무 커서
+      // 슬라이드를 벗어나는 일 방지. 이후 사용자가 자유롭게 조절.
+      const DEFAULT_WIDTH_PT = 200;
       await new Promise<void>((resolve, reject) => {
         const opts: Office.SetSelectedDataOptions & {
+          imageWidth?: number;
           imageLeft?: number;
           imageTop?: number;
         } = {
           coercionType: Office.CoercionType.Image,
+          imageWidth: DEFAULT_WIDTH_PT, // 세로는 비율 유지로 자동 계산
         };
         if (pos) {
           opts.imageLeft = pos.left; // 선택한 개체 위치에 삽입

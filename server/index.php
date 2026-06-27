@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+// 운영: 에러 메시지를 화면에 노출하지 않음(정보 노출 방지). 로그로만 기록.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 // 프론트 컨트롤러 (Apache/공유호스팅 + PHP 내장서버 공용).
 // Apache 서브디렉터리(예: /powerPlus/) 배포를 고려해 경로 prefix는 무시하고
 // 끝부분(/api/assets ...)으로 라우팅한다.
@@ -11,9 +15,16 @@ require_once __DIR__ . '/src/AdminController.php';
 require_once __DIR__ . '/src/CategoryController.php';
 require_once __DIR__ . '/src/UsageController.php';
 
-// ── CORS (운영에서는 CORS_ORIGIN 으로 add-in 도메인만 허용) ──
-$origin = getenv('CORS_ORIGIN') ?: '*';
+// ── CORS: 알려진 출처만 허용 (운영 도메인 + 로컬 dev). 그 외엔 운영 도메인으로 고정 ──
+$allowedOrigins = array_filter([
+    'https://hom2box.com',
+    'https://localhost:3000',
+    getenv('CORS_ORIGIN') ?: null,
+]);
+$reqOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$origin = in_array($reqOrigin, $allowedOrigins, true) ? $reqOrigin : 'https://hom2box.com';
 header('Access-Control-Allow-Origin: ' . $origin);
+header('Vary: Origin');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
