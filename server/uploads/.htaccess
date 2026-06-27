@@ -1,0 +1,5 @@
+# 업로드 폴더 보안 — 여기선 PHP/스크립트 실행 금지 (이미지 정적 서빙만)
+php_flag engine off
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
+  Require all denied
+</FilesMatch>

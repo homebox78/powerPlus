@@ -8,6 +8,7 @@ require_once __DIR__ . '/src/AssetController.php';
 require_once __DIR__ . '/src/AuthController.php';
 require_once __DIR__ . '/src/AuthService.php';
 require_once __DIR__ . '/src/AdminController.php';
+require_once __DIR__ . '/src/CategoryController.php';
 
 // ── CORS (운영에서는 CORS_ORIGIN 으로 add-in 도메인만 허용) ──
 $origin = getenv('CORS_ORIGIN') ?: '*';
@@ -83,7 +84,43 @@ try {
         exit;
     }
 
-    // ── 관리자 자산 CRUD (관리자 이메일만) ──
+    // ── 카테고리 목록 (로그인 사용자) ──
+    if (preg_match('#/api/categories$#', $path) && $method === 'GET') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        (new CategoryController())->list();
+        exit;
+    }
+
+    // ── 관리자 카테고리 CRUD (관리자만, JSON) ──
+    if (preg_match('#/api/admin/categories(?:/([^/]+))?$#', $path, $m)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        $cc = new CategoryController();
+        $key = $m[1] ?? '';
+        if ($method === 'POST' && $key === '') {
+            $cc->create(read_json_body());
+            exit;
+        }
+        if ($method === 'PUT' && $key !== '') {
+            $cc->update(urldecode($key), read_json_body());
+            exit;
+        }
+        if ($method === 'DELETE' && $key !== '') {
+            $cc->delete(urldecode($key));
+            exit;
+        }
+        json_out(['error' => 'Not Found', 'code' => 404], 404);
+        exit;
+    }
+
+    // ── 관리자 자산 CRUD (관리자만). 이미지 업로드 때문에 multipart(POST) 사용 ──
     if (preg_match('#/api/admin/assets(?:/([^/]+))?$#', $path, $m)) {
         $email = (new AuthService())->validateToken(bearer_token() ?? '');
         if (!AdminController::isAdmin($email)) {
@@ -93,11 +130,11 @@ try {
         $admin = new AdminController();
         $id = $m[1] ?? '';
         if ($method === 'POST' && $id === '') {
-            $admin->create(read_json_body());
+            $admin->create($_POST, $_FILES);           // 신규 (multipart)
             exit;
         }
-        if ($method === 'PUT' && $id !== '') {
-            $admin->update(urldecode($id), read_json_body());
+        if ($method === 'POST' && $id !== '') {
+            $admin->update(urldecode($id), $_POST, $_FILES); // 수정 (multipart)
             exit;
         }
         if ($method === 'DELETE' && $id !== '') {

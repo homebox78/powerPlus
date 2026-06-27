@@ -6,63 +6,95 @@
   <title>powerPlus 관리자</title>
   <style>
     :root {
-      --bg: #f8fafc; --surface: #fff; --border: #e2e8f0; --text: #0f172a;
-      --muted: #64748b; --accent: #2563eb; --accent-soft: #eff6ff; --danger: #b91c1c;
+      --bg:#f1f5f9; --surface:#fff; --border:#e2e8f0; --text:#0f172a;
+      --muted:#64748b; --accent:#2563eb; --accent-soft:#eff6ff; --danger:#b91c1c; --ok:#16a34a;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: var(--bg); color: var(--text);
-      font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif; font-size: 14px;
-    }
-    .hidden { display: none !important; }
-    button { font: inherit; cursor: pointer; }
-    input, select, textarea {
-      font: inherit; width: 100%; padding: 8px 10px; border: 1px solid var(--border);
-      border-radius: 8px; outline: none; background: var(--surface);
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-    .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 8px; padding: 8px 14px; font-weight: 600; }
-    .btn--ghost { background: var(--surface); color: var(--accent); }
-    .btn--danger { background: var(--surface); color: var(--danger); border-color: var(--border); }
-    .btn:disabled { opacity: .5; cursor: default; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text);
+      font-family:"Segoe UI","Malgun Gothic",system-ui,sans-serif; font-size:14px; }
+    .hidden { display:none !important; }
+    button { font:inherit; cursor:pointer; }
+    input,select { font:inherit; width:100%; padding:9px 11px; border:1px solid var(--border);
+      border-radius:8px; outline:none; background:var(--surface); }
+    input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft); }
+    .btn { border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:8px;
+      padding:9px 16px; font-weight:600; }
+    .btn--ghost { background:var(--surface); color:var(--accent); }
+    .btn--danger { background:var(--surface); color:var(--danger); border-color:var(--border); }
+    .btn:disabled { opacity:.5; cursor:default; }
+    .msg { font-size:12px; }
+    .msg--err { color:var(--danger); } .msg--ok { color:var(--ok); }
 
     /* 로그인 */
-    .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .login__card { width: 100%; max-width: 340px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(15,23,42,.06); }
-    .login__title { margin: 0; text-align: center; color: var(--accent); font-size: 22px; }
-    .login__sub { margin: 4px 0 18px; text-align: center; color: var(--muted); font-size: 13px; }
-    .field { margin-bottom: 10px; }
-    .field > label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    .msg { margin-top: 10px; font-size: 12px; text-align: center; }
-    .msg--err { color: var(--danger); }
-    .msg--ok { color: var(--accent); }
+    .login { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .login__card { width:100%; max-width:340px; background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:24px; box-shadow:0 2px 16px rgba(15,23,42,.08); }
+    .login__title { margin:0; text-align:center; color:var(--accent); font-size:22px; }
+    .login__sub { margin:4px 0 18px; text-align:center; color:var(--muted); font-size:13px; }
+    .field { margin-bottom:10px; }
+    .field>label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
 
-    /* 메인 */
-    .wrap { max-width: 960px; margin: 0 auto; padding: 16px; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
-    .topbar h1 { font-size: 18px; margin: 0; }
-    .topbar__user { font-size: 12px; color: var(--muted); margin-right: 8px; }
-    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    th { font-size: 12px; color: var(--muted); background: #f1f5f9; }
-    tr:last-child td { border-bottom: none; }
-    .thumb { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
-    .thumb svg { width: 100%; height: 100%; }
-    .tag { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 1px 8px; font-size: 11px; margin: 1px; }
-    .row-actions { white-space: nowrap; display: flex; gap: 6px; }
-    .row-actions button { padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+    /* 레이아웃 */
+    .wrap { max-width:1080px; margin:0 auto; padding:16px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+    .topbar h1 { font-size:18px; margin:0; }
+    .topbar__user { font-size:12px; color:var(--muted); margin-right:8px; }
+    .tabs { display:flex; gap:6px; margin-bottom:14px; }
+    .tab { border:1px solid var(--border); background:var(--surface); color:var(--muted);
+      border-radius:999px; padding:6px 16px; }
+    .tab--active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
-    /* 폼(모달) */
-    .modal { position: fixed; inset: 0; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .modal__card { width: 100%; max-width: 560px; max-height: 90vh; overflow: auto; background: var(--surface); border-radius: 12px; padding: 20px; }
-    .modal__title { margin: 0 0 14px; font-size: 16px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .form-grid .full { grid-column: 1 / -1; }
-    textarea { min-height: 110px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; resize: vertical; }
-    .preview { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
-    .preview__box { width: 80px; height: 80px; border: 1px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-    .preview__box svg { width: 100%; height: 100%; }
-    .modal__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+    .toolbar select { width:auto; min-width:140px; }
+    .toolbar .spacer { flex:1; }
+
+    /* 자산 카드 그리드 */
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px;
+      display:flex; flex-direction:column; gap:8px; }
+    .card__img { height:100px; display:flex; align-items:center; justify-content:center; background:#f8fafc;
+      border-radius:8px; overflow:hidden; }
+    .card__img img { height:100px; width:auto; }       /* 미리보기: 높이 100px, 가로 auto */
+    .card__img svg { height:100px; width:auto; }
+    .card__cat { font-size:11px; color:var(--accent); font-weight:600; }
+    .card__tags { display:flex; flex-wrap:wrap; gap:3px; min-height:20px; }
+    .tag { background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:1px 8px; font-size:11px; }
+    .tag--more { background:#f1f5f9; color:var(--muted); }
+    .card__actions { display:flex; gap:6px; margin-top:auto; }
+    .card__actions button { flex:1; padding:6px; border-radius:7px; font-size:12px; }
+    .empty { color:var(--muted); text-align:center; padding:40px 0; grid-column:1/-1; }
+
+    /* 카테고리 테이블 */
+    table { width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border);
+      border-radius:10px; overflow:hidden; }
+    th,td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); }
+    th { font-size:12px; color:var(--muted); background:#f8fafc; }
+    tr:last-child td { border-bottom:none; }
+
+    /* 모달 */
+    .modal { position:fixed; inset:0; background:rgba(15,23,42,.5); display:flex; align-items:center;
+      justify-content:center; padding:16px; z-index:10; }
+    .modal__card { width:100%; max-width:540px; max-height:92vh; overflow:auto; background:var(--surface);
+      border-radius:14px; padding:22px; }
+    .modal__title { margin:0 0 16px; font-size:17px; }
+
+    /* 드롭존 */
+    .drop { border:2px dashed var(--border); border-radius:10px; padding:14px; text-align:center;
+      color:var(--muted); cursor:pointer; transition:.12s; }
+    .drop:hover, .drop--over { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+    .drop__preview { height:100px; margin-top:10px; display:none; }
+    .drop__preview img { height:100px; width:auto; border-radius:6px; }
+
+    /* 태그 칩 입력 */
+    .tagbox { border:1px solid var(--border); border-radius:8px; padding:6px; display:flex; flex-wrap:wrap;
+      gap:4px; align-items:center; background:var(--surface); }
+    .tagbox:focus-within { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft); }
+    .chip { background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:2px 8px;
+      font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+    .chip b { cursor:pointer; font-weight:700; }
+    .tagbox input { border:none; box-shadow:none !important; flex:1; min-width:100px; padding:4px; width:auto; }
+    .hint { font-size:11px; color:var(--muted); margin-top:4px; }
+    .modal__actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
   </style>
 </head>
 <body>
@@ -72,78 +104,70 @@
       <h1 class="login__title">powerPlus 관리자</h1>
       <p class="login__sub">자산 라이브러리 관리</p>
       <div id="step-email">
-        <div class="field">
-          <label for="email">회사 이메일</label>
-          <input id="email" type="email" placeholder="name@solideos.com" autocomplete="email" />
-        </div>
+        <div class="field"><label>회사 이메일</label>
+          <input id="email" type="email" placeholder="name@solideos.com" /></div>
         <button id="btn-request" class="btn" style="width:100%">인증코드 받기</button>
       </div>
       <div id="step-code" class="hidden">
-        <div class="field">
-          <label for="code">인증코드 (<span id="code-email"></span>)</label>
-          <input id="code" type="text" inputmode="numeric" maxlength="6" placeholder="000000" />
-        </div>
+        <div class="field"><label>인증코드</label>
+          <input id="code" inputmode="numeric" maxlength="6" placeholder="000000" /></div>
         <button id="btn-verify" class="btn" style="width:100%">로그인</button>
       </div>
-      <div id="login-msg" class="msg"></div>
+      <p id="login-msg" class="msg" style="text-align:center;margin-top:10px"></p>
     </div>
   </div>
 
   <!-- 메인 -->
   <div id="main" class="wrap hidden">
     <div class="topbar">
-      <h1>자산 관리</h1>
-      <div>
-        <span class="topbar__user" id="who"></span>
-        <button id="btn-new" class="btn">+ 새 자산</button>
-        <button id="btn-logout" class="btn btn--ghost">로그아웃</button>
-      </div>
+      <h1>powerPlus 관리자</h1>
+      <div><span class="topbar__user" id="who"></span>
+        <button id="btn-logout" class="btn btn--ghost">로그아웃</button></div>
     </div>
-    <div id="list-msg" class="msg"></div>
-    <table>
-      <thead>
-        <tr><th>미리보기</th><th>ID</th><th>이름</th><th>카테고리</th><th>태그</th><th></th></tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
+    <div class="tabs">
+      <button class="tab tab--active" data-tab="assets">자산</button>
+      <button class="tab" data-tab="cats">카테고리</button>
+    </div>
+
+    <!-- 자산 탭 -->
+    <section id="tab-assets">
+      <div class="toolbar">
+        <select id="filter-cat"><option value="all">전체 카테고리</option></select>
+        <input id="search" placeholder="태그로 검색…" style="max-width:220px" />
+        <div class="spacer"></div>
+        <button id="btn-new" class="btn">+ 새 자산</button>
+      </div>
+      <div id="asset-grid" class="grid"></div>
+    </section>
+
+    <!-- 카테고리 탭 -->
+    <section id="tab-cats" class="hidden">
+      <div class="toolbar"><div class="spacer"></div><button id="btn-new-cat" class="btn">+ 새 카테고리</button></div>
+      <table><thead><tr><th>이름</th><th>key</th><th>자산 수</th><th></th></tr></thead>
+        <tbody id="cat-rows"></tbody></table>
+    </section>
   </div>
 
-  <!-- 폼 모달 -->
+  <!-- 자산 모달 -->
   <div id="modal" class="modal hidden">
     <div class="modal__card">
       <h2 class="modal__title" id="modal-title">새 자산</h2>
-      <div class="form-grid">
-        <div class="field">
-          <label for="f-id">ID</label>
-          <input id="f-id" placeholder="ic-heart" />
+      <div class="field"><label>카테고리</label><select id="f-category"></select></div>
+      <div class="field"><label>이미지 (PNG·JPG)</label>
+        <div class="drop" id="drop">클릭하거나 파일을 끌어다 놓으세요
+          <div class="drop__preview" id="drop-preview"></div>
         </div>
-        <div class="field">
-          <label for="f-category">카테고리</label>
-          <select id="f-category">
-            <option value="icon">아이콘 (icon)</option>
-            <option value="photo">사진 (photo)</option>
-            <option value="illust">일러스트 (illust)</option>
-            <option value="diagram">다이어그램 (diagram)</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label for="f-name">이름</label>
-          <input id="f-name" placeholder="하트" />
-        </div>
-        <div class="field full">
-          <label for="f-tags">태그 (콤마로 구분)</label>
-          <input id="f-tags" placeholder="하트, 좋아요, 사랑" />
-        </div>
-        <div class="field full">
-          <label for="f-svg">SVG 코드</label>
-          <textarea id="f-svg" placeholder="&lt;svg ...&gt;...&lt;/svg&gt;"></textarea>
-        </div>
-        <div class="preview">
-          <span style="font-size:12px;color:var(--muted)">미리보기</span>
-          <div class="preview__box" id="f-preview"></div>
-        </div>
+        <input id="f-image" type="file" accept="image/png,image/jpeg" class="hidden" />
       </div>
-      <div id="modal-msg" class="msg msg--err"></div>
+      <div class="field"><label>국문 키워드 (Enter 또는 콤마로 추가)</label>
+        <div class="tagbox" id="tagbox-ko"><input id="f-tag-ko" placeholder="예: 화살표, 상승, 증가…" /></div>
+        <div class="hint"><span id="ko-count">0</span>개</div>
+      </div>
+      <div class="field"><label>영문 키워드 (Enter 또는 콤마로 추가)</label>
+        <div class="tagbox" id="tagbox-en"><input id="f-tag-en" placeholder="e.g. arrow, up, increase…" /></div>
+        <div class="hint">국문+영문 합쳐 <b>25개 이상</b> 권장 · 현재 <span id="en-count">0</span>개(영문)</div>
+      </div>
+      <p id="modal-msg" class="msg msg--err"></p>
       <div class="modal__actions">
         <button id="btn-cancel" class="btn btn--ghost">취소</button>
         <button id="btn-save" class="btn">저장</button>
@@ -151,152 +175,227 @@
     </div>
   </div>
 
+  <!-- 카테고리 모달 -->
+  <div id="cat-modal" class="modal hidden">
+    <div class="modal__card" style="max-width:380px">
+      <h2 class="modal__title" id="cat-modal-title">새 카테고리</h2>
+      <div class="field"><label>key (영문소문자/숫자, 예: sticker)</label><input id="c-key" /></div>
+      <div class="field"><label>이름 (예: 스티커)</label><input id="c-label" /></div>
+      <p id="cat-modal-msg" class="msg msg--err"></p>
+      <div class="modal__actions">
+        <button id="c-cancel" class="btn btn--ghost">취소</button>
+        <button id="c-save" class="btn">저장</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // 운영(서버에 같이 배포)에서는 상대경로, 로컬 데모에서는 배포 서버 절대경로.
-    const API_BASE = location.hostname === "hom2box.com" ? "../api" : "https://hom2box.com/powerPlus/api";
+    const API = location.hostname === "hom2box.com" ? "../api" : "https://hom2box.com/powerPlus/api";
     const TOKEN_KEY = "pp_admin_token";
     const $ = (id) => document.getElementById(id);
-    let editingId = null;
+    let categories = [], assets = [], editingId = null, tagsKo = [], tagsEn = [], editingCatKey = null;
 
-    function token() { return localStorage.getItem(TOKEN_KEY); }
-    function authHeaders() { return token() ? { Authorization: "Bearer " + token() } : {}; }
-
+    const token = () => localStorage.getItem(TOKEN_KEY);
     async function api(path, opts = {}) {
-      const res = await fetch(API_BASE + path, {
-        ...opts,
-        headers: { "Content-Type": "application/json", ...authHeaders(), ...(opts.headers || {}) },
-      });
+      const headers = { ...(opts.headers || {}) };
+      if (token()) headers.Authorization = "Bearer " + token();
+      if (opts.body && !(opts.body instanceof FormData)) headers["Content-Type"] = "application/json";
+      const res = await fetch(API + path, { ...opts, headers });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || ("오류 " + res.status));
       return body;
     }
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
-    // ── 로그인 ──
+    /* ── 로그인 ── */
     $("btn-request").onclick = async () => {
-      const email = $("email").value.trim();
-      setMsg("login-msg", "");
-      try {
-        await api("/auth/request", { method: "POST", body: JSON.stringify({ email }) });
-        $("step-email").classList.add("hidden");
-        $("step-code").classList.remove("hidden");
-        $("code-email").textContent = email;
-        setMsg("login-msg", "인증코드를 이메일로 보냈습니다.", "ok");
+      try { await api("/auth/request", { method:"POST", body: JSON.stringify({ email: $("email").value.trim() }) });
+        $("step-email").classList.add("hidden"); $("step-code").classList.remove("hidden");
+        setMsg("login-msg","인증코드를 이메일로 보냈습니다.","ok");
       } catch (e) { setMsg("login-msg", e.message, "err"); }
     };
-
     $("btn-verify").onclick = async () => {
-      const email = $("email").value.trim();
-      const code = $("code").value.trim();
-      setMsg("login-msg", "");
-      try {
-        const r = await api("/auth/verify", { method: "POST", body: JSON.stringify({ email, code }) });
-        localStorage.setItem(TOKEN_KEY, r.token);
-        await enterAdmin();
+      try { const r = await api("/auth/verify", { method:"POST",
+          body: JSON.stringify({ email: $("email").value.trim(), code: $("code").value.trim() }) });
+        localStorage.setItem(TOKEN_KEY, r.token); await enter();
       } catch (e) { setMsg("login-msg", e.message, "err"); }
     };
+    $("btn-logout").onclick = async () => { try { await api("/auth/logout",{method:"POST"}); } catch {}
+      localStorage.removeItem(TOKEN_KEY); location.reload(); };
 
-    $("btn-logout").onclick = async () => {
-      try { await api("/auth/logout", { method: "POST" }); } catch {}
-      localStorage.removeItem(TOKEN_KEY);
-      location.reload();
-    };
-
-    async function enterAdmin() {
-      // 관리자 권한 확인
-      let me;
-      try { me = await api("/auth/me"); }
-      catch { localStorage.removeItem(TOKEN_KEY); return; }
-      if (!me.isAdmin) {
-        setMsg("login-msg", "관리자 권한이 없는 계정입니다.", "err");
-        localStorage.removeItem(TOKEN_KEY);
-        return;
-      }
-      $("login").classList.add("hidden");
-      $("main").classList.remove("hidden");
-      $("who").textContent = me.email;
-      await loadAssets();
+    async function enter() {
+      let me; try { me = await api("/auth/me"); } catch { localStorage.removeItem(TOKEN_KEY); return; }
+      if (!me.isAdmin) { setMsg("login-msg","관리자 권한이 없는 계정입니다.","err"); localStorage.removeItem(TOKEN_KEY); return; }
+      $("login").classList.add("hidden"); $("main").classList.remove("hidden"); $("who").textContent = me.email;
+      await loadCategories(); await loadAssets();
     }
 
-    // ── 목록 ──
-    async function loadAssets() {
-      setMsg("list-msg", "불러오는 중…");
+    /* ── 탭 ── */
+    document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
+      document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("tab--active", x === t));
+      $("tab-assets").classList.toggle("hidden", t.dataset.tab !== "assets");
+      $("tab-cats").classList.toggle("hidden", t.dataset.tab !== "cats");
+      if (t.dataset.tab === "cats") renderCats();
+    });
+
+    /* ── 카테고리 ── */
+    async function loadCategories() {
+      categories = (await api("/categories")).data || [];
+      const opts = '<option value="all">전체 카테고리</option>' +
+        categories.map((c) => `<option value="${esc(c.key)}">${esc(c.label)}</option>`).join("");
+      $("filter-cat").innerHTML = opts;
+      $("f-category").innerHTML = categories.map((c) => `<option value="${esc(c.key)}">${esc(c.label)}</option>`).join("");
+    }
+    function catCount(key) { return assets.filter((a) => a.category === key).length; }
+    function renderCats() {
+      $("cat-rows").innerHTML = categories.map((c) => `<tr>
+        <td>${esc(c.label)}</td><td><code>${esc(c.key)}</code></td><td>${catCount(c.key)}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn btn--ghost" data-ce="${esc(c.key)}" style="padding:4px 10px;font-size:12px">수정</button>
+          <button class="btn btn--danger" data-cd="${esc(c.key)}" style="padding:4px 10px;font-size:12px">삭제</button>
+        </td></tr>`).join("");
+      $("cat-rows").querySelectorAll("[data-ce]").forEach((b) => b.onclick = () => openCat(categories.find((c)=>c.key===b.dataset.ce)));
+      $("cat-rows").querySelectorAll("[data-cd]").forEach((b) => b.onclick = () => delCat(b.dataset.cd));
+    }
+    $("btn-new-cat").onclick = () => openCat(null);
+    $("c-cancel").onclick = () => $("cat-modal").classList.add("hidden");
+    function openCat(c) {
+      editingCatKey = c ? c.key : null;
+      $("cat-modal-title").textContent = c ? "카테고리 수정" : "새 카테고리";
+      $("c-key").value = c ? c.key : ""; $("c-key").disabled = !!c;
+      $("c-label").value = c ? c.label : ""; setMsg("cat-modal-msg","");
+      $("cat-modal").classList.remove("hidden");
+    }
+    $("c-save").onclick = async () => {
       try {
-        const r = await api("/assets?limit=500");
-        renderRows(r.data || []);
-        setMsg("list-msg", "");
-      } catch (e) { setMsg("list-msg", e.message, "err"); }
+        const label = $("c-label").value.trim();
+        if (editingCatKey) await api("/admin/categories/"+encodeURIComponent(editingCatKey), { method:"PUT", body: JSON.stringify({ label }) });
+        else await api("/admin/categories", { method:"POST", body: JSON.stringify({ key: $("c-key").value.trim().toLowerCase(), label }) });
+        $("cat-modal").classList.add("hidden"); await loadCategories(); renderCats();
+      } catch (e) { setMsg("cat-modal-msg", e.message, "err"); }
+    };
+    async function delCat(key) {
+      if (!confirm(`카테고리 '${key}' 삭제?`)) return;
+      try { await api("/admin/categories/"+encodeURIComponent(key), { method:"DELETE" }); await loadCategories(); renderCats(); }
+      catch (e) { alert(e.message); }
     }
 
-    function renderRows(assets) {
-      const cat = { icon: "아이콘", photo: "사진", illust: "일러스트", diagram: "다이어그램" };
-      $("rows").innerHTML = assets.map((a) => `
-        <tr>
-          <td><div class="thumb">${a.svg}</div></td>
-          <td><code>${esc(a.id)}</code></td>
-          <td>${esc(a.name)}</td>
-          <td>${cat[a.category] || esc(a.category)}</td>
-          <td>${(a.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</td>
-          <td><div class="row-actions">
-            <button class="btn btn--ghost" data-edit="${esc(a.id)}">수정</button>
-            <button class="btn btn--danger" data-del="${esc(a.id)}">삭제</button>
-          </div></td>
-        </tr>`).join("");
-      $("rows").querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => openEdit(assets.find((x) => x.id === b.dataset.edit)));
-      $("rows").querySelectorAll("[data-del]").forEach((b) => b.onclick = () => removeAsset(b.dataset.del));
+    /* ── 자산 목록 ── */
+    async function loadAssets() {
+      assets = (await api("/assets?limit=500")).data || [];
+      renderAssets();
+    }
+    $("filter-cat").onchange = renderAssets;
+    $("search").oninput = renderAssets;
+    function renderAssets() {
+      const cat = $("filter-cat").value, q = $("search").value.trim().toLowerCase();
+      const list = assets.filter((a) => (cat === "all" || a.category === cat) &&
+        (!q || (a.tags || []).some((t) => t.toLowerCase().includes(q))));
+      const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
+      $("asset-grid").innerHTML = list.length ? list.map((a) => {
+        const thumb = a.image_url ? `<img src="${esc(a.image_url)}" alt="">` : (a.svg || "");
+        const tg = (a.tags || []);
+        const shown = tg.slice(0, 8).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
+        const more = tg.length > 8 ? `<span class="tag tag--more">+${tg.length - 8}</span>` : "";
+        return `<div class="card">
+          <div class="card__img">${thumb}</div>
+          <div class="card__cat">${esc(catLabel(a.category))}</div>
+          <div class="card__tags">${shown}${more}</div>
+          <div class="card__actions">
+            <button class="btn btn--ghost" data-e="${esc(a.id)}">수정</button>
+            <button class="btn btn--danger" data-d="${esc(a.id)}">삭제</button>
+          </div></div>`;
+      }).join("") : `<div class="empty">자산이 없습니다. "+ 새 자산"으로 추가하세요.</div>`;
+      $("asset-grid").querySelectorAll("[data-e]").forEach((b) => b.onclick = () => openAsset(assets.find((a)=>a.id===b.dataset.e)));
+      $("asset-grid").querySelectorAll("[data-d]").forEach((b) => b.onclick = () => delAsset(b.dataset.d));
+    }
+    async function delAsset(id) {
+      if (!confirm("이 자산을 삭제할까요?")) return;
+      try { await api("/admin/assets/"+encodeURIComponent(id), { method:"DELETE" }); await loadAssets(); }
+      catch (e) { alert(e.message); }
     }
 
-    // ── 폼 ──
-    $("btn-new").onclick = () => openForm(null);
+    /* ── 자산 추가/수정 ── */
+    let pickedFile = null;
+    $("btn-new").onclick = () => openAsset(null);
     $("btn-cancel").onclick = () => $("modal").classList.add("hidden");
-    $("f-svg").oninput = () => { $("f-preview").innerHTML = $("f-svg").value; };
-
-    function openForm(asset) {
-      editingId = asset ? asset.id : null;
-      $("modal-title").textContent = asset ? "자산 수정" : "새 자산";
-      $("f-id").value = asset ? asset.id : "";
-      $("f-id").disabled = !!asset;
-      $("f-name").value = asset ? asset.name : "";
-      $("f-category").value = asset ? asset.category : "icon";
-      $("f-tags").value = asset ? (asset.tags || []).join(", ") : "";
-      $("f-svg").value = asset ? asset.svg : "";
-      $("f-preview").innerHTML = asset ? asset.svg : "";
-      setMsg("modal-msg", "");
-      $("modal").classList.remove("hidden");
+    $("drop").onclick = () => $("f-image").click();
+    $("f-image").onchange = (e) => setFile(e.target.files[0]);
+    $("drop").ondragover = (e) => { e.preventDefault(); $("drop").classList.add("drop--over"); };
+    $("drop").ondragleave = () => $("drop").classList.remove("drop--over");
+    $("drop").ondrop = (e) => { e.preventDefault(); $("drop").classList.remove("drop--over"); setFile(e.dataTransfer.files[0]); };
+    function setFile(f) {
+      if (!f) return;
+      pickedFile = f;
+      const pv = $("drop-preview");
+      pv.innerHTML = `<img src="${URL.createObjectURL(f)}">`; pv.style.display = "block";
     }
-    const openEdit = openForm;
+    // 칩 입력 박스 설정: 국문/영문 공통 로직
+    function setupTagbox(boxId, inputId, countId, getArr) {
+      const box = $(boxId), input = $(inputId);
+      const add = (str) => {
+        str.split(",").map((s) => s.trim()).filter(Boolean).forEach((t) => {
+          const arr = getArr(); if (!arr.includes(t)) arr.push(t);
+        });
+        renderChips(boxId, inputId, countId, getArr);
+      };
+      input.onkeydown = (e) => {
+        if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(input.value); input.value = ""; }
+        else if (e.key === "Backspace" && !input.value && getArr().length) { getArr().pop(); renderChips(boxId, inputId, countId, getArr); }
+      };
+      input.onblur = () => { if (input.value.trim()) { add(input.value); input.value = ""; } };
+    }
+    function renderChips(boxId, inputId, countId, getArr) {
+      const box = $(boxId), input = $(inputId), arr = getArr();
+      box.querySelectorAll(".chip").forEach((c) => c.remove());
+      arr.forEach((t, i) => {
+        const el = document.createElement("span");
+        el.className = "chip"; el.innerHTML = `${esc(t)}<b>×</b>`;
+        el.querySelector("b").onclick = () => { arr.splice(i, 1); renderChips(boxId, inputId, countId, getArr); };
+        box.insertBefore(el, input);
+      });
+      $(countId).textContent = arr.length;
+    }
+    setupTagbox("tagbox-ko", "f-tag-ko", "ko-count", () => tagsKo);
+    setupTagbox("tagbox-en", "f-tag-en", "en-count", () => tagsEn);
+
+    function openAsset(a) {
+      editingId = a ? a.id : null; pickedFile = null;
+      tagsKo = a ? [...(a.tags_ko || [])] : [];
+      tagsEn = a ? [...(a.tags_en || [])] : [];
+      $("modal-title").textContent = a ? "자산 수정" : "새 자산";
+      $("f-category").value = a ? a.category : (categories[0] && categories[0].key);
+      const pv = $("drop-preview");
+      if (a && a.image_url) { pv.innerHTML = `<img src="${esc(a.image_url)}">`; pv.style.display = "block"; }
+      else if (a && a.svg) { pv.innerHTML = a.svg; pv.style.display = "block"; }
+      else { pv.innerHTML = ""; pv.style.display = "none"; }
+      $("f-tag-ko").value = ""; $("f-tag-en").value = "";
+      renderChips("tagbox-ko", "f-tag-ko", "ko-count", () => tagsKo);
+      renderChips("tagbox-en", "f-tag-en", "en-count", () => tagsEn);
+      setMsg("modal-msg", ""); $("modal").classList.remove("hidden"); $("f-tag-ko").focus();
+    }
 
     $("btn-save").onclick = async () => {
-      const payload = {
-        id: $("f-id").value.trim(),
-        name: $("f-name").value.trim(),
-        category: $("f-category").value,
-        tags: $("f-tags").value,
-        svg: $("f-svg").value.trim(),
-      };
       setMsg("modal-msg", "");
+      if (tagsKo.length + tagsEn.length === 0) return setMsg("modal-msg", "국문/영문 키워드를 한 개 이상 입력하세요.", "err");
+      if (!editingId && !pickedFile) return setMsg("modal-msg", "이미지를 올려주세요 (PNG·JPG).", "err");
+      const fd = new FormData();
+      fd.append("category", $("f-category").value);
+      fd.append("tags_ko", JSON.stringify(tagsKo));
+      fd.append("tags_en", JSON.stringify(tagsEn));
+      if (pickedFile) fd.append("image", pickedFile);
       try {
-        if (editingId) await api("/admin/assets/" + encodeURIComponent(editingId), { method: "PUT", body: JSON.stringify(payload) });
-        else await api("/admin/assets", { method: "POST", body: JSON.stringify(payload) });
-        $("modal").classList.add("hidden");
-        await loadAssets();
+        const path = editingId ? "/admin/assets/" + encodeURIComponent(editingId) : "/admin/assets";
+        await api(path, { method: "POST", body: fd });
+        $("modal").classList.add("hidden"); await loadAssets();
       } catch (e) { setMsg("modal-msg", e.message, "err"); }
     };
 
-    async function removeAsset(id) {
-      if (!confirm(`'${id}' 자산을 삭제할까요?`)) return;
-      try { await api("/admin/assets/" + encodeURIComponent(id), { method: "DELETE" }); await loadAssets(); }
-      catch (e) { setMsg("list-msg", e.message, "err"); }
-    }
-
     function setMsg(id, text, kind) {
-      const el = $(id);
-      el.textContent = text || "";
+      const el = $(id); el.textContent = text || "";
       el.className = "msg" + (kind === "err" ? " msg--err" : kind === "ok" ? " msg--ok" : "");
     }
-    function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-
-    // 토큰 있으면 바로 관리자 진입 시도
-    if (token()) enterAdmin();
+    if (token()) enter();
   </script>
 </body>
 </html>

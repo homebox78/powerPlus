@@ -3,3 +3,7 @@
 vendor/
 *.log
 .env
+
+# 업로드된 자산 이미지(사용자 데이터)는 추적 안 함 — .htaccess 만 유지
+/uploads/*
+!/uploads/.htaccess
