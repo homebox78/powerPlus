@@ -12,7 +12,6 @@ import { fetchCategories } from "./api/categories";
 import { useInsert } from "./hooks/useInsert";
 import { useFavorites } from "./hooks/useFavorites";
 import { useRecent } from "./hooks/useRecent";
-import { INSERT_SIZES, useInsertSize } from "./hooks/useInsertSize";
 
 // 특수 탭(즐겨찾기/최근) — 클라이언트에서 필터링.
 const SPECIAL_TABS: Category[] = [
@@ -47,7 +46,6 @@ export default function App() {
   const { insertingId, message, error, insert, clearMessage } = useInsert();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const { recent, pushRecent } = useRecent();
-  const { sizeKey, setSize, sizePt } = useInsertSize();
 
   // 특수 탭(즐겨찾기/최근)은 서버엔 'all' 로 요청하고 클라이언트에서 거른다.
   const serverCategory =
@@ -92,7 +90,7 @@ export default function App() {
   }, [rawAssets, category, favorites, recent]);
 
   async function handleInsert(asset: Asset) {
-    const ok = await insert(asset, sizePt);
+    const ok = await insert(asset);
     if (ok) {
       pushRecent(asset.id); // 실제 삽입 성공 시에만 최근 기록
       recordUsage(asset.id); // 사용 통계 기록 (실패해도 무시)
@@ -135,25 +133,9 @@ export default function App() {
       <SearchBar value={query} onChange={setQuery} />
       <CategoryTabs categories={[...cats, ...SPECIAL_TABS]} active={category} onChange={setCategory} />
 
-      <div className="toolbar">
-        <div className="app__count">
-          {loading ? "불러오는 중…" : `${displayed.length}개 자산`}
-          {offline && !loading && " · 오프라인(로컬 데이터)"}
-        </div>
-        <div className="sizebar" role="group" aria-label="삽입 크기">
-          <span className="sizebar__label">삽입 크기</span>
-          {INSERT_SIZES.map((s) => (
-            <button
-              key={s.key}
-              className={"sizebar__btn" + (sizeKey === s.key ? " sizebar__btn--on" : "")}
-              aria-pressed={sizeKey === s.key}
-              title={`${s.pt}pt`}
-              onClick={() => setSize(s.key)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+      <div className="app__count">
+        {loading ? "불러오는 중…" : `${displayed.length}개 자산`}
+        {offline && !loading && " · 오프라인(로컬 데이터)"}
       </div>
 
       <main className="app__body">

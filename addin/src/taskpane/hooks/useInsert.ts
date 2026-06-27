@@ -64,8 +64,8 @@ export function useInsert() {
     error: false,
   });
 
-  /** 자산을 현재 슬라이드에 삽입. 성공하면 true (최근 사용 기록용). sizePt 는 가로세로 크기(pt). */
-  const insert = useCallback(async (asset: Asset, sizePt = 150): Promise<boolean> => {
+  /** 자산을 현재 슬라이드에 삽입. 성공하면 true (최근 사용 기록용). 크기는 원본대로(사용자가 이후 조절). */
+  const insert = useCallback(async (asset: Asset): Promise<boolean> => {
     setState({ insertingId: asset.id, message: null, error: false });
     try {
       // 업로드 자산이면 이미지 URL을, 구 mock이면 SVG를 base64(PNG)로 변환
@@ -100,16 +100,13 @@ export function useInsert() {
       }
 
       // 현재 슬라이드에 이미지 삽입 (Common API — 모든 PowerPoint 버전에서 동작).
+      // 크기는 지정하지 않음 → 원본 크기로 삽입, 이후 사용자가 자유롭게 조절.
       await new Promise<void>((resolve, reject) => {
         const opts: Office.SetSelectedDataOptions & {
-          imageWidth?: number;
-          imageHeight?: number;
           imageLeft?: number;
           imageTop?: number;
         } = {
           coercionType: Office.CoercionType.Image,
-          imageWidth: sizePt, // 단위 pt
-          imageHeight: sizePt,
         };
         if (pos) {
           opts.imageLeft = pos.left; // 선택한 개체 위치에 삽입
