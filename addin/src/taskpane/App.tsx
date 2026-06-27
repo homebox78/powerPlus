@@ -168,7 +168,17 @@ export default function App() {
   return (
     <div className="app">
       <header className="app__header app__header--row">
-        <h1 className="app__title">powerPlus 자산 라이브러리</h1>
+        <div className="brand">
+          <span className="brand__mark" aria-hidden>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="#fff">
+              <rect x="3" y="3" width="7" height="7" rx="1.6" />
+              <rect x="14" y="3" width="7" height="7" rx="1.6" />
+              <rect x="3" y="14" width="7" height="7" rx="1.6" />
+              <rect x="14" y="14" width="7" height="7" rx="1.6" />
+            </svg>
+          </span>
+          <h1 className="app__title">powerPlus</h1>
+        </div>
         <button className="app__logout" onClick={handleLogout} title={email}>
           로그아웃
         </button>

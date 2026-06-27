@@ -48,9 +48,29 @@ body {
   gap: 8px;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.brand__mark {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+}
+
 .app__title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
   margin: 0;
 }
 
@@ -249,6 +269,7 @@ body {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff; /* hover 시에도 흰 글자 유지 (파랑 on 파랑 방지) */
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.28);
 }
 
 .app__count {
