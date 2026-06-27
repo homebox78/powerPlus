@@ -5,45 +5,98 @@ declare(strict_types=1);
 // Apache 서브디렉터리(예: /powerPlus/) 배포를 고려해 경로 prefix는 무시하고
 // 끝부분(/api/assets ...)으로 라우팅한다.
 require_once __DIR__ . '/src/AssetController.php';
+require_once __DIR__ . '/src/AuthController.php';
+require_once __DIR__ . '/src/AuthService.php';
 
 // ── CORS (운영에서는 CORS_ORIGIN 으로 add-in 도메인만 허용) ──
 $origin = getenv('CORS_ORIGIN') ?: '*';
 header('Access-Control-Allow-Origin: ' . $origin);
-header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
 
-$path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$path = rtrim($path, '/');
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$path   = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$path   = rtrim($path, '/');
+
+/** JSON 응답 헬퍼 */
+function json_out(mixed $payload, int $status = 200): void
+{
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+}
+
+/** 요청 본문(JSON) → 배열 */
+function read_json_body(): array
+{
+    $raw  = file_get_contents('php://input') ?: '';
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : [];
+}
+
+/** Authorization: Bearer <token> 추출 (Apache/CGI 환경 차이 흡수) */
+function bearer_token(): ?string
+{
+    $h = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    if ($h === '' && function_exists('apache_request_headers')) {
+        $hdrs = apache_request_headers();
+        $h = $hdrs['Authorization'] ?? $hdrs['authorization'] ?? '';
+    }
+    if (preg_match('/Bearer\s+(.+)/i', (string) $h, $m)) {
+        return trim($m[1]);
+    }
+    return null;
+}
 
 // 헬스 체크
 if (preg_match('#/health$#', $path)) {
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['status' => 'ok']);
+    json_out(['status' => 'ok']);
     exit;
 }
 
-$controller = new AssetController();
-
 try {
-    if (preg_match('#/api/assets/([^/]+)$#', $path, $m)) {
-        $controller->get(urldecode($m[1]));
+    // ── 인증 라우트 (로그인 불필요) ──
+    if (preg_match('#/api/auth/request$#', $path) && $method === 'POST') {
+        (new AuthController())->request(read_json_body());
         exit;
     }
-    if (preg_match('#/api/assets$#', $path)) {
-        $controller->list($_GET);
+    if (preg_match('#/api/auth/verify$#', $path) && $method === 'POST') {
+        (new AuthController())->verify(read_json_body());
+        exit;
+    }
+    if (preg_match('#/api/auth/me$#', $path)) {
+        (new AuthController())->me(bearer_token());
+        exit;
+    }
+    if (preg_match('#/api/auth/logout$#', $path) && $method === 'POST') {
+        (new AuthController())->logout(bearer_token());
         exit;
     }
 
-    http_response_code(404);
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Not Found', 'code' => 404], JSON_UNESCAPED_UNICODE);
+    // ── 보호된 자산 라우트 (로그인 필요) ──
+    if (preg_match('#/api/assets#', $path)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        $controller = new AssetController();
+        if (preg_match('#/api/assets/([^/]+)$#', $path, $m)) {
+            $controller->get(urldecode($m[1]));
+            exit;
+        }
+        if (preg_match('#/api/assets$#', $path)) {
+            $controller->list($_GET);
+            exit;
+        }
+    }
+
+    json_out(['error' => 'Not Found', 'code' => 404], 404);
 } catch (Throwable $e) {
     // 운영에서는 상세 메시지 대신 logger로 기록할 것
-    http_response_code(500);
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Internal Server Error', 'code' => 500], JSON_UNESCAPED_UNICODE);
+    json_out(['error' => 'Internal Server Error', 'code' => 500], 500);
 }

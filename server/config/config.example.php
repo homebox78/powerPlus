@@ -1,10 +1,25 @@
 <?php
 // 이 파일을 config.php 로 "복사"한 뒤 실제 값으로 채우세요. (config.php 는 git 제외)
-// 환경변수(DB_HOST 등)가 있으면 그쪽이 우선합니다.
+// 환경변수(DB_HOST, ALLOWED_DOMAIN 등)가 있으면 그쪽이 우선합니다.
 return [
+    // ── 데이터베이스 ──
     'host' => '127.0.0.1',
     'port' => 3306,
     'db'   => 'powerplus',
     'user' => 'root',
     'pass' => '',
+
+    // ── 인증 (이메일 OTP) ──
+    // 이 도메인 이메일만 로그인 허용. 빈 문자열이면 도메인 제한 없음.
+    'allowed_domain'   => 'solideos.com',
+    'code_ttl_min'     => 10,   // 인증코드 유효시간(분)
+    'session_ttl_days' => 30,   // 로그인 유지(일)
+
+    // ── 메일 발송 ──
+    'mail_from'      => 'noreply@hom2box.com',
+    'mail_from_name' => 'powerPlus',
+
+    // 개발용: mail() 이 안 되는 로컬 환경에서 인증코드를 응답/로그로 확인.
+    // !!! 운영 서버에서는 반드시 false !!!
+    'auth_debug'     => false,
 ];

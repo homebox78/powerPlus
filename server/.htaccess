@@ -2,8 +2,11 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Authorization 헤더를 PHP로 전달 (Apache/FastCGI 가 기본적으로 떼는 경우 대비)
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
   # 민감 디렉터리 직접 접근 차단 (HTTP 요청만 — PHP include 에는 영향 없음)
-  RewriteRule ^(config|src|bin|sql)(/|$) - [F,L]
+  RewriteRule ^(config|src|bin|sql|logs)(/|$) - [F,L]
 
   # 실제 존재하는 파일/디렉터리는 그대로 제공
   RewriteCond %{REQUEST_FILENAME} -f [OR]

@@ -26,7 +26,12 @@ module.exports = async (env, options) => {
       rules: [
         {
           test: /\.tsx?$/,
-          use: "ts-loader",
+          // tsconfig 는 noEmit:true (에디터/`tsc --noEmit` 타입체크용).
+          // 번들 생성을 위해 ts-loader 에서만 emit 을 켜준다.
+          use: {
+            loader: "ts-loader",
+            options: { compilerOptions: { noEmit: false } },
+          },
           exclude: /node_modules/,
         },
         {
