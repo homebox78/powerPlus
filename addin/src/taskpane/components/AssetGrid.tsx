@@ -8,6 +8,7 @@ interface Props {
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (id: string) => void;
   emptyMessage?: string;
+  loading?: boolean;
 }
 
 export default function AssetGrid({
@@ -17,9 +18,29 @@ export default function AssetGrid({
   isFavorite,
   onToggleFavorite,
   emptyMessage = "결과가 없습니다.",
+  loading = false,
 }: Props) {
+  // 첫 로딩(표시할 게 아직 없음) → 스켈레톤
+  if (loading && assets.length === 0) {
+    return (
+      <div className="grid" aria-busy="true" aria-label="불러오는 중">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div key={i} className="card card--skeleton">
+            <div className="skel skel--thumb" />
+            <div className="skel skel--text" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (assets.length === 0) {
-    return <div className="empty">{emptyMessage}</div>;
+    return (
+      <div className="empty">
+        <div className="empty__icon" aria-hidden>🔍</div>
+        <div>{emptyMessage}</div>
+      </div>
+    );
   }
 
   return (
@@ -27,33 +48,38 @@ export default function AssetGrid({
       {assets.map((a) => {
         const fav = isFavorite(a.id);
         const label = a.name || a.tags?.[0] || a.id;
+        const inserting = insertingId === a.id;
         return (
           <div key={a.id} className="card">
             <button
               className="card__btn"
               title={`${label} — 클릭하면 슬라이드에 삽입`}
-              disabled={insertingId === a.id}
+              disabled={inserting}
               onClick={() => onInsert(a)}
             >
-              {a.image_url ? (
-                <div className="card__thumb">
+              <div className="card__thumb">
+                {a.image_url ? (
                   <img src={a.image_url} alt={label} loading="lazy" decoding="async" />
-                </div>
-              ) : (
-                <div
-                  className="card__thumb"
+                ) : (
                   // 구 mock: SVG 문자열 렌더 (신뢰된 내부 자산만)
-                  dangerouslySetInnerHTML={{ __html: a.svg || "" }}
-                />
-              )}
-              <div className="card__name">
-                {insertingId === a.id ? "삽입 중…" : label}
+                  <span
+                    className="card__svg"
+                    dangerouslySetInnerHTML={{ __html: a.svg || "" }}
+                  />
+                )}
+                {inserting && (
+                  <span className="card__inserting" aria-hidden>
+                    <span className="spinner" />
+                  </span>
+                )}
               </div>
+              <div className="card__name">{label}</div>
             </button>
             <button
               className={"card__fav" + (fav ? " card__fav--on" : "")}
               title={fav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
               aria-pressed={fav}
+              aria-label={fav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
               onClick={() => onToggleFavorite(a.id)}
             >
               ★

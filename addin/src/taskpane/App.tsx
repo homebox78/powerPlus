@@ -177,6 +177,7 @@ export default function App() {
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
           emptyMessage={emptyMessage}
+          loading={loading}
         />
         {hasMore && (
           <button className="loadmore" onClick={loadMore} disabled={loadingMore}>
