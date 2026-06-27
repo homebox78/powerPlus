@@ -20,17 +20,19 @@ export interface FetchResult {
   offline: boolean;
 }
 
-/** 서버에서 자산 목록을 가져온다. 서버 미연결 시 로컬 mock으로 폴백. */
+/** 서버에서 자산 목록을 가져온다(페이지 단위). 서버 미연결 시 로컬 mock으로 폴백. */
 export async function fetchAssets(
   category: string,
   query: string,
+  page = 1,
+  limit = 60,
   signal?: AbortSignal
 ): Promise<FetchResult> {
   const params = new URLSearchParams({
     category,
     q: query.trim(),
-    page: "1",
-    limit: "200",
+    page: String(page),
+    limit: String(limit),
   });
 
   const token = getToken();
@@ -49,8 +51,8 @@ export async function fetchAssets(
     if (signal?.aborted) throw e;
     // 인증 만료/누락은 mock 으로 가리지 말고 상위로 — 로그인 화면 전환
     if (e instanceof AuthRequiredError) throw e;
-    // 서버 미연결 → 로컬 mock 데이터로 폴백 (오프라인 데모)
-    const assets = filterAssets(category, query);
-    return { assets, total: assets.length, offline: true };
+    // 서버 미연결 → 로컬 mock 데이터로 폴백 (오프라인 데모, mock은 소량이라 1페이지)
+    const all = filterAssets(category, query);
+    return { assets: page === 1 ? all : [], total: all.length, offline: true };
   }
 }

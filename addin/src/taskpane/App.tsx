@@ -47,18 +47,25 @@ export default function App() {
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const { recent, pushRecent } = useRecent();
 
-  // 특수 탭(즐겨찾기/최근)은 서버엔 'all' 로 요청하고 클라이언트에서 거른다.
-  const serverCategory =
-    category === "favorites" || category === "recent" ? "all" : category;
+  const [total, setTotal] = React.useState(0);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+  const pageRef = React.useRef(1);
 
-  // 카테고리/검색어 변경 시 서버에서 자산을 가져온다 (이전 요청은 취소).
+  const PAGE_SIZE = 60;
+  // 특수 탭(즐겨찾기/최근)은 클라이언트 필터라 전체를 한 번에, 일반 탭은 페이지 단위.
+  const isSpecial = category === "favorites" || category === "recent";
+  const serverCategory = isSpecial ? "all" : category;
+
+  // 카테고리/검색어 변경 → 1페이지부터 새로 로드 (이전 요청 취소).
   React.useEffect(() => {
     if (!email) return; // 로그인 전에는 조회하지 않음
     const ctrl = new AbortController();
+    pageRef.current = 1;
     setLoading(true);
-    fetchAssets(serverCategory, query, ctrl.signal)
+    fetchAssets(serverCategory, query, 1, isSpecial ? 500 : PAGE_SIZE, ctrl.signal)
       .then((r) => {
         setRawAssets(r.assets);
+        setTotal(r.total);
         setOffline(r.offline);
       })
       .catch((e) => {
@@ -73,7 +80,27 @@ export default function App() {
         if (!ctrl.signal.aborted) setLoading(false);
       });
     return () => ctrl.abort();
-  }, [serverCategory, query, email]);
+  }, [category, query, email]);
+
+  // 다음 페이지 추가 로드 (일반 탭에서만)
+  async function loadMore() {
+    setLoadingMore(true);
+    try {
+      pageRef.current += 1;
+      const r = await fetchAssets(serverCategory, query, pageRef.current, PAGE_SIZE);
+      setRawAssets((prev) => [...prev, ...r.assets]);
+      setTotal(r.total);
+    } catch (e) {
+      if (e instanceof AuthRequiredError) {
+        clearSession();
+        setUserEmail(null);
+      }
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  const hasMore = !isSpecial && rawAssets.length < total;
 
   // 표시할 자산: 특수 탭이면 즐겨찾기/최근으로 필터·정렬.
   const displayed = React.useMemo(() => {
@@ -134,7 +161,11 @@ export default function App() {
       <CategoryTabs categories={[...cats, ...SPECIAL_TABS]} active={category} onChange={setCategory} />
 
       <div className="app__count">
-        {loading ? "불러오는 중…" : `${displayed.length}개 자산`}
+        {loading
+          ? "불러오는 중…"
+          : isSpecial
+            ? `${displayed.length}개 자산`
+            : `${displayed.length}개${total > displayed.length ? ` / 전체 ${total}` : ""}`}
         {offline && !loading && " · 오프라인(로컬 데이터)"}
       </div>
 
@@ -147,6 +178,11 @@ export default function App() {
           onToggleFavorite={toggleFavorite}
           emptyMessage={emptyMessage}
         />
+        {hasMore && (
+          <button className="loadmore" onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? "불러오는 중…" : `더 보기 (${displayed.length}/${total})`}
+          </button>
+        )}
       </main>
 
       {message && (

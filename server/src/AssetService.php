@@ -24,9 +24,11 @@ final class AssetService
         }
         $q = trim($q);
         if ($q !== '') {
-            // 태그(JSON 텍스트) 또는 이름 부분일치
-            $where[] = '(tags LIKE :q OR name LIKE :q)';
-            $params[':q'] = '%' . $q . '%';
+            // 태그(JSON 텍스트) 또는 이름 부분일치.
+            // ATTR_EMULATE_PREPARES=false 에서는 같은 명명 파라미터 재사용 불가 → :q1/:q2 분리.
+            $where[] = '(tags LIKE :q1 OR name LIKE :q2)';
+            $params[':q1'] = '%' . $q . '%';
+            $params[':q2'] = '%' . $q . '%';
         }
         $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 

@@ -1,4 +1,8 @@
 # powerPlus API (Apache) — 모든 요청을 index.php 로 라우팅
+
+# 디렉터리 리스팅 차단
+Options -Indexes
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
@@ -17,8 +21,13 @@
   RewriteRule ^ index.php [L]
 </IfModule>
 
-# mod_rewrite 가 없거나 막혀도 민감 파일은 보호 (Apache 2.4)
-<FilesMatch "\.(sql|md|json)$">
+# 민감 파일 직접 접근 차단 (mod_rewrite 없어도 보호, Apache 2.4)
+<FilesMatch "\.(sql|md|json|pem|key|env|bak|ini|sh|lock|log|example\.php)$">
+  Require all denied
+</FilesMatch>
+
+# 닷파일(.env, .git, .htaccess 등) 차단
+<FilesMatch "^\.">
   Require all denied
 </FilesMatch>
 
