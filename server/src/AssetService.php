@@ -7,7 +7,7 @@ require_once __DIR__ . '/Config.php';
 /** 자산 조회/검색/CRUD. SQL은 모두 prepared statement. */
 final class AssetService
 {
-    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path';
+    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, slide_path';
 
     /**
      * 카테고리 + 검색어(태그/이름) 필터 + 페이지네이션.
@@ -83,14 +83,14 @@ final class AssetService
         return array_values(array_unique(array_merge(array_values($ko), array_values($en))));
     }
 
-    /** @param array{id:string,name?:?string,category:string,tags_ko?:array,tags_en?:array,svg?:?string,image_path?:?string} $d */
+    /** @param array{id:string,name?:?string,category:string,tags_ko?:array,tags_en?:array,svg?:?string,image_path?:?string,slide_path?:?string} $d */
     public function create(array $d): array
     {
         $ko = $d['tags_ko'] ?? [];
         $en = $d['tags_en'] ?? [];
         Database::pdo()->prepare(
-            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path)
-             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path)'
+            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, slide_path)
+             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :slide_path)'
         )->execute([
             ':id'         => $d['id'],
             ':name'       => $d['name'] ?? null,
@@ -100,6 +100,7 @@ final class AssetService
             ':tags_en'    => json_encode(array_values($en), JSON_UNESCAPED_UNICODE),
             ':svg'        => $d['svg'] ?? null,
             ':image_path' => $d['image_path'] ?? null,
+            ':slide_path' => $d['slide_path'] ?? null,
         ]);
         return $this->find($d['id']) ?? [];
     }
@@ -152,6 +153,10 @@ final class AssetService
         $base = rtrim((string) Config::get('public_base_url', 'https://hom2box.com/powerPlus'), '/');
         $row['image_url'] = !empty($row['image_path'])
             ? $base . '/' . ltrim((string) $row['image_path'], '/')
+            : null;
+        // 장표(ppt) 자산: 슬라이드 파일 URL (삽입 시 슬라이드로 추가)
+        $row['slide_url'] = !empty($row['slide_path'])
+            ? $base . '/' . ltrim((string) $row['slide_path'], '/')
             : null;
         return $row;
     }

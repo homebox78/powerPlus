@@ -67,12 +67,8 @@ export function useInsert() {
   /** 자산을 현재 슬라이드에 삽입. 성공하면 true (최근 사용 기록용). 크기는 원본대로(사용자가 이후 조절). */
   const insert = useCallback(async (asset: Asset): Promise<boolean> => {
     setState({ insertingId: asset.id, message: null, error: false });
+    const label = asset.name || asset.tags?.[0] || asset.id;
     try {
-      // 업로드 자산이면 이미지 URL을, 구 mock이면 SVG를 base64(PNG)로 변환
-      const base64 = asset.image_url
-        ? await imageUrlToBase64(asset.image_url)
-        : await svgToPngBase64(asset.svg || "");
-
       if (!isPowerPoint()) {
         // 브라우저에서 미리보기 중 — 삽입은 PowerPoint에서만 가능
         setState({
@@ -82,6 +78,24 @@ export function useInsert() {
         });
         return false;
       }
+
+      // 장표(ppt) 자산 → 새 슬라이드로 추가 (이미지가 아니라 슬라이드 삽입)
+      if (asset.slide_url) {
+        const pptxB64 = await imageUrlToBase64(asset.slide_url); // 임의 바이너리 → base64
+        await PowerPoint.run(async (context) => {
+          context.presentation.insertSlidesFromBase64(pptxB64, {
+            formatting: "KeepSourceFormatting",
+          });
+          await context.sync();
+        });
+        setState({ insertingId: null, message: `"${label}" 장표 추가됨`, error: false });
+        return true;
+      }
+
+      // 이미지 자산 → base64(PNG)로 변환
+      const base64 = asset.image_url
+        ? await imageUrlToBase64(asset.image_url)
+        : await svgToPngBase64(asset.svg || "");
 
       // 슬라이드에서 선택한 개체가 있으면 그 위치에, 없으면 슬라이드 중앙에 삽입.
       // (Office 애드인 API는 마우스 포인터 픽셀 위치를 제공하지 않으므로 "선택 위치" 기준이 최선)
@@ -124,7 +138,7 @@ export function useInsert() {
 
       setState({
         insertingId: null,
-        message: `"${asset.name || asset.tags?.[0] || asset.id}" 삽입 완료`,
+        message: `"${label}" 삽입 완료`,
         error: false,
       });
       return true;

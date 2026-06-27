@@ -12,6 +12,7 @@ export interface Asset {
   tags: string[];
   svg?: string; // 구 mock 자산: 인라인 SVG
   image_url?: string; // 서버 업로드 자산: PNG/JPG URL (있으면 이걸로 표시·삽입)
+  slide_url?: string; // 장표(ppt) 자산: .pptx URL (있으면 슬라이드로 삽입)
 }
 
 export interface Category {

@@ -12,7 +12,16 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS categories (
   sort_order INT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 $pdo->exec("INSERT IGNORE INTO categories (`key`,label,sort_order) VALUES
-  ('icon','아이콘',1),('photo','사진',2),('illust','일러스트',3),('diagram','다이어그램',4)");
+  ('icon','아이콘',1),('photo','사진',2),('illust','일러스트',3),('diagram','다이어그램',4),('ppt','장표',5)");
+
+// 장표(ppt) 자산용 슬라이드 파일 경로 컬럼
+$hasSlide = (int) $pdo->query(
+    "SELECT COUNT(*) FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='assets' AND COLUMN_NAME='slide_path'"
+)->fetchColumn();
+if ($hasSlide === 0) {
+    $pdo->exec("ALTER TABLE assets ADD COLUMN slide_path VARCHAR(255) NULL AFTER image_path");
+}
 
 // 사용 통계 로그 테이블 (Phase: 통계)
 $pdo->exec("CREATE TABLE IF NOT EXISTS usage_log (
