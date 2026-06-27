@@ -56,7 +56,7 @@ export default function Login({ onSuccess }: { onSuccess: (email: string) => voi
               className="login__input"
               type="email"
               autoComplete="email"
-              placeholder="name@solideos.com"
+              placeholder="userid@solideos.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
