@@ -73,12 +73,14 @@ module.exports = async (env, options) => {
           ca: httpsOptions.ca,
         },
       },
-      // /api 요청을 PHP 서버로 프록시 (https 작업창 → http 서버 mixed-content 회피)
+      // /api 요청을 PHP 서버로 프록시.
+      // 기본: 배포된 hom2box 서버 (로컬에 PHP가 없어도 실데이터 확인 가능)
+      // 로컬 PHP로 테스트하려면 target 을 "http://localhost:8000" 으로 바꾸세요.
       proxy: [
         {
           context: ["/api"],
-          target: "http://localhost:8000",
-          secure: false,
+          target: "https://hom2box.com/powerPlus",
+          secure: true,
           changeOrigin: true,
         },
       ],

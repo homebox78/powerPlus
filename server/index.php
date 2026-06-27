@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../src/AssetController.php';
+// 프론트 컨트롤러 (Apache/공유호스팅 + PHP 내장서버 공용).
+// Apache 서브디렉터리(예: /powerPlus/) 배포를 고려해 경로 prefix는 무시하고
+// 끝부분(/api/assets ...)으로 라우팅한다.
+require_once __DIR__ . '/src/AssetController.php';
 
 // ── CORS (운영에서는 CORS_ORIGIN 으로 add-in 도메인만 허용) ──
 $origin = getenv('CORS_ORIGIN') ?: '*';
@@ -15,12 +18,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = rtrim($path, '/');
-if ($path === '') {
-    $path = '/';
-}
 
 // 헬스 체크
-if ($path === '/health') {
+if (preg_match('#/health$#', $path)) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['status' => 'ok']);
     exit;
@@ -29,11 +29,11 @@ if ($path === '/health') {
 $controller = new AssetController();
 
 try {
-    if (preg_match('#^/api/assets/([^/]+)$#', $path, $m)) {
+    if (preg_match('#/api/assets/([^/]+)$#', $path, $m)) {
         $controller->get(urldecode($m[1]));
         exit;
     }
-    if ($path === '/api/assets') {
+    if (preg_match('#/api/assets$#', $path)) {
         $controller->list($_GET);
         exit;
     }
