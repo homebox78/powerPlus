@@ -4,32 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>powerPlus 관리자</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg:#f1f5f9; --surface:#fff; --border:#e2e8f0; --text:#0f172a;
-      --muted:#64748b; --accent:#2563eb; --accent-soft:#eff6ff; --danger:#b91c1c; --ok:#16a34a;
+      --bg:#f0f3f6; --surface:#fff; --border:#e8ecf1; --text:#1c2733;
+      --muted:#98a2b0; --ink2:#566070; --accent:#2b8af5; --accent-d:#1b7bef;
+      --accent-soft:#e9f2fe; --danger:#f0566a; --danger-soft:#fdebee; --ok:#1a9c5b;
     }
     * { box-sizing:border-box; }
     body { margin:0; background:var(--bg); color:var(--text);
-      font-family:"Segoe UI","Malgun Gothic",system-ui,sans-serif; font-size:14px; }
+      font-family:Pretendard,"Segoe UI","Malgun Gothic",system-ui,sans-serif; font-size:14px;
+      -webkit-font-smoothing:antialiased; }
     .hidden { display:none !important; }
     button { font:inherit; cursor:pointer; }
     input,select { font:inherit; width:100%; padding:9px 11px; border:1px solid var(--border);
       border-radius:8px; outline:none; background:var(--surface); }
     input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft); }
-    .btn { border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:8px;
-      padding:9px 16px; font-weight:600; }
-    .btn--ghost { background:var(--surface); color:var(--accent); }
-    .btn--danger { background:var(--surface); color:var(--danger); border-color:var(--border); }
+    .btn { border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:11px;
+      padding:10px 16px; font-weight:700; box-shadow:0 6px 16px rgba(43,138,245,.22); }
+    .btn:hover { background:var(--accent-d); }
+    .btn--ghost { background:var(--surface); color:var(--accent); box-shadow:none; }
+    .btn--danger { background:var(--surface); color:var(--danger); border-color:var(--border); box-shadow:none; }
     .btn:disabled { opacity:.5; cursor:default; }
     .msg { font-size:12px; }
     .msg--err { color:var(--danger); } .msg--ok { color:var(--ok); }
 
     /* 로그인 */
     .login { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
-    .login__card { width:100%; max-width:340px; background:var(--surface); border:1px solid var(--border);
-      border-radius:12px; padding:24px; box-shadow:0 2px 16px rgba(15,23,42,.08); }
-    .login__title { margin:0; text-align:center; color:var(--accent); font-size:22px; }
+    .login__card { width:100%; max-width:360px; background:var(--surface); border:1px solid var(--border);
+      border-radius:20px; padding:32px 28px; box-shadow:0 18px 50px rgba(28,39,51,.10); }
+    .login__title { margin:0; text-align:center; color:var(--accent); font-size:22px; font-weight:800; letter-spacing:-.02em; }
     .login__sub { margin:4px 0 18px; text-align:center; color:var(--muted); font-size:13px; }
     .field { margin-bottom:10px; }
     .field>label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
@@ -148,6 +153,7 @@
       <button class="tab" data-tab="assets">자산</button>
       <button class="tab" data-tab="cats">카테고리</button>
       <button class="tab" data-tab="ann">공지</button>
+      <button class="tab" data-tab="req">요청</button>
     </div>
 
     <!-- 대시보드 탭 -->
@@ -197,6 +203,15 @@
       </div>
       <table><thead><tr><th>제목</th><th>내용</th><th>상태</th><th>등록일</th><th></th></tr></thead>
         <tbody id="ann-rows"></tbody></table>
+    </section>
+
+    <!-- 요청 탭 -->
+    <section id="tab-req" class="hidden">
+      <div class="toolbar">
+        <span style="color:var(--muted);font-size:13px">사용자가 보낸 콘텐츠 요청입니다.</span>
+      </div>
+      <table><thead><tr><th>유형</th><th>제목 · 설명</th><th>요청자</th><th>상태</th><th>등록일</th><th></th></tr></thead>
+        <tbody id="req-rows"></tbody></table>
     </section>
   </div>
 
@@ -307,10 +322,43 @@
       $("tab-cats").classList.toggle("hidden", t.dataset.tab !== "cats");
       $("tab-stats").classList.toggle("hidden", t.dataset.tab !== "stats");
       $("tab-ann").classList.toggle("hidden", t.dataset.tab !== "ann");
+      $("tab-req").classList.toggle("hidden", t.dataset.tab !== "req");
       if (t.dataset.tab === "cats") renderCats();
       if (t.dataset.tab === "stats") loadStats();
       if (t.dataset.tab === "ann") loadAnns();
+      if (t.dataset.tab === "req") loadReqs();
     });
+
+    /* ── 콘텐츠 요청 ── */
+    let reqs = [];
+    async function loadReqs() {
+      try {
+        reqs = (await api("/admin/requests")).data || [];
+        renderReqs();
+      } catch (e) { $("req-rows").innerHTML = `<tr><td colspan="6" class="msg--err" style="padding:20px">${esc(e.message)}</td></tr>`; }
+    }
+    function renderReqs() {
+      const badge = (s) => s === "done"
+        ? `<span class="tag" style="background:#e3f6ec;color:#1a9c5b">완료</span>`
+        : s === "rejected"
+          ? `<span class="tag" style="background:#fdebee;color:#f0566a">거절</span>`
+          : `<span class="tag" style="background:#e9f2fe;color:#2b8af5">대기</span>`;
+      $("req-rows").innerHTML = reqs.length ? reqs.map((r) => `<tr>
+        <td><span class="tag">${esc(r.type)}</span></td>
+        <td><div style="font-weight:700">${esc(r.title)}</div>${r.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${esc(r.description)}</div>` : ""}${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px">${esc(r.link)}</a>` : ""}</td>
+        <td style="color:var(--muted);font-size:12px">${esc(r.email || "-")}</td>
+        <td>${badge(r.status)}</td>
+        <td style="white-space:nowrap;color:var(--muted)">${esc((r.created_at||"").slice(0,10))}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn btn--ghost" data-rdone="${r.id}" style="padding:5px 10px;font-size:12px">완료</button>
+          <button class="btn btn--ghost" data-rrej="${r.id}" style="padding:5px 10px;font-size:12px">거절</button>
+          <button class="btn btn--danger" data-rdel="${r.id}" style="padding:5px 9px;font-size:12px">삭제</button>
+        </td></tr>`).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:36px">접수된 요청이 없습니다.</td></tr>`;
+      const setStatus = async (id, status) => { try { await api("/admin/requests/" + id, { method:"PUT", body: JSON.stringify({ status }) }); await loadReqs(); } catch (e) { alert(e.message); } };
+      $("req-rows").querySelectorAll("[data-rdone]").forEach((b) => b.onclick = () => setStatus(b.dataset.rdone, "done"));
+      $("req-rows").querySelectorAll("[data-rrej]").forEach((b) => b.onclick = () => setStatus(b.dataset.rrej, "rejected"));
+      $("req-rows").querySelectorAll("[data-rdel]").forEach((b) => b.onclick = async () => { if (!confirm("이 요청을 삭제할까요?")) return; try { await api("/admin/requests/" + b.dataset.rdel, { method:"DELETE" }); await loadReqs(); } catch (e) { alert(e.message); } });
+    }
 
     /* ── 공지 ── */
     let anns = [], editingAnnId = null;
@@ -379,14 +427,15 @@
       };
       try {
         const r = await api("/admin/stats");
-        let annCount = 0;
+        let annCount = 0, reqCount = 0;
         try { annCount = ((await api("/admin/announcements")).data || []).filter((a) => a.is_active).length; } catch {}
+        try { reqCount = ((await api("/admin/requests")).data || []).filter((x) => x.status === "new").length; } catch {}
         $("dash-kpi").innerHTML =
           kpi("📦", "총 자산", assets.length) +
           kpi("🗂️", "카테고리", categories.length) +
           kpi("🔥", "총 삽입", r.summary.total) +
           kpi("⭐", "총 즐겨찾기", r.summary.favorites ?? 0) +
-          kpi("📢", "활성 공지", annCount);
+          kpi("📮", "대기 요청", reqCount);
         // 카테고리별 자산 분포 (막대)
         const counts = categories.map((c) => ({ label: c.label, n: assets.filter((a) => a.category === c.key).length }));
         const max = Math.max(1, ...counts.map((c) => c.n));

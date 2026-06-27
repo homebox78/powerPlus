@@ -16,6 +16,7 @@ require_once __DIR__ . '/src/CategoryController.php';
 require_once __DIR__ . '/src/UsageController.php';
 require_once __DIR__ . '/src/PrefsController.php';
 require_once __DIR__ . '/src/AnnouncementController.php';
+require_once __DIR__ . '/src/RequestController.php';
 
 // ── CORS: 알려진 출처만 허용 (운영 도메인 + 로컬 dev). 그 외엔 운영 도메인으로 고정 ──
 $allowedOrigins = array_filter([
@@ -180,6 +181,42 @@ try {
         }
         if ($method === 'DELETE' && $key !== '') {
             $cc->delete(urldecode($key));
+            exit;
+        }
+        json_out(['error' => 'Not Found', 'code' => 404], 404);
+        exit;
+    }
+
+    // ── 콘텐츠 요청 등록 (로그인 사용자) ──
+    if (preg_match('#/api/requests$#', $path) && $method === 'POST') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        (new RequestController())->create(read_json_body(), $email);
+        exit;
+    }
+
+    // ── 관리자 콘텐츠 요청 (관리자만) ──
+    if (preg_match('#/api/admin/requests(?:/(\d+))?$#', $path, $m)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        $rc = new RequestController();
+        $id = isset($m[1]) ? (int) $m[1] : 0;
+        if ($method === 'GET' && $id === 0) {
+            $rc->listAll();
+            exit;
+        }
+        if ($method === 'PUT' && $id > 0) {
+            $rc->update($id, read_json_body());
+            exit;
+        }
+        if ($method === 'DELETE' && $id > 0) {
+            $rc->delete($id);
             exit;
         }
         json_out(['error' => 'Not Found', 'code' => 404], 404);

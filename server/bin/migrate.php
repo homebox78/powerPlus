@@ -75,6 +75,19 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS announcements (
   INDEX idx_active (is_active, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+// 콘텐츠 요청 테이블 — 사용자가 필요한 자료를 요청, 관리자가 검토
+$pdo->exec("CREATE TABLE IF NOT EXISTS content_requests (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NULL,
+  type VARCHAR(32) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  link VARCHAR(500) NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'new',
+  created_at DATETIME NOT NULL,
+  INDEX idx_status (status, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 echo "migrate OK\n";
 echo "categories:\n";
 foreach ($pdo->query("SELECT `key`,label,sort_order FROM categories ORDER BY sort_order") as $r) {

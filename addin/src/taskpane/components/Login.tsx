@@ -43,8 +43,24 @@ export default function Login({ onSuccess }: { onSuccess: (email: string) => voi
   return (
     <div className="login">
       <div className="login__card">
+        <div className="login__logo" aria-hidden>
+          <svg
+            width="27"
+            height="27"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5" />
+            <rect x="3.5" y="8.5" width="12" height="12" rx="2.5" />
+            <path d="M9.5 12.6v3.8M7.6 14.5h3.8" />
+          </svg>
+        </div>
         <h1 className="login__title">powerPlus</h1>
-        <p className="login__subtitle">자산 라이브러리에 로그인</p>
+        <p className="login__subtitle">에셋 라이브러리에 로그인</p>
 
         {step === "email" ? (
           <form onSubmit={handleRequest} className="login__form">
