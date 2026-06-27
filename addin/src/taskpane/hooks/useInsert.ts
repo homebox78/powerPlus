@@ -83,21 +83,42 @@ export function useInsert() {
         return false;
       }
 
-      // 현재 슬라이드에 이미지 삽입 (Common API — 모든 PowerPoint 버전에서 동작).
-      // PowerPoint.shapes.addImage 는 런타임에 없는 환경이 있어 setSelectedDataAsync 사용.
-      await new Promise<void>((resolve, reject) => {
-        Office.context.document.setSelectedDataAsync(
-          base64,
-          {
-            coercionType: Office.CoercionType.Image,
-            imageWidth: sizePt, // 단위 pt — 슬라이드 중앙에 배치됨
-            imageHeight: sizePt,
-          },
-          (res) => {
-            if (res.status === Office.AsyncResultStatus.Succeeded) resolve();
-            else reject(new Error(res.error?.message || "삽입에 실패했습니다."));
+      // 슬라이드에서 선택한 개체가 있으면 그 위치에, 없으면 슬라이드 중앙에 삽입.
+      // (Office 애드인 API는 마우스 포인터 픽셀 위치를 제공하지 않으므로 "선택 위치" 기준이 최선)
+      let pos: { left: number; top: number } | null = null;
+      try {
+        await PowerPoint.run(async (context) => {
+          const sel = context.presentation.getSelectedShapes();
+          sel.load("items/left, items/top");
+          await context.sync();
+          if (sel.items.length > 0) {
+            pos = { left: sel.items[0].left, top: sel.items[0].top };
           }
-        );
+        });
+      } catch {
+        // getSelectedShapes 미지원/선택 없음 → 중앙 삽입으로 폴백
+      }
+
+      // 현재 슬라이드에 이미지 삽입 (Common API — 모든 PowerPoint 버전에서 동작).
+      await new Promise<void>((resolve, reject) => {
+        const opts: Office.SetSelectedDataOptions & {
+          imageWidth?: number;
+          imageHeight?: number;
+          imageLeft?: number;
+          imageTop?: number;
+        } = {
+          coercionType: Office.CoercionType.Image,
+          imageWidth: sizePt, // 단위 pt
+          imageHeight: sizePt,
+        };
+        if (pos) {
+          opts.imageLeft = pos.left; // 선택한 개체 위치에 삽입
+          opts.imageTop = pos.top;
+        }
+        Office.context.document.setSelectedDataAsync(base64, opts, (res) => {
+          if (res.status === Office.AsyncResultStatus.Succeeded) resolve();
+          else reject(new Error(res.error?.message || "삽입에 실패했습니다."));
+        });
       });
 
       setState({
