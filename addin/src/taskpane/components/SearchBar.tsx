@@ -24,6 +24,20 @@ export default function SearchBar({ value, onChange, categories, category, onCat
 
   return (
     <div className="search">
+      <span className="search__icon" aria-hidden>🔍</span>
+      <input
+        className="search__input"
+        type="search"
+        aria-label="자산 검색"
+        placeholder="태그로 검색"
+        value={local}
+        onChange={(e) => handle(e.target.value)}
+      />
+      {local && (
+        <button className="search__clear" aria-label="검색어 지우기" onClick={() => handle("")}>
+          ×
+        </button>
+      )}
       <select
         className="search__cat"
         value={category}
@@ -36,22 +50,6 @@ export default function SearchBar({ value, onChange, categories, category, onCat
           </option>
         ))}
       </select>
-      <div className="search__field">
-        <span className="search__icon" aria-hidden>🔍</span>
-        <input
-          className="search__input"
-          type="search"
-          aria-label="자산 검색"
-          placeholder="태그로 검색"
-          value={local}
-          onChange={(e) => handle(e.target.value)}
-        />
-        {local && (
-          <button className="search__clear" aria-label="검색어 지우기" onClick={() => handle("")}>
-            ×
-          </button>
-        )}
-      </div>
     </div>
   );
 }
