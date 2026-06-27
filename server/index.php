@@ -7,6 +7,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/src/AssetController.php';
 require_once __DIR__ . '/src/AuthController.php';
 require_once __DIR__ . '/src/AuthService.php';
+require_once __DIR__ . '/src/AdminController.php';
 
 // ── CORS (운영에서는 CORS_ORIGIN 으로 add-in 도메인만 허용) ──
 $origin = getenv('CORS_ORIGIN') ?: '*';
@@ -69,11 +70,41 @@ try {
         exit;
     }
     if (preg_match('#/api/auth/me$#', $path)) {
-        (new AuthController())->me(bearer_token());
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        json_out(['email' => $email, 'isAdmin' => AdminController::isAdmin($email)]);
         exit;
     }
     if (preg_match('#/api/auth/logout$#', $path) && $method === 'POST') {
         (new AuthController())->logout(bearer_token());
+        exit;
+    }
+
+    // ── 관리자 자산 CRUD (관리자 이메일만) ──
+    if (preg_match('#/api/admin/assets(?:/([^/]+))?$#', $path, $m)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        $admin = new AdminController();
+        $id = $m[1] ?? '';
+        if ($method === 'POST' && $id === '') {
+            $admin->create(read_json_body());
+            exit;
+        }
+        if ($method === 'PUT' && $id !== '') {
+            $admin->update(urldecode($id), read_json_body());
+            exit;
+        }
+        if ($method === 'DELETE' && $id !== '') {
+            $admin->delete(urldecode($id));
+            exit;
+        }
+        json_out(['error' => 'Not Found', 'code' => 404], 404);
         exit;
     }
 

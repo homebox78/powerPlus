@@ -15,6 +15,9 @@ return [
     'code_ttl_min'     => 10,   // 인증코드 유효시간(분)
     'session_ttl_days' => 30,   // 로그인 유지(일)
 
+    // 관리자(자산 추가/수정/삭제 가능) 이메일 목록.
+    'admin_emails'     => ['wds0119@solideos.com'],
+
     // ── 메일 발송 ──
     'mail_from'      => 'noreply@hom2box.com',
     'mail_from_name' => 'powerPlus',

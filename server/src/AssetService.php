@@ -61,6 +61,49 @@ final class AssetService
         return $row ? $this->hydrate($row) : null;
     }
 
+    /**
+     * 자산 생성. 성공 시 생성된 자산, 실패(중복 id 등) 시 예외.
+     * @param array{id:string,name:string,category:string,tags:array,svg:string} $data
+     */
+    public function create(array $data): array
+    {
+        $stmt = Database::pdo()->prepare(
+            'INSERT INTO assets (id, name, category, tags, svg) VALUES (:id, :name, :category, :tags, :svg)'
+        );
+        $stmt->execute([
+            ':id'       => $data['id'],
+            ':name'     => $data['name'],
+            ':category' => $data['category'],
+            ':tags'     => json_encode(array_values($data['tags']), JSON_UNESCAPED_UNICODE),
+            ':svg'      => $data['svg'],
+        ]);
+        return $this->find($data['id']) ?? [];
+    }
+
+    /** 자산 수정. 존재하지 않으면 false. */
+    public function update(string $id, array $data): bool
+    {
+        $stmt = Database::pdo()->prepare(
+            'UPDATE assets SET name = :name, category = :category, tags = :tags, svg = :svg WHERE id = :id'
+        );
+        $stmt->execute([
+            ':id'       => $id,
+            ':name'     => $data['name'],
+            ':category' => $data['category'],
+            ':tags'     => json_encode(array_values($data['tags']), JSON_UNESCAPED_UNICODE),
+            ':svg'      => $data['svg'],
+        ]);
+        return $stmt->rowCount() >= 0 && $this->find($id) !== null;
+    }
+
+    /** 자산 삭제. 삭제된 행이 있으면 true. */
+    public function delete(string $id): bool
+    {
+        $stmt = Database::pdo()->prepare('DELETE FROM assets WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount() > 0;
+    }
+
     /** tags(JSON 문자열) → 배열로 변환 */
     private function hydrate(array $row): array
     {
