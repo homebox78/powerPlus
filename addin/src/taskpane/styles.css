@@ -244,10 +244,11 @@ body {
   color: var(--accent);
 }
 
-.tab--active {
+.tab--active,
+.tab--active:hover {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: #fff; /* hover 시에도 흰 글자 유지 (파랑 on 파랑 방지) */
 }
 
 .app__count {
@@ -444,27 +445,15 @@ body {
   opacity: 0.5;
 }
 
-.loadmore {
-  display: block;
-  width: calc(100% - 8px);
-  margin: 8px 4px 12px;
-  padding: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
+/* 무한 스크롤 센티넬 + 추가 로딩 스피너 */
+.scroll-sentinel {
+  height: 1px;
 }
 
-.loadmore:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.loadmore:disabled {
-  opacity: 0.5;
-  cursor: default;
+.loadmore-spin {
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 20px;
 }
 
 /* 토스트 */

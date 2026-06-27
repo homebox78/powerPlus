@@ -102,6 +102,23 @@ export default function App() {
 
   const hasMore = !isSpecial && rawAssets.length < total;
 
+  // 무한 스크롤: 하단 센티넬이 보이면 다음 페이지 자동 로드
+  const bodyRef = React.useRef<HTMLElement>(null);
+  const sentinelRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const root = bodyRef.current;
+    if (!sentinel || !root || !hasMore) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) loadMore();
+      },
+      { root, rootMargin: "300px" }
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+  }, [hasMore, loadingMore, serverCategory, query]);
+
   // 표시할 자산: 특수 탭이면 즐겨찾기/최근으로 필터·정렬.
   const displayed = React.useMemo(() => {
     if (category === "favorites") {
@@ -169,7 +186,7 @@ export default function App() {
         {offline && !loading && " · 오프라인(로컬 데이터)"}
       </div>
 
-      <main className="app__body">
+      <main className="app__body" ref={bodyRef}>
         <AssetGrid
           assets={displayed}
           insertingId={insertingId}
@@ -179,10 +196,12 @@ export default function App() {
           emptyMessage={emptyMessage}
           loading={loading}
         />
-        {hasMore && (
-          <button className="loadmore" onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? "불러오는 중…" : `더 보기 (${displayed.length}/${total})`}
-          </button>
+        {/* 무한 스크롤 센티넬 + 추가 로딩 표시 */}
+        <div ref={sentinelRef} className="scroll-sentinel" aria-hidden />
+        {loadingMore && (
+          <div className="loadmore-spin" aria-label="더 불러오는 중">
+            <span className="spinner" />
+          </div>
         )}
       </main>
 
