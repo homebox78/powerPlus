@@ -302,7 +302,8 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* 반응형: 작업창을 넓힐수록 칸이 자동으로 늘어남 (좁으면 3칸, 넓으면 더 많이) */
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
   gap: 8px;
   padding: 0 4px 8px;
 }
