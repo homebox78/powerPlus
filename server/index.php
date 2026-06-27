@@ -15,6 +15,7 @@ require_once __DIR__ . '/src/AdminController.php';
 require_once __DIR__ . '/src/CategoryController.php';
 require_once __DIR__ . '/src/UsageController.php';
 require_once __DIR__ . '/src/PrefsController.php';
+require_once __DIR__ . '/src/AnnouncementController.php';
 
 // ── CORS: 알려진 출처만 허용 (운영 도메인 + 로컬 dev). 그 외엔 운영 도메인으로 고정 ──
 $allowedOrigins = array_filter([
@@ -26,7 +27,7 @@ $reqOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $origin = in_array($reqOrigin, $allowedOrigins, true) ? $reqOrigin : 'https://hom2box.com';
 header('Access-Control-Allow-Origin: ' . $origin);
 header('Vary: Origin');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(204);
@@ -179,6 +180,46 @@ try {
         }
         if ($method === 'DELETE' && $key !== '') {
             $cc->delete(urldecode($key));
+            exit;
+        }
+        json_out(['error' => 'Not Found', 'code' => 404], 404);
+        exit;
+    }
+
+    // ── 공지(알람) 목록 (로그인 사용자) — 활성 공지만 ──
+    if (preg_match('#/api/announcements$#', $path) && $method === 'GET') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) {
+            json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401);
+            exit;
+        }
+        (new AnnouncementController())->listActive();
+        exit;
+    }
+
+    // ── 관리자 공지 CRUD (관리자만, JSON) ──
+    if (preg_match('#/api/admin/announcements(?:/(\d+))?$#', $path, $m)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        $ac = new AnnouncementController();
+        $id = isset($m[1]) ? (int) $m[1] : 0;
+        if ($method === 'GET' && $id === 0) {
+            $ac->listAll();
+            exit;
+        }
+        if ($method === 'POST' && $id === 0) {
+            $ac->create(read_json_body());
+            exit;
+        }
+        if ($method === 'PUT' && $id > 0) {
+            $ac->update($id, read_json_body());
+            exit;
+        }
+        if ($method === 'DELETE' && $id > 0) {
+            $ac->delete($id);
             exit;
         }
         json_out(['error' => 'Not Found', 'code' => 404], 404);

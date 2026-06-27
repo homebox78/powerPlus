@@ -21,8 +21,9 @@ final class AssetController
         $page     = max(1, (int) ($query['page'] ?? 1));
         $limit    = (int) ($query['limit'] ?? 50);
         $limit    = max(1, min(500, $limit ?: 50));
+        $sort     = isset($query['sort']) ? (string) $query['sort'] : 'latest';
 
-        $this->json($this->service->list($category, $q, $page, $limit));
+        $this->json($this->service->list($category, $q, $page, $limit, $sort));
     }
 
     /** GET /api/assets/{id} */

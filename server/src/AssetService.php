@@ -9,36 +9,56 @@ final class AssetService
 {
     private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, slide_path';
 
+    /** 자산별 조회수(삽입 횟수) 및 즐겨찾기 수 서브쿼리 — 모든 응답에 노출(인기/즐겨찾기 순위용) */
+    private const COUNT_COLS =
+        '(SELECT COUNT(*) FROM usage_log u WHERE u.asset_id = a.id) AS views, ' .
+        '(SELECT COUNT(*) FROM user_favorites f WHERE f.asset_id = a.id) AS fav_count';
+
+    /** 정렬 키 → ORDER BY 절 (화이트리스트로 SQL 인젝션 방지) */
+    private static function orderBy(string $sort): string
+    {
+        switch ($sort) {
+            case 'popular':   // 인기순(뷰/삽입 많은 순)
+                return 'ORDER BY views DESC, a.id';
+            case 'favorites': // 즐겨찾기순(많이 즐겨찾기된 순)
+                return 'ORDER BY fav_count DESC, a.id';
+            default:          // 기본(등록 순)
+                return 'ORDER BY a.id';
+        }
+    }
+
     /**
-     * 카테고리 + 검색어(태그/이름) 필터 + 페이지네이션.
+     * 카테고리 + 검색어(태그/이름) 필터 + 정렬 + 페이지네이션.
      * @return array{data:array<int,array>,total:int,page:int,limit:int}
      */
-    public function list(string $category, string $q, int $page, int $limit): array
+    public function list(string $category, string $q, int $page, int $limit, string $sort = 'latest'): array
     {
         $pdo = Database::pdo();
         $where = [];
         $params = [];
         if ($category !== '' && $category !== 'all') {
-            $where[] = 'category = :category';
+            $where[] = 'a.category = :category';
             $params[':category'] = $category;
         }
         $q = trim($q);
         if ($q !== '') {
             // 태그(JSON 텍스트) 또는 이름 부분일치.
             // ATTR_EMULATE_PREPARES=false 에서는 같은 명명 파라미터 재사용 불가 → :q1/:q2 분리.
-            $where[] = '(tags LIKE :q1 OR name LIKE :q2)';
+            $where[] = '(a.tags LIKE :q1 OR a.name LIKE :q2)';
             $params[':q1'] = '%' . $q . '%';
             $params[':q2'] = '%' . $q . '%';
         }
         $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM assets $whereSql");
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM assets a $whereSql");
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
+        $cols = preg_replace('/(^|,\s*)/', '$1a.', self::COLS); // 모든 컬럼에 a. 별칭
         $offset = ($page - 1) * $limit;
         $stmt = $pdo->prepare(
-            'SELECT ' . self::COLS . " FROM assets $whereSql ORDER BY id LIMIT :limit OFFSET :offset"
+            "SELECT $cols, " . self::COUNT_COLS . " FROM assets a $whereSql "
+            . self::orderBy($sort) . ' LIMIT :limit OFFSET :offset'
         );
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -143,6 +163,13 @@ final class AssetService
     /** tags(통합/ko/en) → 배열, image_path → 전체 URL(image_url). svg(구 mock)도 그대로 유지. */
     private function hydrate(array $row): array
     {
+        // 인기/즐겨찾기 순위용 카운트 (list 쿼리에서만 존재)
+        if (array_key_exists('views', $row)) {
+            $row['views'] = (int) $row['views'];
+        }
+        if (array_key_exists('fav_count', $row)) {
+            $row['fav_count'] = (int) $row['fav_count'];
+        }
         $row['tags']    = json_decode((string) ($row['tags'] ?? '[]'), true) ?: [];
         $row['tags_ko'] = json_decode((string) ($row['tags_ko'] ?? '[]'), true) ?: [];
         $row['tags_en'] = json_decode((string) ($row['tags_en'] ?? '[]'), true) ?: [];

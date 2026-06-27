@@ -12,6 +12,15 @@ import { fetchCategories } from "./api/categories";
 import { useInsert } from "./hooks/useInsert";
 import { useFavorites } from "./hooks/useFavorites";
 import { useRecent } from "./hooks/useRecent";
+import { fetchAnnouncements, getAnnSeen, setAnnSeen } from "./api/announcements";
+import type { Announcement } from "./api/announcements";
+
+// 정렬 옵션
+const SORTS = [
+  { key: "latest", label: "기본" },
+  { key: "popular", label: "인기순" },
+  { key: "favorites", label: "즐겨찾기순" },
+];
 
 // 특수 탭(즐겨찾기/최근) — 클라이언트에서 필터링.
 const SPECIAL_TABS: Category[] = [
@@ -27,7 +36,18 @@ export default function App() {
 
   const [category, setCategory] = React.useState("all");
   const [query, setQuery] = React.useState("");
+  const [sort, setSort] = React.useState("latest");
   const [cats, setCats] = React.useState<Category[]>(CATEGORIES); // 폴백: 하드코딩
+
+  // 전체 컨텐츠 수(필터 무관) — 로그인 시 1회 조회
+  const [grandTotal, setGrandTotal] = React.useState<number | null>(null);
+
+  // 공지(알람)
+  const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
+  const [annSeen, setAnnSeenState] = React.useState<number>(() => getAnnSeen());
+  const [annOpen, setAnnOpen] = React.useState(false);
+  const [annExpanded, setAnnExpanded] = React.useState<number | null>(null); // 펼친 공지 id
+  const unreadAnn = announcements.filter((a) => a.id > annSeen).length;
 
   // 로그인 후 서버에서 카테고리 목록 로드 (실패 시 폴백 유지)
   React.useEffect(() => {
@@ -37,6 +57,17 @@ export default function App() {
       .catch(() => {
         /* 서버 미연결 → 하드코딩 카테고리 유지 */
       });
+  }, [email]);
+
+  // 로그인 후 전체 컨텐츠 수 + 공지 로드
+  React.useEffect(() => {
+    if (!email) return;
+    fetchAssets("all", "", 1, 1)
+      .then((r) => setGrandTotal(r.total))
+      .catch(() => undefined);
+    fetchAnnouncements()
+      .then(setAnnouncements)
+      .catch(() => undefined);
   }, [email]);
 
   const [rawAssets, setRawAssets] = React.useState<Asset[]>([]);
@@ -62,7 +93,7 @@ export default function App() {
     const ctrl = new AbortController();
     pageRef.current = 1;
     setLoading(true);
-    fetchAssets(serverCategory, query, 1, isSpecial ? 500 : PAGE_SIZE, ctrl.signal)
+    fetchAssets(serverCategory, query, 1, isSpecial ? 500 : PAGE_SIZE, ctrl.signal, sort)
       .then((r) => {
         setRawAssets(r.assets);
         setTotal(r.total);
@@ -80,14 +111,14 @@ export default function App() {
         if (!ctrl.signal.aborted) setLoading(false);
       });
     return () => ctrl.abort();
-  }, [category, query, email]);
+  }, [category, query, email, sort]);
 
   // 다음 페이지 추가 로드 (일반 탭에서만)
   async function loadMore() {
     setLoadingMore(true);
     try {
       pageRef.current += 1;
-      const r = await fetchAssets(serverCategory, query, pageRef.current, PAGE_SIZE);
+      const r = await fetchAssets(serverCategory, query, pageRef.current, PAGE_SIZE, undefined, sort);
       setRawAssets((prev) => [...prev, ...r.assets]);
       setTotal(r.total);
     } catch (e) {
@@ -117,7 +148,7 @@ export default function App() {
     );
     io.observe(sentinel);
     return () => io.disconnect();
-  }, [hasMore, loadingMore, serverCategory, query]);
+  }, [hasMore, loadingMore, serverCategory, query, sort]);
 
   // 표시할 자산: 특수 탭이면 즐겨찾기/최근으로 필터·정렬.
   const displayed = React.useMemo(() => {
@@ -147,6 +178,16 @@ export default function App() {
     setRawAssets([]);
   }
 
+  // 공지 패널 열기 → 모두 읽음 처리(벨 숨김)
+  function openAnnouncements() {
+    setAnnOpen(true);
+    const maxId = announcements.reduce((m, a) => Math.max(m, a.id), 0);
+    if (maxId > annSeen) {
+      setAnnSeen(maxId);
+      setAnnSeenState(maxId);
+    }
+  }
+
   // 토스트 메시지 자동 사라짐
   React.useEffect(() => {
     if (!message) return;
@@ -165,6 +206,15 @@ export default function App() {
         ? "최근 사용한 자산이 없습니다. 자산을 삽입하면 여기에 모입니다."
         : "결과가 없습니다.";
 
+  // 카운트: 검색된 수(total) + 전체 컨텐츠 수(grandTotal)
+  const filtered = category !== "all" || query.trim() !== "";
+  const gt = grandTotal ?? total;
+  const countText = isSpecial
+    ? `${displayed.length}개`
+    : filtered
+      ? `검색 ${total}개 · 전체 ${gt}개`
+      : `전체 ${gt}개`;
+
   return (
     <div className="app">
       <header className="app__header app__header--row">
@@ -179,20 +229,44 @@ export default function App() {
           </span>
           <h1 className="app__title">powerPlus</h1>
         </div>
-        <button className="app__logout" onClick={handleLogout} title={email}>
-          로그아웃
-        </button>
+        <div className="app__actions">
+          {unreadAnn > 0 && (
+            <button
+              className="bell"
+              onClick={openAnnouncements}
+              aria-label={`새 공지 ${unreadAnn}건`}
+              title={`새 공지 ${unreadAnn}건`}
+            >
+              🔔<span className="bell__badge">{unreadAnn}</span>
+            </button>
+          )}
+          <button className="app__logout" onClick={handleLogout} title={email}>
+            로그아웃
+          </button>
+        </div>
       </header>
 
       <CategoryTabs categories={SPECIAL_TABS} active={category} onChange={setCategory} />
 
       <div className="app__count">
-        {loading
-          ? "불러오는 중…"
-          : isSpecial
-            ? `${displayed.length}개 자산`
-            : `${displayed.length}개${total > displayed.length ? ` / 전체 ${total}` : ""}`}
-        {offline && !loading && " · 오프라인(로컬 데이터)"}
+        <span className="app__count-text">
+          {loading ? "불러오는 중…" : countText}
+          {offline && !loading && " · 오프라인"}
+        </span>
+        {!isSpecial && (
+          <select
+            className="app__sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            aria-label="정렬"
+          >
+            {SORTS.map((s) => (
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <main className="app__body" ref={bodyRef}>
@@ -226,6 +300,48 @@ export default function App() {
       {message && (
         <div className={"toast" + (error ? " toast--error" : "")} role="status">
           {message}
+        </div>
+      )}
+
+      {annOpen && (
+        <div className="ann-overlay" onClick={() => setAnnOpen(false)}>
+          <div className="ann-panel" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="공지">
+            <div className="ann-panel__head">
+              <span>📢 공지</span>
+              <button className="ann-panel__close" onClick={() => setAnnOpen(false)} aria-label="닫기">
+                ×
+              </button>
+            </div>
+            <div className="ann-panel__body">
+              {announcements.length === 0 ? (
+                <div className="ann-empty">등록된 공지가 없습니다.</div>
+              ) : (
+                announcements.map((a) => {
+                  const open = annExpanded === a.id;
+                  return (
+                    <div className={"ann-item" + (open ? " ann-item--open" : "")} key={a.id}>
+                      <button
+                        className="ann-item__title"
+                        onClick={() => setAnnExpanded(open ? null : a.id)}
+                        aria-expanded={open}
+                      >
+                        <span className="ann-item__title-text">{a.title}</span>
+                        <span className="ann-item__chev" aria-hidden>
+                          {open ? "▴" : "▾"}
+                        </span>
+                      </button>
+                      {open && (
+                        <div className="ann-item__detail">
+                          {a.body && <div className="ann-item__body">{a.body}</div>}
+                          <div className="ann-item__date">{a.created_at?.slice(0, 10)}</div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

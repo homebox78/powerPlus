@@ -29,8 +29,9 @@ final class UsageController
     public function stats(): void
     {
         $this->json([
-            'summary' => $this->service->summary(),
-            'top'     => $this->service->top(50),
+            'summary'      => $this->service->summary(),
+            'top'          => $this->service->top(50),
+            'topFavorites' => $this->service->topFavorites(50),
         ]);
     }
 

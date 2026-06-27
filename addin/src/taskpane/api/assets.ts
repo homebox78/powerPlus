@@ -26,13 +26,15 @@ export async function fetchAssets(
   query: string,
   page = 1,
   limit = 60,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  sort: string = "latest"
 ): Promise<FetchResult> {
   const params = new URLSearchParams({
     category,
     q: query.trim(),
     page: String(page),
     limit: String(limit),
+    sort,
   });
 
   const token = getToken();

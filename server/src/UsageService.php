@@ -15,15 +15,30 @@ final class UsageService
     }
 
     /**
-     * 많이 쓴 순 상위 자산 + 사용 횟수 (자산 정보 포함).
+     * 뷰(삽입) 순위 — 많이 쓴 순 상위 자산 + 사용 횟수.
      * @return array<int,array{count:int,asset:?array}>
      */
     public function top(int $limit = 50): array
     {
+        return $this->rank('usage_log', 'used_at', $limit);
+    }
+
+    /**
+     * 즐겨찾기 순위 — 많이 즐겨찾기된 순 상위 자산 + 즐겨찾기 수.
+     * @return array<int,array{count:int,asset:?array}>
+     */
+    public function topFavorites(int $limit = 50): array
+    {
+        return $this->rank('user_favorites', 'created_at', $limit);
+    }
+
+    /** 공통: 특정 테이블에서 asset_id 별 카운트 상위 N. */
+    private function rank(string $table, string $dateCol, int $limit): array
+    {
         $limit = max(1, min(200, $limit));
         $stmt = Database::pdo()->prepare(
-            'SELECT asset_id, COUNT(*) AS cnt FROM usage_log
-             GROUP BY asset_id ORDER BY cnt DESC, MAX(used_at) DESC LIMIT :lim'
+            "SELECT asset_id, COUNT(*) AS cnt FROM $table
+             GROUP BY asset_id ORDER BY cnt DESC, MAX($dateCol) DESC LIMIT :lim"
         );
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
@@ -39,13 +54,14 @@ final class UsageService
         return $out;
     }
 
-    /** 전체 사용 횟수 / 고유 사용 자산 수 */
+    /** 전체 사용 횟수 / 고유 사용 자산 수 / 즐겨찾기 총 수 */
     public function summary(): array
     {
         $pdo = Database::pdo();
         return [
-            'total'  => (int) $pdo->query('SELECT COUNT(*) FROM usage_log')->fetchColumn(),
-            'unique' => (int) $pdo->query('SELECT COUNT(DISTINCT asset_id) FROM usage_log')->fetchColumn(),
+            'total'     => (int) $pdo->query('SELECT COUNT(*) FROM usage_log')->fetchColumn(),
+            'unique'    => (int) $pdo->query('SELECT COUNT(DISTINCT asset_id) FROM usage_log')->fetchColumn(),
+            'favorites' => (int) $pdo->query('SELECT COUNT(*) FROM user_favorites')->fetchColumn(),
         ];
     }
 }

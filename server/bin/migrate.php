@@ -64,6 +64,17 @@ foreach (['tags_ko', 'tags_en'] as $c) {
     }
 }
 
+// 공지(알람) 테이블 — 관리자가 등록, 사용자 애드인 우측상단 알람에 표시
+$pdo->exec("CREATE TABLE IF NOT EXISTS announcements (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  body TEXT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NULL,
+  INDEX idx_active (is_active, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 echo "migrate OK\n";
 echo "categories:\n";
 foreach ($pdo->query("SELECT `key`,label,sort_order FROM categories ORDER BY sort_order") as $r) {
