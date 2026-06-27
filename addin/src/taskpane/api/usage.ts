@@ -1,7 +1,7 @@
 import { getToken } from "./auth";
+import { API_BASE } from "./config";
 
 // 자산 삽입 시 사용 기록을 서버에 남긴다 (통계용). 실패해도 삽입 흐름엔 영향 없음.
-const API_BASE = "/api";
 
 export async function recordUsage(assetId: string): Promise<void> {
   const token = getToken();

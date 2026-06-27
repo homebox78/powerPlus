@@ -8,14 +8,14 @@ import type { Asset, Category } from "./data/mockAssets";
 import { fetchAssets, AuthRequiredError } from "./api/assets";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
 import { recordUsage } from "./api/usage";
+import { fetchCategories } from "./api/categories";
 import { useInsert } from "./hooks/useInsert";
 import { useFavorites } from "./hooks/useFavorites";
 import { useRecent } from "./hooks/useRecent";
 import { INSERT_SIZES, useInsertSize } from "./hooks/useInsertSize";
 
-// 일반 카테고리 + 특수 탭(즐겨찾기/최근). 특수 탭은 클라이언트에서 필터링한다.
-const TABS: Category[] = [
-  ...CATEGORIES,
+// 특수 탭(즐겨찾기/최근) — 클라이언트에서 필터링.
+const SPECIAL_TABS: Category[] = [
   { key: "favorites", label: "⭐ 즐겨찾기" },
   { key: "recent", label: "🕒 최근" },
 ];
@@ -28,6 +28,17 @@ export default function App() {
 
   const [category, setCategory] = React.useState("all");
   const [query, setQuery] = React.useState("");
+  const [cats, setCats] = React.useState<Category[]>(CATEGORIES); // 폴백: 하드코딩
+
+  // 로그인 후 서버에서 카테고리 목록 로드 (실패 시 폴백 유지)
+  React.useEffect(() => {
+    if (!email) return;
+    fetchCategories()
+      .then((list) => setCats([{ key: "all", label: "전체" }, ...list]))
+      .catch(() => {
+        /* 서버 미연결 → 하드코딩 카테고리 유지 */
+      });
+  }, [email]);
 
   const [rawAssets, setRawAssets] = React.useState<Asset[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -122,7 +133,7 @@ export default function App() {
       </header>
 
       <SearchBar value={query} onChange={setQuery} />
-      <CategoryTabs categories={TABS} active={category} onChange={setCategory} />
+      <CategoryTabs categories={[...cats, ...SPECIAL_TABS]} active={category} onChange={setCategory} />
 
       <div className="toolbar">
         <div className="app__count">

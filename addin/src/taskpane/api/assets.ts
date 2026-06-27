@@ -1,10 +1,7 @@
 import type { Asset } from "../data/mockAssets";
 import { filterAssets } from "../data/mockAssets";
 import { getToken } from "./auth";
-
-// 개발: webpack dev 서버가 /api 를 PHP 서버(http://localhost:8000)로 프록시.
-// 운영: 같은 도메인에 배포하거나 환경에 맞게 절대 URL로 교체.
-const API_BASE = "/api";
+import { API_BASE } from "./config";
 
 /** 로그인이 필요(401)함을 알리는 전용 에러 — 상위에서 로그인 화면으로 전환. */
 export class AuthRequiredError extends Error {}

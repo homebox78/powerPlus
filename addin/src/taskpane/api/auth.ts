@@ -1,7 +1,6 @@
-// 이메일 OTP 인증 클라이언트.
-// dev: webpack 프록시가 /api 를 PHP 서버로 전달. 토큰은 작업창 localStorage 에 보관.
+// 이메일 OTP 인증 클라이언트. 토큰은 작업창 localStorage 에 보관.
+import { API_BASE } from "./config";
 
-const API_BASE = "/api";
 const TOKEN_KEY = "pp_token";
 const EMAIL_KEY = "pp_email";
 
