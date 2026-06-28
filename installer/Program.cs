@@ -22,6 +22,7 @@ public class MainForm : Form
     const string GUID = "629c04eb-661e-43a4-abc4-21a298eb92db";
     const string WEF_KEY = @"Software\Microsoft\Office\16.0\WEF\Developer";
 
+    const int BASE_W = 720, BASE_H = 512; // 디자인 기준(96 DPI)
     readonly WebView2 _web = new();
     string _installPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "powerPlus");
@@ -51,19 +52,37 @@ public class MainForm : Form
         }
     }
 
+    // 창을 모니터 DPI에 맞춰 키운다(WebView2는 콘텐츠를 배율대로 렌더하므로 창도 같이 커져야 안 찌그러짐)
+    void ApplyDpiSize()
+    {
+        double s = DeviceDpi / 96.0;
+        int w = (int)Math.Round(BASE_W * s), h = (int)Math.Round(BASE_H * s);
+        var wa = Screen.FromControl(this).WorkingArea; // 화면 작업영역 안으로 클램프
+        w = Math.Min(w, wa.Width); h = Math.Min(h, wa.Height);
+        ClientSize = new Size(w, h);
+        Location = new Point(wa.Left + (wa.Width - Width) / 2, wa.Top + (wa.Height - Height) / 2);
+    }
+
+    protected override void OnDpiChanged(DpiChangedEventArgs e)
+    {
+        base.OnDpiChanged(e);
+        ApplyDpiSize();      // 다른 배율 모니터로 옮길 때 재조정
+        ApplyRoundedCorners();
+    }
+
     public MainForm()
     {
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.CenterScreen;
-        AutoScaleMode = AutoScaleMode.Dpi;
-        ClientSize = new Size(720, 512);
+        AutoScaleMode = AutoScaleMode.None; // DPI 스케일은 ApplyDpiSize에서 직접(이중 스케일/미스케일 방지)
+        ClientSize = new Size(BASE_W, BASE_H); // 임시 — Load에서 DeviceDpi로 보정
         BackColor = Color.White;
         Text = "powerPlus 설치 마법사";
         try { Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!); } catch { }
 
         _web.Dock = DockStyle.Fill;
         Controls.Add(_web);
-        Load += async (_, __) => { ApplyRoundedCorners(); await InitAsync(); };
+        Load += async (_, __) => { ApplyDpiSize(); ApplyRoundedCorners(); await InitAsync(); };
     }
 
     async Task InitAsync()
