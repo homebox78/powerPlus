@@ -22,7 +22,7 @@ public class MainForm : Form
     const string GUID = "629c04eb-661e-43a4-abc4-21a298eb92db";
     const string WEF_KEY = @"Software\Microsoft\Office\16.0\WEF\Developer";
 
-    const int BASE_W = 720, BASE_H = 512; // 디자인 기준(96 DPI)
+    const int BASE_W = 720, BASE_H = 532; // 디자인 기준(96 DPI) — 세로 +20px(설치 중 세로 스크롤 방지)
     readonly WebView2 _web = new();
     string _installPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "powerPlus");
