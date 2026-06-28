@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/AssetService.php';
 require_once __DIR__ . '/CategoryService.php';
 require_once __DIR__ . '/Config.php';
+require_once __DIR__ . '/Thumb.php';
 
 /** 관리자용 자산 CRUD. 이미지는 PNG/JPG 파일 업로드, ID는 카테고리별 자동 생성. */
 final class AdminController
@@ -67,6 +68,7 @@ final class AdminController
                     return;
                 }
                 $data['image_path'] = $img['path'];
+                $data['thumb_path'] = $img['thumb'] ?? null;
             }
         } else {
             $img = $this->saveImage($files['image'] ?? null, $category, $id);
@@ -75,6 +77,7 @@ final class AdminController
                 return;
             }
             $data['image_path'] = $img['path'];
+            $data['thumb_path'] = $img['thumb'] ?? null;
         }
 
         $asset = $this->service->create($data);
@@ -119,6 +122,7 @@ final class AdminController
                 return;
             }
             $patch['image_path'] = $saved['path'];
+            $patch['thumb_path'] = $saved['thumb'] ?? null;
         }
         // 장표 파일(.ppt/.pptx)이 올라온 경우에만 교체
         if ($this->hasUpload($files['slide'] ?? null)) {
@@ -143,6 +147,9 @@ final class AdminController
         }
         if (!empty($asset['image_path'])) {
             @unlink(__DIR__ . '/../' . $asset['image_path']);
+        }
+        if (!empty($asset['thumb_path'])) {
+            @unlink(__DIR__ . '/../' . $asset['thumb_path']);
         }
         if (!empty($asset['slide_path'])) {
             @unlink(__DIR__ . '/../' . $asset['slide_path']);
@@ -173,10 +180,14 @@ final class AdminController
             return ['error' => '업로드 폴더를 만들 수 없습니다. (권한 확인)'];
         }
         $rel = "uploads/$category/$id.$ext";
-        if (!@move_uploaded_file($file['tmp_name'], __DIR__ . '/../' . $rel)) {
+        $absRoot = __DIR__ . '/../';
+        if (!@move_uploaded_file($file['tmp_name'], $absRoot . $rel)) {
             return ['error' => '파일 저장에 실패했습니다. (서버 권한 확인)'];
         }
-        return ['path' => $rel];
+        // 목록 표시용 썸네일 생성 (실패해도 원본으로 폴백되므로 치명적 아님)
+        $thumbRel = Thumb::pathFor($rel);
+        $thumb = Thumb::make($absRoot . $rel, $absRoot . $thumbRel, 360) ? $thumbRel : null;
+        return ['path' => $rel, 'thumb' => $thumb];
     }
 
     /** 업로드 파일이 실제로 존재하는지(선택 필드 판별). */

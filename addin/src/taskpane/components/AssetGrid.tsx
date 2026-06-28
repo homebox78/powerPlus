@@ -81,8 +81,9 @@ export default function AssetGrid({
               onClick={() => onInsert(a)}
             >
               <div className="card__thumb" style={{ background: tintOf(a.category) }}>
-                {a.image_url ? (
-                  <img src={a.image_url} alt={label} loading="lazy" decoding="async" />
+                {a.image_url || a.thumb_url ? (
+                  // 목록은 썸네일(빠른 로딩), 삽입은 원본(useInsert가 image_url 사용)
+                  <img src={a.thumb_url || a.image_url} alt={label} loading="lazy" decoding="async" />
                 ) : (
                   <span className="card__svg" dangerouslySetInnerHTML={{ __html: a.svg || "" }} />
                 )}

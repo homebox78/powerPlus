@@ -14,6 +14,15 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS categories (
 $pdo->exec("INSERT IGNORE INTO categories (`key`,label,sort_order) VALUES
   ('icon','아이콘',1),('photo','사진',2),('illust','일러스트',3),('diagram','다이어그램',4),('ppt','장표',5)");
 
+// 썸네일 경로 컬럼 (목록 표시용 축소 이미지 — 삽입은 원본 image_path 사용)
+$hasThumb = (int) $pdo->query(
+    "SELECT COUNT(*) FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='assets' AND COLUMN_NAME='thumb_path'"
+)->fetchColumn();
+if ($hasThumb === 0) {
+    $pdo->exec("ALTER TABLE assets ADD COLUMN thumb_path VARCHAR(255) NULL AFTER image_path");
+}
+
 // 장표(ppt) 자산용 슬라이드 파일 경로 컬럼
 $hasSlide = (int) $pdo->query(
     "SELECT COUNT(*) FROM information_schema.COLUMNS

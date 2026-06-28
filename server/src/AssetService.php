@@ -7,7 +7,7 @@ require_once __DIR__ . '/Config.php';
 /** 자산 조회/검색/CRUD. SQL은 모두 prepared statement. */
 final class AssetService
 {
-    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, slide_path';
+    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path';
 
     /** 자산별 조회수(삽입 횟수) 및 즐겨찾기 수 서브쿼리 — 모든 응답에 노출(인기/즐겨찾기 순위용) */
     private const COUNT_COLS =
@@ -109,8 +109,8 @@ final class AssetService
         $ko = $d['tags_ko'] ?? [];
         $en = $d['tags_en'] ?? [];
         Database::pdo()->prepare(
-            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, slide_path)
-             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :slide_path)'
+            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path)
+             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :thumb_path, :slide_path)'
         )->execute([
             ':id'         => $d['id'],
             ':name'       => $d['name'] ?? null,
@@ -120,6 +120,7 @@ final class AssetService
             ':tags_en'    => json_encode(array_values($en), JSON_UNESCAPED_UNICODE),
             ':svg'        => $d['svg'] ?? null,
             ':image_path' => $d['image_path'] ?? null,
+            ':thumb_path' => $d['thumb_path'] ?? null,
             ':slide_path' => $d['slide_path'] ?? null,
         ]);
         return $this->find($d['id']) ?? [];
@@ -140,9 +141,11 @@ final class AssetService
             ? $d['image_path'] : ($cur['image_path'] ?? null);
         $slide_path = array_key_exists('slide_path', $d) && $d['slide_path'] !== null
             ? $d['slide_path'] : ($cur['slide_path'] ?? null);
+        $thumb_path = array_key_exists('thumb_path', $d) && $d['thumb_path'] !== null
+            ? $d['thumb_path'] : ($cur['thumb_path'] ?? null);
 
         Database::pdo()->prepare(
-            'UPDATE assets SET name = :name, category = :category, tags = :tags, tags_ko = :tags_ko, tags_en = :tags_en, image_path = :image_path, slide_path = :slide_path WHERE id = :id'
+            'UPDATE assets SET name = :name, category = :category, tags = :tags, tags_ko = :tags_ko, tags_en = :tags_en, image_path = :image_path, thumb_path = :thumb_path, slide_path = :slide_path WHERE id = :id'
         )->execute([
             ':id'         => $id,
             ':name'       => $name,
@@ -151,6 +154,7 @@ final class AssetService
             ':tags_ko'    => json_encode(array_values($ko), JSON_UNESCAPED_UNICODE),
             ':tags_en'    => json_encode(array_values($en), JSON_UNESCAPED_UNICODE),
             ':image_path' => $image_path,
+            ':thumb_path' => $thumb_path,
             ':slide_path' => $slide_path,
         ]);
         return true;
@@ -184,6 +188,10 @@ final class AssetService
         $row['image_url'] = !empty($row['image_path'])
             ? $base . '/' . ltrim((string) $row['image_path'], '/')
             : null;
+        // 목록 표시용 썸네일 URL (없으면 원본으로 폴백). 삽입은 항상 image_url(원본) 사용.
+        $row['thumb_url'] = !empty($row['thumb_path'])
+            ? $base . '/' . ltrim((string) $row['thumb_path'], '/')
+            : $row['image_url'];
         // 장표(ppt) 자산: 슬라이드 파일 URL (삽입 시 슬라이드로 추가)
         $row['slide_url'] = !empty($row['slide_path'])
             ? $base . '/' . ltrim((string) $row['slide_path'], '/')

@@ -11,7 +11,8 @@ export interface Asset {
   category: string; // 'icon' | 'photo' | 'illust' | 'diagram' 또는 동적 카테고리 key
   tags: string[];
   svg?: string; // 구 mock 자산: 인라인 SVG
-  image_url?: string; // 서버 업로드 자산: PNG/JPG URL (있으면 이걸로 표시·삽입)
+  image_url?: string; // 서버 업로드 자산: PNG/JPG 원본 URL (삽입에 사용)
+  thumb_url?: string; // 목록 표시용 축소 썸네일 URL (없으면 image_url 폴백)
   slide_url?: string; // 장표(ppt) 자산: .pptx URL (있으면 슬라이드로 삽입)
 }
 
