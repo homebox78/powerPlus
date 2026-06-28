@@ -1,13 +1,13 @@
 :root {
-  --bg: #f0f3f6;
+  --bg: #edf1f5;
   --surface: #ffffff;
-  --line: #e8ecf1;
-  --ink: #1c2733;
-  --ink2: #566070;
-  --muted: #98a2b0;
-  --primary: #2b8af5;
-  --primary-d: #1b7bef;
-  --primary-soft: #e9f2fe;
+  --line: #dddddd;
+  --ink: #333333;
+  --ink2: #555555;
+  --muted: #999999;
+  --primary: #e0701f;
+  --primary-d: #c43e1c;
+  --primary-soft: #fbeee4;
   --coral: #f0566a;
   --coral-soft: #fdebee;
   /* 하위 호환 별칭 (기존 규칙용) */
@@ -161,7 +161,7 @@ body {
   height: 32px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3d9bff, #1b7bef);
+  background: linear-gradient(140deg, #f0894c, #c43e1c);
   color: #fff;
   font-size: 13px;
   font-weight: 800;
@@ -215,7 +215,7 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 13px;
-  background: linear-gradient(135deg, #3d9bff, #1b7bef);
+  background: linear-gradient(140deg, #f0894c, #c43e1c);
   color: #fff;
   font-size: 17px;
   font-weight: 800;
@@ -585,7 +585,7 @@ body {
 }
 .card:hover {
   border-color: var(--primary);
-  box-shadow: 0 8px 20px rgba(43, 138, 245, 0.14);
+  box-shadow: 0 8px 20px rgba(196, 62, 28, 0.14);
   transform: translateY(-2px);
 }
 
@@ -808,15 +808,15 @@ body {
   height: 36px;
   border: none;
   border-radius: 11px;
-  background: var(--primary);
+  background: #333333;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 5px 13px rgba(43, 138, 245, 0.3);
+  box-shadow: 0 5px 13px rgba(0, 0, 0, 0.22);
   cursor: pointer;
 }
 .composer__send:hover {
-  background: var(--primary-d);
+  background: #1f1f1f;
 }
 .catmenu {
   position: absolute;
@@ -908,17 +908,17 @@ body {
 .login__btn {
   margin-top: 6px;
   border: none;
-  background: var(--primary);
+  background: #333333;
   color: #fff;
   border-radius: 12px;
   padding: 13px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(43, 138, 245, 0.26);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
 }
 .login__btn:hover {
-  background: var(--primary-d);
+  background: #1f1f1f;
 }
 .login__btn:disabled {
   opacity: 0.5;
@@ -1092,10 +1092,10 @@ body {
   padding: 14px;
   font-size: 14px;
   font-weight: 800;
-  background: var(--primary);
+  background: #333333;
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(43, 138, 245, 0.28);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
 }
 .sheet__submit:disabled {
   background: #e7ebf0;
@@ -1145,7 +1145,7 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
-  background: #1c2733;
+  background: #333333;
   color: #fff;
   border-radius: 12px;
   padding: 11px 15px;

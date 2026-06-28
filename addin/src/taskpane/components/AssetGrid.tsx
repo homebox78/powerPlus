@@ -14,7 +14,7 @@ interface Props {
 
 // 카테고리별 썸네일 배경 틴트 (디자인 시스템)
 const TINTS: Record<string, string> = {
-  icon: "#e9f2fe",
+  icon: "#fbeee4",
   photo: "#edf0f4",
   illust: "#fdebee",
   diagram: "#f0ebfb",
