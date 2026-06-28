@@ -9,6 +9,10 @@
 
 > 개발/배포 소스는 이 폴더가 아니라 `addin/`(애드인) · `server/`(서버+관리자 화면) · `installer/`(설치기) · `design/`(시안) 에 있습니다. 여긴 **완성품 전달용**만 둡니다.
 
+> ⚠️ **설치 exe는 git에 없습니다**(빌드 산출물 → gitignore). 다른 PC/사람은 **GitHub Releases**에서 받으세요:
+> **다운로드: https://github.com/homebox78/powerPlus/releases/latest** (`powerPlus_Setup.exe`)
+> 현재 버전: [v1.0.1](https://github.com/homebox78/powerPlus/releases/download/v1.0.1/powerPlus_Setup.exe)
+
 ## 전달 방법(요약)
 - **사용자**: `사용자/` 폴더를 통째로(또는 exe만) 전달 → 더블클릭 설치.
 - **관리자**: `관리자/관리자_안내.md` 전달 + 관리자 이메일을 서버 `admin_emails`에 등록.

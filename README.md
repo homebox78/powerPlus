@@ -26,6 +26,9 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 - `배포/사용자/` : **일반 사용자**에게 → 설치 파일 `powerPlus_Setup.exe` + [설치·사용 안내](배포/사용자/설치_및_사용안내.md)
 - `배포/관리자/` : **관리자**에게 → [관리자 대시보드 안내](배포/관리자/관리자_안내.md)
 
+> ⚠️ **설치 exe(`powerPlus_Setup.exe`)는 git에 포함되지 않습니다**(빌드 산출물). 다른 PC에서 pull해도 exe는 안 받아집니다 → **GitHub Releases에서 다운로드**: https://github.com/homebox78/powerPlus/releases/latest
+> 새로 빌드했으면 `gh release create vX.Y.Z installer/powerPlus_Setup.exe …` 로 릴리스에 올립니다.
+
 ---
 
 ## 🏗️ 기술 스택
