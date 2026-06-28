@@ -85,11 +85,11 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #3d9bff, #1b7bef);
+  background: linear-gradient(140deg, #f0894c, #c43e1c);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 5px 12px rgba(43, 138, 245, 0.28);
+  box-shadow: 0 5px 12px rgba(196, 62, 28, 0.3);
 }
 
 .brand__text {
@@ -273,18 +273,22 @@ body {
   font-size: 15px;
 }
 .profile__item-title {
+  display: block;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
 }
 .profile__item-sub {
-  font-size: 11px;
+  display: block; /* 설명글 줄바꿈 */
+  font-size: 10px; /* 제목보다 1px 더 작게 */
   color: var(--muted);
-  margin-top: 1px;
+  margin-top: 2px;
+  line-height: 1.4;
 }
 .profile__logout {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* 글자 왼쪽, 아이콘 오른쪽 */
   gap: 8px;
   width: 100%;
   padding: 9px 11px;
@@ -296,6 +300,11 @@ body {
   color: var(--coral);
   text-align: left;
   cursor: pointer;
+}
+.profile__logout-ic {
+  flex: 0 0 auto;
+  display: flex;
+  transform: scaleX(-1); /* 화살표가 오른쪽(나가기)으로 향하게 반전 */
 }
 .profile__logout:hover {
   background: var(--coral-soft);
@@ -330,60 +339,56 @@ body {
   overflow: auto;
 }
 .notif__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  width: 100%;
-  padding: 12px 14px;
-  border: none;
   border-bottom: 1px solid #f1f4f7;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-}
-.notif__item--unread {
-  background: #fafbfd;
 }
 .notif__item:last-child {
   border-bottom: none;
 }
-.notif__dot {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: var(--primary-soft);
+.notif__item--open {
+  background: #fafbfd;
+}
+/* 제목+날짜 한 줄 (클릭 시 아코디언) */
+.notif__row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  margin-top: 1px;
-}
-.notif__dot span {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--primary);
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
 }
 .notif__body {
   flex: 1;
   min-width: 0;
 }
 .notif__item-title {
+  display: block;
   font-size: 12.5px;
   font-weight: 700;
   color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .notif__item-meta {
+  display: block;
   font-size: 11px;
   font-weight: 600;
   color: var(--muted);
   margin-top: 1px;
 }
+.notif__chev {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+}
 .notif__item-text {
   font-size: 12.5px;
   color: var(--ink2);
   line-height: 1.5;
-  margin-top: 5px;
+  padding: 0 14px 12px;
   white-space: pre-wrap;
 }
 .notif__unread-dot {
@@ -848,12 +853,12 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #3d9bff, #1b7bef);
+  background: linear-gradient(140deg, #f0894c, #c43e1c);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  box-shadow: 0 8px 18px rgba(43, 138, 245, 0.3);
+  box-shadow: 0 8px 18px rgba(196, 62, 28, 0.3);
 }
 .login__title {
   font-size: 21px;
