@@ -154,8 +154,12 @@ public class MainForm : Form
                 var manifestPath = Path.Combine(_installPath, "manifest.xml");
                 File.WriteAllText(manifestPath, ReadResource("manifest.xml"), new System.Text.UTF8Encoding(false));
                 // PowerPoint 웹 애드인 사이드로드 등록 (HKCU, 관리자 권한 불필요)
+                // ⚠️ MS 공식 형식: 값 "이름=manifest 전체경로, 데이터=manifest 전체경로".
+                //    (이름=GUID 형식은 Office가 재시작 시 정리해 애드인이 사라지는 원인)
                 using var key = Registry.CurrentUser.CreateSubKey(WEF_KEY);
-                key.SetValue(GUID, manifestPath, RegistryValueKind.String);
+                try { key.DeleteValue(GUID, false); } catch { }            // 옛 형식 흔적 제거
+                try { key.DeleteValue(manifestPath, false); } catch { }     // 중복 방지
+                key.SetValue(manifestPath, manifestPath, RegistryValueKind.String);
             });
             await Task.Delay(900); // 진행 표시가 자연스럽도록 약간의 텀
             Post(new { @event = "done" });
