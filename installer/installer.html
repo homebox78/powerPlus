@@ -132,15 +132,13 @@
         <!-- 2 options -->
         <div class="col hidden" data-step="2">
           <div class="h2">설치 옵션</div>
-          <div class="sub">설치 경로와 추가 옵션을 선택하세요.</div>
+          <div class="sub">설치 위치를 확인하세요. 그대로 두셔도 됩니다.</div>
           <div class="flabel" style="margin:20px 0 8px">설치 위치</div>
           <div style="display:flex;gap:8px">
             <div class="path"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#98A2B0" stroke-width="1.7"><path d="M4 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2z" stroke-linejoin="round"/></svg><span id="pathTxt"></span></div>
             <button class="browse" id="browse">찾아보기</button>
           </div>
-          <div class="sub" style="margin-top:7px">필요 공간 48.2 MB · 사용자 폴더에 설치(관리자 권한 불필요)</div>
-          <div class="flabel" style="margin:22px 0 10px">추가 옵션</div>
-          <div id="opts" style="display:flex;flex-direction:column;gap:2px"></div>
+          <div class="sub" style="margin-top:7px">사용자 폴더에 설치(관리자 권한 불필요) · 애드인 본체와 자산은 서버에서 불러옵니다(웹 방식)</div>
         </div>
         <!-- 3 installing -->
         <div class="col hidden center" data-step="3">
@@ -179,16 +177,11 @@
   var s = {
     step:0, agreed:false, launch:true, progress:0,
     path: 'C:\\Users\\사용자\\AppData\\Local\\powerPlus',
-    options:[
-      {id:'ribbon', title:'PowerPoint 리본에 바로가기 추가', desc:'[삽입 → 추가 기능] 에 powerPlus 버튼을 추가합니다', on:true},
-      {id:'startup', title:'시작 시 자동 로그인', desc:'회사 계정으로 자동 연결합니다', on:true},
-      {id:'sample', title:'샘플 자산 팩 포함', desc:'아이콘·다이어그램 기본 100종을 함께 설치', on:false},
-    ],
   };
   var ICON_CHK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>';
   var ICON_CHK_S = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>';
-  var TASKS = ['파일 압축 해제 중','레지스트리 등록 중','PowerPoint 추가 기능 연결 중','자산 인덱스 생성 중'];
-  var FILES = ['core.dll','manifest.xml','assets.idx','ribbon.json'];
+  var TASKS = ['설치 준비 중','매니페스트 설치 중','레지스트리 등록 중','PowerPoint 추가 기능 연결 중'];
+  var FILES = ['','manifest.xml','WEF\\Developer',''];
 
   function el(id){ return document.getElementById(id); }
 
@@ -202,17 +195,6 @@
       h+='<div class="step"><span class="'+dot+'">'+inner+'</span><span class="step__label'+((cur||done)?' step__label--on':'')+'">'+STEP_LABELS[i]+'</span></div>';
     }
     el('steps').innerHTML=h;
-  }
-  function renderOpts(){
-    var h='';
-    for(var i=0;i<s.options.length;i++){
-      var o=s.options[i];
-      h+='<button class="opt" data-oid="'+o.id+'"><span class="opt__box'+(o.on?' opt__box--on':'')+'">'+(o.on?ICON_CHK_S:'')+'</span>'
-        +'<span style="flex:1;min-width:0"><span class="opt__t">'+o.title+'</span><span class="opt__d">'+o.desc+'</span></span></button>';
-    }
-    el('opts').innerHTML=h;
-    var btns=el('opts').querySelectorAll('[data-oid]');
-    for(var j=0;j<btns.length;j++){ btns[j].onclick=function(){ var id=this.getAttribute('data-oid'); var o=s.options.find(function(x){return x.id===id;}); o.on=!o.on; renderOpts(); }; }
   }
   function render(){
     renderSteps();
@@ -228,7 +210,6 @@
     var nx=el('next');
     nx.textContent = s.step===0?'다음':s.step===1?'동의 및 다음':s.step===2?'설치':s.step===4?'완료':'설치 중…';
     nx.disabled = (s.step===3) || (s.step===1 && !s.agreed);
-    if(s.step===2) renderOpts();
     // progress
     var pct=Math.min(100,Math.round(s.progress));
     var ti=Math.min(TASKS.length-1, Math.floor(pct/25));
@@ -240,8 +221,7 @@
   var visTimer=null, hostDone=false;
   function startInstall(){
     s.step=3; s.progress=0; hostDone=false; render();
-    send({action:'install', path:s.path, options:{
-      ribbon:s.options[0].on, startup:s.options[1].on, sample:s.options[2].on }});
+    send({action:'install', path:s.path});
     // 시각적 진행(호스트 완료 신호 전까지 ~90%까지만)
     if(visTimer) clearInterval(visTimer);
     visTimer=setInterval(function(){
