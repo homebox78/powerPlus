@@ -13,3 +13,8 @@ deploy.env
 /data/
 
 # 설치 exe는 git에 포함(다른 PC에서 pull하면 바로 받도록) — 배포/사용자/powerPlus_Setup.exe 추적
+
+# data 아카이브(FTP로 직접 이동, git 제외)
+data.7z
+data*.7z
+data*.zip
