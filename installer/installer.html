@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" />
+<style>
+  :root{ --ink:#1C2733; --ink2:#566070; --muted:#98A2B0; --line:#E6EAEF; --orange:#E8703A; --orangeD:#C43E1C; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; font-family:Pretendard,system-ui,sans-serif; background:#fff; -webkit-user-select:none; user-select:none; overflow:hidden; }
+  button{ font-family:inherit; border:none; background:none; cursor:pointer; padding:0; }
+  .win{ display:flex; flex-direction:column; height:100vh; }
+  /* titlebar */
+  .tbar{ display:flex; align-items:center; gap:9px; height:40px; padding:0 14px; background:#F4F6F9; border-bottom:1px solid #E3E8ED; flex:none; }
+  .lights{ display:flex; gap:7px; }
+  .lights span{ width:12px; height:12px; border-radius:50%; }
+  .l-r{ background:#FF5F57; cursor:pointer; }
+  .l-y{ background:#FEBC2E; } .l-g{ background:#28C840; }
+  .tbar__title{ margin-left:6px; font:600 12.5px Pretendard; color:var(--ink2); white-space:nowrap; }
+  .tbar__ver{ margin-left:auto; font:500 11px "JetBrains Mono",monospace; color:var(--muted); }
+  .tbar__drag{ position:absolute; left:60px; right:60px; top:0; height:40px; -webkit-app-region:drag; }
+  .body{ flex:1; display:flex; min-height:0; }
+  /* sidebar */
+  .side{ width:230px; flex:none; background:linear-gradient(165deg,#E8703A,#C43E1C); padding:26px 22px; display:flex; flex-direction:column; color:#fff; }
+  .side__logo{ width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.25); }
+  .side__name{ font:800 21px Pretendard; margin-top:16px; letter-spacing:-.02em; }
+  .side__sub{ font:600 12px Pretendard; color:rgba(255,255,255,.82); margin-top:4px; line-height:1.5; }
+  .steps{ display:flex; flex-direction:column; gap:3px; margin-top:30px; }
+  .step{ display:flex; align-items:center; gap:11px; padding:8px 0; }
+  .step__dot{ width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.3); }
+  .step__dot--cur{ background:rgba(255,255,255,.22); border:1.5px solid rgba(255,255,255,.9); }
+  .step__dot--done{ background:rgba(255,255,255,.95); border:none; }
+  .step__num{ font:800 11px Pretendard; color:rgba(255,255,255,.6); }
+  .step__num--cur{ color:#fff; }
+  .step__label{ font:600 13px Pretendard; color:rgba(255,255,255,.62); }
+  .step__label--on{ font-weight:800; color:#fff; }
+  .side__copy{ margin-top:auto; font:500 10.5px Pretendard; color:rgba(255,255,255,.6); line-height:1.5; }
+  /* content */
+  .content{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .panel{ flex:1; padding:34px 36px; overflow:auto; }
+  .hidden{ display:none !important; }
+  .h1{ font:800 24px Pretendard; color:var(--ink); letter-spacing:-.03em; }
+  .h2{ font:800 20px Pretendard; color:var(--ink); letter-spacing:-.02em; }
+  .lead{ font:500 13.5px Pretendard; color:var(--ink2); line-height:1.7; margin-top:14px; }
+  .sub{ font:500 12.5px Pretendard; color:var(--muted); margin-top:6px; }
+  .card{ margin-top:22px; background:#F7F9FB; border:1px solid var(--line); border-radius:13px; padding:18px 20px; }
+  .card__t{ font:700 12px Pretendard; color:var(--muted); margin-bottom:12px; }
+  .req{ display:flex; align-items:center; gap:10px; padding:5px 0; font:600 12.5px Pretendard; color:var(--ink2); }
+  .eula{ flex:1; margin-top:16px; border:1px solid var(--line); border-radius:12px; background:#FAFBFC; padding:16px 18px; overflow:auto; font:500 12px Pretendard; color:var(--ink2); line-height:1.75; min-height:0; }
+  .col{ display:flex; flex-direction:column; height:100%; }
+  .chk{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .chkbox{ width:21px; height:21px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none; background:#fff; border:1.5px solid #CCD4DD; }
+  .chkbox--on{ background:var(--orange); border:none; }
+  .flabel{ font:700 12px Pretendard; color:var(--ink2); }
+  .path{ flex:1; display:flex; align-items:center; gap:9px; border:1.5px solid var(--line); border-radius:11px; padding:11px 13px; background:#FAFBFC; }
+  .path span{ flex:1; font:500 12.5px "JetBrains Mono",monospace; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .browse{ border:1.5px solid var(--line); border-radius:11px; padding:0 16px; font:700 12.5px Pretendard; color:var(--ink2); background:#fff; }
+  .opt{ display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:11px; text-align:left; width:100%; }
+  .opt:hover{ background:#F4F6F9; }
+  .opt__box{ width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex:none; background:#fff; border:1.5px solid #CCD4DD; }
+  .opt__box--on{ background:var(--orange); border:none; }
+  .opt__t{ display:block; font:700 13px Pretendard; color:var(--ink); }
+  .opt__d{ display:block; font:500 11.5px Pretendard; color:var(--muted); margin-top:1px; }
+  .center{ display:flex; flex-direction:column; justify-content:center; height:100%; }
+  .pbar{ margin-top:22px; height:10px; border-radius:6px; background:#EAEEF2; overflow:hidden; }
+  .pbar__fill{ height:100%; border-radius:6px; background:linear-gradient(90deg,#E8703A,#C43E1C); width:0%; transition:width .22s ease; }
+  .prow{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+  .pfile{ font:600 11.5px "JetBrains Mono",monospace; color:var(--muted); }
+  .ppct{ font:800 13px Pretendard; color:var(--orangeD); }
+  .donewrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; }
+  .donecheck{ width:74px; height:74px; border-radius:50%; background:#E3F6EC; display:flex; align-items:center; justify-content:center; }
+  /* footer */
+  .foot{ flex:none; display:flex; align-items:center; gap:10px; padding:16px 24px; border-top:1px solid #EEF1F4; background:#FAFBFC; }
+  .btn-back{ border:1.5px solid var(--line); border-radius:10px; padding:10px 20px; font:700 13px Pretendard; color:var(--ink2); background:#fff; white-space:nowrap; }
+  .btn-cancel{ border-radius:10px; padding:10px 18px; font:700 13px Pretendard; color:var(--muted); background:none; white-space:nowrap; }
+  .btn-next{ border-radius:10px; padding:10px 24px; font:800 13px Pretendard; color:#fff; white-space:nowrap;
+    background:linear-gradient(140deg,#E8703A,#C43E1C); box-shadow:0 5px 14px rgba(196,62,28,.3); }
+  .btn-next:disabled{ background:#E2E7ED; color:#AEB7C4; box-shadow:none; cursor:not-allowed; }
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="tbar">
+    <div class="tbar__drag" id="drag"></div>
+    <div class="lights"><span class="l-r" id="close"></span><span class="l-y"></span><span class="l-g"></span></div>
+    <span class="tbar__title">powerPlus 설치 마법사</span>
+    <span class="tbar__ver">v1.0.3</span>
+  </div>
+  <div class="body">
+    <div class="side">
+      <div class="side__logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".55"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+      </div>
+      <div class="side__name">powerPlus</div>
+      <div class="side__sub">PowerPoint 자산 라이브러리 애드인</div>
+      <div class="steps" id="steps"></div>
+      <div class="side__copy">© 2026 solideos<br>All rights reserved.</div>
+    </div>
+    <div class="content">
+      <div class="panel" id="panel">
+        <!-- 0 welcome -->
+        <div class="col" data-step="0">
+          <div class="h1">powerPlus 설치를 시작합니다</div>
+          <div class="lead">이 마법사는 PowerPoint용 <b style="color:var(--ink)">powerPlus 애드인</b>을 설치합니다.<br>아이콘·사진·일러스트·다이어그램·장표를 작업창에서 바로 검색해 슬라이드에 삽입할 수 있습니다.</div>
+          <div class="card">
+            <div class="card__t">설치 전 확인</div>
+            <div class="req"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A9C5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>Microsoft PowerPoint 2019 이상 또는 Microsoft 365</div>
+            <div class="req"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A9C5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>Windows 10/11</div>
+            <div class="req"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A9C5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>인터넷 연결 및 회사 계정</div>
+          </div>
+        </div>
+        <!-- 1 license -->
+        <div class="col hidden" data-step="1">
+          <div class="h2">라이선스 동의</div>
+          <div class="sub">계속하려면 아래 약관에 동의해야 합니다.</div>
+          <div class="eula">
+            <b style="color:var(--ink)">최종 사용자 사용권 계약 (EULA)</b><br><br>
+            본 소프트웨어 powerPlus(이하 “소프트웨어”)는 solideos가 제공하며, 사내 PowerPoint 자산 관리 목적에 한해 사용이 허가됩니다.<br><br>
+            1. 사용자는 회사 계정으로 인증된 범위 내에서 소프트웨어를 사용합니다.<br>
+            2. 소프트웨어에 포함된 자산의 저작권은 각 제작자 및 회사에 있으며, 외부 무단 배포를 금합니다.<br>
+            3. 사용 과정에서 수집되는 삽입·즐겨찾기 통계는 서비스 개선 목적에 한해 활용됩니다.<br>
+            4. 본 소프트웨어는 “있는 그대로” 제공되며, 회사는 관련 법령이 허용하는 범위 내에서 책임을 제한합니다.<br><br>
+            자세한 내용은 사내 포털의 소프트웨어 사용 정책을 참고하세요.
+          </div>
+          <button class="chk" id="agree" style="margin-top:16px;flex:none">
+            <span class="chkbox" id="agreeBox"></span>
+            <span style="font:600 13px Pretendard;color:var(--ink)">위 라이선스 계약에 동의합니다</span>
+          </button>
+        </div>
+        <!-- 2 options -->
+        <div class="col hidden" data-step="2">
+          <div class="h2">설치 옵션</div>
+          <div class="sub">설치 경로와 추가 옵션을 선택하세요.</div>
+          <div class="flabel" style="margin:20px 0 8px">설치 위치</div>
+          <div style="display:flex;gap:8px">
+            <div class="path"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#98A2B0" stroke-width="1.7"><path d="M4 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2z" stroke-linejoin="round"/></svg><span id="pathTxt"></span></div>
+            <button class="browse" id="browse">찾아보기</button>
+          </div>
+          <div class="sub" style="margin-top:7px">필요 공간 48.2 MB · 사용자 폴더에 설치(관리자 권한 불필요)</div>
+          <div class="flabel" style="margin:22px 0 10px">추가 옵션</div>
+          <div id="opts" style="display:flex;flex-direction:column;gap:2px"></div>
+        </div>
+        <!-- 3 installing -->
+        <div class="col hidden center" data-step="3">
+          <div class="h2">설치하는 중…</div>
+          <div class="lead" id="task" style="margin-top:8px;font-size:12.5px"></div>
+          <div class="pbar"><div class="pbar__fill" id="pfill"></div></div>
+          <div class="prow"><span class="pfile" id="pfile"></span><span class="ppct" id="ppct">0%</span></div>
+        </div>
+        <!-- 4 done -->
+        <div class="col hidden" data-step="4">
+          <div class="donewrap">
+            <div class="donecheck"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1A9C5B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></div>
+            <div style="font:800 22px Pretendard;color:var(--ink);margin-top:20px;letter-spacing:-.02em">설치가 완료되었습니다</div>
+            <div style="font:500 13px Pretendard;color:var(--ink2);margin-top:9px;line-height:1.6">PowerPoint를 실행하고 <b style="color:var(--ink)">[삽입 → powerPlus]</b> 에서<br>자산 라이브러리를 바로 사용할 수 있습니다.</div>
+            <button class="chk" id="launch" style="margin-top:20px">
+              <span class="chkbox" id="launchBox"></span>
+              <span style="font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap">지금 PowerPoint 실행하기</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="btn-back hidden" id="back">이전</button>
+        <span style="margin-left:auto"></span>
+        <button class="btn-cancel" id="cancel">취소</button>
+        <button class="btn-next" id="next">다음</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var host = (window.chrome && window.chrome.webview) ? window.chrome.webview : null;
+  function send(o){ if(host) host.postMessage(JSON.stringify(o)); }
+  var STEP_LABELS = ['시작','라이선스','옵션','설치','완료'];
+  var s = {
+    step:0, agreed:false, launch:true, progress:0,
+    path: 'C:\\Users\\사용자\\AppData\\Local\\powerPlus',
+    options:[
+      {id:'ribbon', title:'PowerPoint 리본에 바로가기 추가', desc:'[삽입] 탭에 powerPlus 버튼을 고정합니다', on:true},
+      {id:'startup', title:'시작 시 자동 로그인', desc:'회사 계정으로 자동 연결합니다', on:true},
+      {id:'sample', title:'샘플 자산 팩 포함', desc:'아이콘·다이어그램 기본 100종을 함께 설치', on:false},
+    ],
+  };
+  var ICON_CHK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>';
+  var ICON_CHK_S = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>';
+  var TASKS = ['파일 압축 해제 중','레지스트리 등록 중','PowerPoint 추가 기능 연결 중','자산 인덱스 생성 중'];
+  var FILES = ['core.dll','manifest.xml','assets.idx','ribbon.json'];
+
+  function el(id){ return document.getElementById(id); }
+
+  function renderSteps(){
+    var h='';
+    for(var i=0;i<STEP_LABELS.length;i++){
+      var done=i<s.step, cur=i===s.step;
+      var dot='step__dot'+(done?' step__dot--done':cur?' step__dot--cur':'');
+      var inner = done?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C43E1C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>'
+        :'<span class="step__num'+(cur?' step__num--cur':'')+'">'+(i+1)+'</span>';
+      h+='<div class="step"><span class="'+dot+'">'+inner+'</span><span class="step__label'+((cur||done)?' step__label--on':'')+'">'+STEP_LABELS[i]+'</span></div>';
+    }
+    el('steps').innerHTML=h;
+  }
+  function renderOpts(){
+    var h='';
+    for(var i=0;i<s.options.length;i++){
+      var o=s.options[i];
+      h+='<button class="opt" data-oid="'+o.id+'"><span class="opt__box'+(o.on?' opt__box--on':'')+'">'+(o.on?ICON_CHK_S:'')+'</span>'
+        +'<span style="flex:1;min-width:0"><span class="opt__t">'+o.title+'</span><span class="opt__d">'+o.desc+'</span></span></button>';
+    }
+    el('opts').innerHTML=h;
+    var btns=el('opts').querySelectorAll('[data-oid]');
+    for(var j=0;j<btns.length;j++){ btns[j].onclick=function(){ var id=this.getAttribute('data-oid'); var o=s.options.find(function(x){return x.id===id;}); o.on=!o.on; renderOpts(); }; }
+  }
+  function render(){
+    renderSteps();
+    var panels=document.querySelectorAll('[data-step]');
+    for(var i=0;i<panels.length;i++){ panels[i].classList.toggle('hidden', +panels[i].getAttribute('data-step')!==s.step); }
+    el('pathTxt').textContent=s.path;
+    el('agreeBox').className='chkbox'+(s.agreed?' chkbox--on':''); el('agreeBox').innerHTML=s.agreed?ICON_CHK:'';
+    el('launchBox').className='chkbox'+(s.launch?' chkbox--on':''); el('launchBox').innerHTML=s.launch?ICON_CHK_S:'';
+    // footer
+    el('back').classList.toggle('hidden', !(s.step>0 && s.step!==3 && s.step!==4));
+    el('cancel').textContent = s.step===4?'닫기':'취소';
+    el('cancel').classList.toggle('hidden', s.step===3);
+    var nx=el('next');
+    nx.textContent = s.step===0?'다음':s.step===1?'동의 및 다음':s.step===2?'설치':s.step===4?'완료':'설치 중…';
+    nx.disabled = (s.step===3) || (s.step===1 && !s.agreed);
+    if(s.step===2) renderOpts();
+    // progress
+    var pct=Math.min(100,Math.round(s.progress));
+    var ti=Math.min(TASKS.length-1, Math.floor(pct/25));
+    el('pfill').style.width=pct+'%'; el('ppct').textContent=pct+'%';
+    el('task').textContent=TASKS[ti]; el('pfile').textContent=FILES[ti];
+  }
+
+  // ── install ──
+  var visTimer=null, hostDone=false;
+  function startInstall(){
+    s.step=3; s.progress=0; hostDone=false; render();
+    send({action:'install', path:s.path, options:{
+      ribbon:s.options[0].on, startup:s.options[1].on, sample:s.options[2].on }});
+    // 시각적 진행(호스트 완료 신호 전까지 ~90%까지만)
+    if(visTimer) clearInterval(visTimer);
+    visTimer=setInterval(function(){
+      var cap = hostDone?100:90;
+      s.progress += Math.random()*9+4;
+      if(s.progress>=cap){ s.progress=cap; if(hostDone){ clearInterval(visTimer); visTimer=null; s.progress=100; render(); setTimeout(function(){ s.step=4; render(); },450); return; } }
+      render();
+    },200);
+    if(!host){ setTimeout(function(){ onDone(); },1600); } // 브라우저 데모 폴백
+  }
+  function onDone(){ hostDone=true; }
+  function onError(msg){ if(visTimer){clearInterval(visTimer);visTimer=null;} el('task').textContent='설치 실패: '+(msg||'알 수 없는 오류'); el('task').style.color='#C43E1C'; el('cancel').classList.remove('hidden'); }
+
+  // host → js
+  if(host){ host.addEventListener('message', function(e){
+    var d; try{ d=JSON.parse(e.data); }catch(_){ return; }
+    if(d.event==='done') onDone();
+    else if(d.event==='error') onError(d.msg);
+    else if(d.event==='path' && d.path){ s.path=d.path; render(); }
+  }); }
+
+  // actions
+  function next(){
+    if(s.step===1 && !s.agreed) return;
+    if(s.step===4){ send({action:'finish', launch:s.launch}); if(!host) window.close(); return; }
+    if(s.step===2){ startInstall(); return; }
+    if(s.step===3) return;
+    s.step++; render();
+  }
+  el('next').onclick=next;
+  el('back').onclick=function(){ if(s.step>0 && s.step!==3 && s.step!==4){ s.step--; render(); } };
+  el('cancel').onclick=function(){ send({action:'close'}); if(!host) window.close(); };
+  el('close').onclick=function(){ send({action:'close'}); if(!host) window.close(); };
+  el('agree').onclick=function(){ s.agreed=!s.agreed; render(); };
+  el('launch').onclick=function(){ s.launch=!s.launch; render(); };
+  el('browse').onclick=function(){ send({action:'browse'}); };
+  el('drag').onmousedown=function(){ send({action:'drag'}); };
+
+  send({action:'ready'});
+  render();
+})();
+</script>
+</body>
+</html>
