@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap">
+<style>
+*{box-sizing:border-box;}
+button{font-family:inherit;border:none;background:none;cursor:pointer;padding:0;}
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-thumb{background:#D4DAE2;border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<!-- ================= FRAME 1 : 어시스턴트형 ================= -->
+<div style="position:absolute;left:48px;top:56px;width:400px;">
+  <div data-drags-parent="1" style="display:flex;align-items:center;gap:9px;margin-bottom:13px;cursor:grab;">
+    <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:#1C2733;color:#fff;font:800 12px Pretendard;">1</span>
+    <span style="font:700 13.5px Pretendard;color:#3A4554;letter-spacing:-.01em;">어시스턴트형 · 대화 스레드</span>
+  </div>
+  <div style="width:400px;height:760px;background:#fff;border:1px solid #E4E9EF;border-radius:20px;overflow:hidden;box-shadow:0 14px 44px rgba(28,39,51,.11);display:flex;flex-direction:column;font-family:Pretendard,sans-serif;--bg:#F0F3F6;--ink:#1C2733;--ink2:#566070;--muted:#98A2B0;--line:#E8ECF1;--coral:#F0566A;--coralSoft:#FDEBEE;--primary:{{ primary }};--primaryD:{{ primaryD }};--primarySoft:{{ primarySoft }};">
+
+    <!-- header -->
+    <div style="display:flex;align-items:center;gap:11px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--line);">
+      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 12px rgba(43,138,245,.28);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.18;">
+        <span style="font:800 16px Pretendard;color:var(--ink);letter-spacing:-.02em;">powerPlus</span>
+        <span style="font:600 11px Pretendard;color:var(--muted);">에셋 어시스턴트</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <button style="position:relative;width:34px;height:34px;border-radius:10px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="1.7"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round"/></svg>
+          <span style="position:absolute;top:7px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--coral);"></span>
+        </button>
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;color:#fff;font:800 13px Pretendard;">우</div>
+      </div>
+    </div>
+
+    <!-- thread -->
+    <div style="flex:1;overflow:auto;padding:18px 15px 8px;display:flex;flex-direction:column;gap:15px;background:var(--bg);">
+      <div>
+        <div style="font:800 20px Pretendard;color:var(--ink);letter-spacing:-.025em;">무엇을 찾아드릴까요? <span style="font-size:18px;">👋</span></div>
+        <div style="margin-top:7px;font:500 13px Pretendard;color:var(--ink2);line-height:1.55;">필요한 장면을 말로 설명하면<br>슬라이드에 어울리는 자료를 골라드려요.</div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;box-shadow:0 1px 2px rgba(28,39,51,.03);"><span style="width:7px;height:7px;border-radius:50%;background:#2B8AF5;"></span>팀 협업 아이콘</button>
+        <button style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;box-shadow:0 1px 2px rgba(28,39,51,.03);"><span style="width:7px;height:7px;border-radius:50%;background:#22B36B;"></span>매출 성장 차트</button>
+        <button style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;box-shadow:0 1px 2px rgba(28,39,51,.03);"><span style="width:7px;height:7px;border-radius:50%;background:#F5A623;"></span>보고서 표지</button>
+        <button style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;box-shadow:0 1px 2px rgba(28,39,51,.03);"><span style="width:7px;height:7px;border-radius:50%;background:#F0566A;"></span>고객 후기</button>
+      </div>
+
+      <!-- user bubble -->
+      <div style="align-self:flex-end;max-width:80%;background:var(--primary);color:#fff;border-radius:15px 15px 5px 15px;padding:10px 14px;font:600 13.5px Pretendard;line-height:1.45;box-shadow:0 4px 12px rgba(43,138,245,.22);">재고 관리 일러스트 찾아줘</div>
+
+      <!-- assistant -->
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6z"/></svg>
+          </div>
+          <span style="font:600 12.5px Pretendard;color:var(--ink2);"><b style="color:var(--ink);font-weight:800;">재고·물류</b> 자료 6개를 찾았어요</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <sc-for list="{{ threadResults }}" as="a" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(28,39,51,.04);">
+              <div style="position:relative;aspect-ratio:1/1;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 12px);"></div>
+                <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:rgba(28,39,51,.42);text-transform:uppercase;">{{ a.label }}</span>
+                <div style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(28,39,51,.1);">
+                  <sc-if value="{{ a.fav }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F0566A" stroke="#F0566A" stroke-width="1.2"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                  <sc-if value="{{ a.notFav }}" hint-placeholder-val="{{ true }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="1.5"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                </div>
+              </div>
+              <div style="padding:7px 9px;font:700 12px Pretendard;color:var(--ink);">{{ a.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px;font:700 12.5px Pretendard;color:var(--primary);">자료 6개 더 보기</button>
+          <button style="display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 13px;font:700 12.5px Pretendard;color:var(--ink2);">필터</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- composer -->
+    <div style="padding:12px 13px 14px;background:#fff;border-top:1px solid var(--line);">
+      <div style="border:1.5px solid #DDE3EA;border-radius:16px;background:#fff;padding:11px 12px;box-shadow:0 3px 12px rgba(28,39,51,.05);">
+        <div style="font:500 13.5px Pretendard;color:var(--muted);">필요한 자료를 설명해 보세요…</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:11px;">
+          <button style="display:flex;align-items:center;gap:5px;background:var(--primarySoft);color:var(--primary);border-radius:9px;padding:6px 10px;font:700 12px Pretendard;">아이콘<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button style="display:flex;align-items:center;gap:5px;background:#F4F6F9;color:var(--ink2);border-radius:9px;padding:6px 10px;font:700 12px Pretendard;">＋ 첨부</button>
+          <div style="margin-left:auto;width:36px;height:36px;border-radius:11px;background:var(--primary);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 13px rgba(43,138,245,.3);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 19V6M6 12l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FRAME 2 : 검색+탐색 하이브리드 ================= -->
+<div style="position:absolute;left:548px;top:56px;width:400px;">
+  <div data-drags-parent="1" style="display:flex;align-items:center;gap:9px;margin-bottom:13px;cursor:grab;">
+    <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:#1C2733;color:#fff;font:800 12px Pretendard;">2</span>
+    <span style="font:700 13.5px Pretendard;color:#3A4554;letter-spacing:-.01em;">검색 + 탐색 하이브리드</span>
+  </div>
+  <div style="width:400px;height:760px;background:#fff;border:1px solid #E4E9EF;border-radius:20px;overflow:hidden;box-shadow:0 14px 44px rgba(28,39,51,.11);display:flex;flex-direction:column;font-family:Pretendard,sans-serif;--bg:#F0F3F6;--ink:#1C2733;--ink2:#566070;--muted:#98A2B0;--line:#E8ECF1;--coral:#F0566A;--coralSoft:#FDEBEE;--primary:{{ primary }};--primaryD:{{ primaryD }};--primarySoft:{{ primarySoft }};">
+
+    <!-- header -->
+    <div style="display:flex;align-items:center;gap:11px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--line);">
+      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 12px rgba(43,138,245,.28);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.18;">
+        <span style="font:800 16px Pretendard;color:var(--ink);letter-spacing:-.02em;">powerPlus</span>
+        <span style="font:600 11px Pretendard;color:var(--muted);">에셋 라이브러리</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <button style="position:relative;width:34px;height:34px;border-radius:10px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="1.7"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round"/></svg>
+          <span style="position:absolute;top:7px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--coral);"></span>
+        </button>
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;color:#fff;font:800 13px Pretendard;">우</div>
+      </div>
+    </div>
+
+    <!-- ask + chips -->
+    <div style="background:#fff;border-bottom:1px solid var(--line);padding:14px 14px 13px;">
+      <div style="display:flex;align-items:center;gap:9px;background:#F4F6F9;border:1.5px solid #E2E7ED;border-radius:14px;padding:10px 12px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#98A2B0" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
+        <span style="flex:1;font:500 13.5px Pretendard;color:var(--muted);">찾는 자료를 설명해 보세요…</span>
+        <div style="width:30px;height:30px;border-radius:9px;background:var(--primary);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(43,138,245,.28);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 19V6M6 12l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div style="display:flex;gap:7px;overflow-x:auto;margin-top:12px;padding-bottom:2px;">
+        <button style="flex:none;background:#F4F6F9;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">전체</button>
+        <button style="flex:none;background:var(--primary);border-radius:999px;padding:7px 14px;font:700 12.5px Pretendard;color:#fff;white-space:nowrap;box-shadow:0 3px 9px rgba(43,138,245,.25);">아이콘</button>
+        <button style="flex:none;background:#F4F6F9;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">사진</button>
+        <button style="flex:none;background:#F4F6F9;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">일러스트</button>
+        <button style="flex:none;background:#F4F6F9;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">다이어그램</button>
+        <button style="flex:none;background:#F4F6F9;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">장표</button>
+      </div>
+    </div>
+
+    <!-- segmented + count -->
+    <div style="padding:13px 14px 8px;background:var(--bg);">
+      <div style="display:flex;background:#E7EBF0;border-radius:11px;padding:3px;">
+        <button style="flex:1;background:#fff;border-radius:8px;padding:8px;font:700 12.5px Pretendard;color:var(--ink);box-shadow:0 1px 3px rgba(28,39,51,.1);">추천</button>
+        <button style="flex:1;padding:8px;font:700 12.5px Pretendard;color:var(--muted);">즐겨찾기</button>
+        <button style="flex:1;padding:8px;font:700 12.5px Pretendard;color:var(--muted);">최근</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px;">
+        <span style="font:700 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">120개 <span style="color:var(--muted);font-weight:600;">· 전체 225</span></span>
+        <button style="display:flex;align-items:center;gap:4px;font:700 12px Pretendard;color:var(--muted);">인기순<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+
+    <!-- grid -->
+    <div style="flex:1;overflow:auto;padding:6px 14px 12px;background:var(--bg);">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+        <sc-for list="{{ assetsMain }}" as="a" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(28,39,51,.05);">
+            <div style="position:relative;aspect-ratio:4/3;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+              <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 12px);"></div>
+              <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(28,39,51,.42);text-transform:uppercase;">{{ a.label }}</span>
+              <div style="position:absolute;top:8px;right:8px;width:27px;height:27px;border-radius:8px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(28,39,51,.1);">
+                <sc-if value="{{ a.fav }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F0566A" stroke="#F0566A" stroke-width="1.2"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                <sc-if value="{{ a.notFav }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="1.5"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+              </div>
+            </div>
+            <div style="padding:9px 11px 11px;">
+              <div style="font:700 13px Pretendard;color:var(--ink);">{{ a.label }}</div>
+              <div style="font:600 11px Pretendard;color:var(--muted);margin-top:2px;">{{ a.tag }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- footer like -->
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-top:1px solid var(--line);">
+      <button style="display:flex;align-items:center;gap:6px;background:var(--coralSoft);border-radius:9px;padding:7px 12px;font:700 12.5px Pretendard;color:var(--coral);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 11v9H4a1 1 0 01-1-1v-7a1 1 0 011-1h3zm0 0l4-7a2 2 0 013 2l-1 5h5a2 2 0 012 2.3l-1 6a2 2 0 01-2 1.7H7" stroke-linecap="round" stroke-linejoin="round"/></svg>2
+      </button>
+      <button style="display:flex;align-items:center;gap:6px;background:#F4F6F9;border-radius:9px;padding:7px 12px;font:700 12.5px Pretendard;color:var(--ink2);">댓글 2</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FRAME 3 : 카테고리 레일 도구형 ================= -->
+<div style="position:absolute;left:1048px;top:56px;width:400px;">
+  <div data-drags-parent="1" style="display:flex;align-items:center;gap:9px;margin-bottom:13px;cursor:grab;">
+    <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:#1C2733;color:#fff;font:800 12px Pretendard;">3</span>
+    <span style="font:700 13.5px Pretendard;color:#3A4554;letter-spacing:-.01em;">카테고리 레일 · 도구형</span>
+  </div>
+  <div style="width:400px;height:760px;background:#fff;border:1px solid #E4E9EF;border-radius:20px;overflow:hidden;box-shadow:0 14px 44px rgba(28,39,51,.11);display:flex;font-family:Pretendard,sans-serif;--bg:#F0F3F6;--ink:#1C2733;--ink2:#566070;--muted:#98A2B0;--line:#E8ECF1;--coral:#F0566A;--coralSoft:#FDEBEE;--primary:{{ primary }};--primaryD:{{ primaryD }};--primarySoft:{{ primarySoft }};">
+
+    <!-- navy rail -->
+    <div style="width:64px;background:#1A2230;display:flex;flex-direction:column;align-items:center;padding:14px 0;flex:none;">
+      <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;width:100%;align-items:center;">
+        <div style="width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border-radius:13px;color:#8A94A6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
+          <span style="font:600 9.5px Pretendard;">전체</span>
+        </div>
+        <div style="width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border-radius:13px;background:var(--coral);color:#fff;box-shadow:0 6px 14px rgba(240,86,106,.4);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.5 6L20 9.5 13.5 11 12 18l-1.5-7L4 9.5 10.5 8z"/></svg>
+          <span style="font:700 9.5px Pretendard;">아이콘</span>
+        </div>
+        <div style="width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border-radius:13px;color:#8A94A6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M5 17l4.5-4 3 2.5L16 12l3 3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font:600 9.5px Pretendard;">사진</span>
+        </div>
+        <div style="width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border-radius:13px;color:#8A94A6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 19l2.5-.6 9-9-1.9-1.9-9 9z" stroke-linejoin="round"/><path d="M15.5 7.5l1.5-1.5a1.4 1.4 0 012 2L17.5 9.5" stroke-linecap="round"/></svg>
+          <span style="font:600 9.5px Pretendard;">일러스트</span>
+        </div>
+        <div style="width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border-radius:13px;color:#8A94A6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="9" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="M8 7.5l7.5 1M8 16l1-7" stroke-linecap="round"/></svg>
+          <span style="font:600 9.5px Pretendard;">다이어그램</span>
+        </div>
+        <div style="width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border-radius:13px;color:#8A94A6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h16" stroke-linecap="round"/><rect x="6" y="11" width="3.2" height="6" rx="1"/><rect x="11.5" y="7" width="3.2" height="10" rx="1"/><rect x="17" y="13" width="3.2" height="4" rx="1"/></svg>
+          <span style="font:600 9.5px Pretendard;">장표</span>
+        </div>
+      </div>
+      <div style="margin-top:auto;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;color:#fff;font:800 13px Pretendard;">우</div>
+    </div>
+
+    <!-- main -->
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg);">
+      <div style="padding:14px 15px 13px;background:#fff;border-bottom:1px solid var(--line);">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font:800 16px Pretendard;color:var(--ink);letter-spacing:-.02em;">아이콘</div>
+            <div style="font:600 11px Pretendard;color:var(--muted);margin-top:2px;">120개 · 전체 225</div>
+          </div>
+          <button style="width:32px;height:32px;border-radius:10px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;background:#F4F6F9;border:1.5px solid #E2E7ED;border-radius:13px;padding:9px 11px;margin-top:13px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#98A2B0" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
+          <span style="flex:1;font:500 13px Pretendard;color:var(--muted);">설명으로 검색…</span>
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 19V6M6 12l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:7px;padding:12px 15px 8px;">
+        <button style="background:var(--primarySoft);border-radius:999px;padding:6px 12px;font:700 11.5px Pretendard;color:var(--primary);">추천</button>
+        <button style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font:600 11.5px Pretendard;color:var(--ink2);">즐겨찾기</button>
+        <button style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font:600 11.5px Pretendard;color:var(--ink2);">최근</button>
+      </div>
+
+      <div style="flex:1;overflow:auto;padding:4px 15px 14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <sc-for list="{{ railResults }}" as="a" hint-placeholder-count="6">
+            <div style="background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 2px 7px rgba(28,39,51,.05);">
+              <div style="position:relative;aspect-ratio:1/1;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 12px);"></div>
+                <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:rgba(28,39,51,.42);text-transform:uppercase;">{{ a.label }}</span>
+                <div style="position:absolute;top:7px;right:7px;width:25px;height:25px;border-radius:8px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(28,39,51,.1);">
+                  <sc-if value="{{ a.fav }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="#F0566A" stroke="#F0566A" stroke-width="1.2"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                  <sc-if value="{{ a.notFav }}" hint-placeholder-val="{{ true }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="1.5"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                </div>
+              </div>
+              <div style="padding:8px 10px 10px;">
+                <div style="font:700 12.5px Pretendard;color:var(--ink);">{{ a.label }}</div>
+                <div style="font:600 10.5px Pretendard;color:var(--muted);margin-top:1px;">{{ a.tag }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FRAME 4 : 통합형 (조합) ================= -->
+<div style="position:absolute;left:1548px;top:56px;width:400px;">
+  <div data-drags-parent="1" style="display:flex;align-items:center;gap:9px;margin-bottom:13px;cursor:grab;">
+    <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:#1C2733;color:#fff;font:800 12px Pretendard;">4</span>
+    <span style="font:700 13.5px Pretendard;color:#3A4554;letter-spacing:-.01em;">통합형 · 탐색 + 고정 컴포저</span>
+  </div>
+  <div style="width:400px;height:760px;background:#fff;border:1px solid #E4E9EF;border-radius:20px;overflow:hidden;box-shadow:0 14px 44px rgba(28,39,51,.11);display:flex;flex-direction:column;font-family:Pretendard,sans-serif;--bg:#F0F3F6;--ink:#1C2733;--ink2:#566070;--muted:#98A2B0;--line:#E8ECF1;--coral:#F0566A;--coralSoft:#FDEBEE;--primary:{{ primary }};--primaryD:{{ primaryD }};--primarySoft:{{ primarySoft }};">
+
+    <!-- header -->
+    <div style="display:flex;align-items:center;gap:11px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--line);">
+      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 12px rgba(43,138,245,.28);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.18;">
+        <span style="font:800 16px Pretendard;color:var(--ink);letter-spacing:-.02em;">powerPlus</span>
+        <span style="font:600 11px Pretendard;color:var(--muted);">에셋 라이브러리</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <button style="position:relative;width:34px;height:34px;border-radius:10px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="1.7"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round"/></svg>
+          <span style="position:absolute;top:7px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--coral);"></span>
+        </button>
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3D9BFF,#1B7BEF);display:flex;align-items:center;justify-content:center;color:#fff;font:800 13px Pretendard;">우</div>
+      </div>
+    </div>
+
+    <!-- body -->
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);">
+      <!-- greeting + segmented -->
+      <div style="padding:16px 15px 10px;">
+        <div style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.025em;">무엇을 찾아드릴까요? <span style="font-size:16px;">👋</span></div>
+        <div style="display:flex;background:#E7EBF0;border-radius:11px;padding:3px;margin-top:14px;">
+          <button style="flex:1;background:#fff;border-radius:8px;padding:8px;font:700 12.5px Pretendard;color:var(--ink);box-shadow:0 1px 3px rgba(28,39,51,.1);">추천</button>
+          <button style="flex:1;padding:8px;font:700 12.5px Pretendard;color:var(--muted);">즐겨찾기</button>
+          <button style="flex:1;padding:8px;font:700 12.5px Pretendard;color:var(--muted);">최근</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px;">
+          <span style="font:700 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">120개 <span style="color:var(--muted);font-weight:600;">· 전체 225</span></span>
+          <button style="display:flex;align-items:center;gap:4px;font:700 12px Pretendard;color:var(--muted);">인기순<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+
+      <!-- grid -->
+      <div style="flex:1;overflow:auto;padding:2px 15px 12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+          <sc-for list="{{ assetsMain }}" as="a" hint-placeholder-count="6">
+            <div style="background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(28,39,51,.05);">
+              <div style="position:relative;aspect-ratio:4/3;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 12px);"></div>
+                <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(28,39,51,.42);text-transform:uppercase;">{{ a.label }}</span>
+                <div style="position:absolute;top:8px;right:8px;width:27px;height:27px;border-radius:8px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(28,39,51,.1);">
+                  <sc-if value="{{ a.fav }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F0566A" stroke="#F0566A" stroke-width="1.2"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                  <sc-if value="{{ a.notFav }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="1.5"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                </div>
+              </div>
+              <div style="padding:9px 11px 11px;">
+                <div style="font:700 13px Pretendard;color:var(--ink);">{{ a.label }}</div>
+                <div style="font:600 11px Pretendard;color:var(--muted);margin-top:2px;">{{ a.tag }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- pinned composer -->
+      <div style="padding:11px 13px 13px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(28,39,51,.05);">
+        <div style="border:1.5px solid #DDE3EA;border-radius:16px;background:#fff;padding:11px 12px;">
+          <div style="font:500 13.5px Pretendard;color:var(--muted);">필요한 자료를 설명해 보세요…</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:11px;">
+            <button style="display:flex;align-items:center;gap:5px;background:var(--primarySoft);color:var(--primary);border-radius:9px;padding:6px 10px;font:700 12px Pretendard;">아이콘<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button style="display:flex;align-items:center;gap:5px;background:#F4F6F9;color:var(--ink2);border-radius:9px;padding:6px 10px;font:700 12px Pretendard;">＋ 첨부</button>
+            <div style="margin-left:auto;width:36px;height:36px;border-radius:11px;background:var(--primary);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 13px rgba(43,138,245,.3);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 19V6M6 12l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;primary&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;blue&quot;,&quot;options&quot;:[&quot;blue&quot;,&quot;coral&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const A = [
+      {label:'팀 협업', tag:'3D 아이콘', tint:'#E9F2FE', fav:true},
+      {label:'학습·도서', tag:'3D 아이콘', tint:'#E7F6EC', fav:false},
+      {label:'고객 상담', tag:'3D 아이콘', tint:'#EAF3FE', fav:false},
+      {label:'고객 후기', tag:'일러스트', tint:'#FDEBEE', fav:false},
+      {label:'재고 물류', tag:'3D 아이콘', tint:'#FEF4E2', fav:true},
+      {label:'대시보드', tag:'다이어그램', tint:'#F0EBFB', fav:false},
+      {label:'전화 문의', tag:'3D 아이콘', tint:'#FCEAF1', fav:false},
+      {label:'업무 공간', tag:'사진', tint:'#EDF0F4', fav:false},
+    ];
+    A.forEach(a => { a.notFav = !a.fav; });
+    const coral = this.props.primary === 'coral';
+    const primary = coral ? '#F0566A' : '#2B8AF5';
+    const primaryD = coral ? '#DE3F56' : '#1B7BEF';
+    const primarySoft = coral ? '#FDEBEE' : '#E9F2FE';
+    return {
+      primary, primaryD, primarySoft,
+      assetsMain: A.slice(0, 6),
+      threadResults: [A[4], A[5], A[1], A[7]],
+      railResults: A.slice(0, 6),
+    };
+  }
+}
+</script>
+</body>
+</html>

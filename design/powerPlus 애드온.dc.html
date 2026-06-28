@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap">
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;}
+button{font-family:inherit;border:none;background:none;cursor:pointer;padding:0;}
+input{font-family:inherit;outline:none;border:none;background:none;}
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-thumb{background:#D4DAE2;border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+@keyframes ppToast{from{opacity:0;transform:transl(-50%,10px);}to{opacity:1;transform:translateX(-50%);}}
+@keyframes ppDrop{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes ppFade{from{opacity:0;}to{opacity:1;}}
+@keyframes ppSheet{from{transform:translateY(100%);}to{transform:translateY(0);}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#DCE1E7;display:flex;justify-content:center;font-family:Pretendard,sans-serif;">
+  <div style="position:relative;width:100%;max-width:440px;height:100vh;background:#F0F3F6;display:flex;flex-direction:column;overflow:hidden;--bg:#F0F3F6;--ink:#333333;--ink2:#555555;--muted:#999999;--line:#DDDDDD;--coral:#F0566A;--coralSoft:#FDEBEE;--primary:{{ primary }};--primarySoft:{{ primarySoft }};">
+
+    <!-- ===== header ===== -->
+    <div style="position:relative;z-index:30;display:flex;align-items:center;gap:11px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--line);">
+      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;box-shadow:0 5px 12px rgba(196,62,28,.3);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;line-height:1.18;">
+        <span style="font:800 16px Pretendard;color:var(--ink);letter-spacing:-.02em;">powerPlus</span>
+        <span style="font:600 11px Pretendard;color:var(--muted);">에셋 라이브러리</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <button onClick="{{ toggleNotif }}" style="position:relative;width:34px;height:34px;border-radius:10px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="1.7"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round"/></svg>
+          <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:6px;right:7px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;background:var(--coral);color:#fff;font:800 9px Pretendard;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;">{{ unread }}</span></sc-if>
+        </button>
+        <button onClick="{{ toggleProfile }}" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;color:#fff;font:800 13px Pretendard;">우</button>
+      </div>
+    </div>
+
+    <!-- notif dropdown -->
+    <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeMenus }}" style="position:absolute;inset:0;z-index:40;"></div>
+      <div style="position:absolute;top:60px;right:14px;width:308px;z-index:41;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 54px rgba(28,39,51,.22);overflow:hidden;animation:ppDrop .14s ease;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #F1F4F7;">
+          <span style="font:800 14px Pretendard;color:var(--ink);">알림</span>
+          <button onClick="{{ markAllRead }}" style="font:700 12px Pretendard;color:var(--primary);">모두 읽음</button>
+        </div>
+        <div style="max-height:340px;overflow:auto;">
+          <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="2">
+            <button onClick="{{ n.onClick }}" style="{{ n.rowStyle }}">
+              <span style="display:flex;align-items:center;gap:10px;width:100%;">
+                <span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;text-align:left;">
+                  <span style="flex:1;min-width:0;font:700 12.5px Pretendard;color:#333333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ n.title }}</span>
+                  <sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}"><span style="width:6px;height:6px;border-radius:50%;background:var(--coral);flex:none;"></span></sc-if>
+                  <span style="font:600 11px 'JetBrains Mono',monospace;color:#A6B0BD;flex:none;">{{ n.date }}</span>
+                  <svg style="{{ n.chevStyle }}" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </span>
+              <sc-if value="{{ n.expanded }}" hint-placeholder-val="{{ false }}">
+                <span style="display:block;text-align:left;font:500 12px Pretendard;color:#555555;line-height:1.6;padding:11px 2px 3px 2px;">{{ n.body }}</span>
+              </sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- profile dropdown -->
+    <sc-if value="{{ profileOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeMenus }}" style="position:absolute;inset:0;z-index:40;"></div>
+      <div style="position:absolute;top:60px;right:14px;width:262px;z-index:41;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 54px rgba(28,39,51,.22);overflow:hidden;animation:ppDrop .14s ease;">
+        <div style="display:flex;align-items:center;gap:11px;padding:15px 15px 13px;">
+          <div style="width:42px;height:42px;border-radius:13px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;color:#fff;font:800 17px Pretendard;">우</div>
+          <div style="min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;"><span style="font:800 14px Pretendard;color:var(--ink);">우덕성 팀장</span><span style="font:800 9px Pretendard;color:#22B36B;background:#E7F6EC;border-radius:5px;padding:2px 5px;">PRO</span></div>
+            <div style="font:600 11.5px Pretendard;color:var(--muted);margin-top:2px;">ds.woo@solideo.com</div>
+          </div>
+        </div>
+        <div style="height:1px;background:#F1F4F7;"></div>
+        <div style="padding:6px;">
+          <button onClick="{{ openRequest }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 11px;border-radius:10px;text-align:left;" style-hover="background:#F4F6F9;">
+            <span style="width:32px;height:32px;border-radius:9px;background:var(--primarySoft);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10l4 4v12a0 0 0 010 0H5z"/><path d="M12 11v5M9.5 13.5h5"/></svg></span>
+            <span style="display:flex;flex-direction:column;min-width:0;"><span style="font:700 13px Pretendard;color:var(--ink);">콘텐츠 요청하기</span><span style="font:500 11px Pretendard;color:var(--muted);margin-top:1px;">원하는 자료를 관리자에게 요청</span></span>
+          </button>
+        </div>
+        <div style="height:1px;background:#F1F4F7;"></div>
+        <div style="padding:6px;">
+          <button onClick="{{ logout }}" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border-radius:9px;font:700 13px Pretendard;color:var(--coral);text-align:left;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 4h3a1 1 0 011 1v14a1 1 0 01-1 1h-3" stroke-linecap="round"/><path d="M10 8l-4 4 4 4M6 12h10" stroke-linecap="round" stroke-linejoin="round"/></svg>로그아웃
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===== body ===== -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);">
+
+      <div style="padding:16px 15px 10px;position:relative;z-index:20;">
+        <sc-if value="{{ greetingShow }}" hint-placeholder-val="{{ true }}">
+          <div style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.025em;">무엇을 찾아드릴까요? <span style="font-size:16px;">👋</span></div>
+        </sc-if>
+        <sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 13px;">
+            <span style="font:600 13px Pretendard;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">‘<b style="color:var(--ink);font-weight:800;">{{ activeQuery }}</b>’ 검색 결과 {{ count }}개</span>
+            <button onClick="{{ clearQuery }}" style="font:700 12px Pretendard;color:var(--primary);white-space:nowrap;flex:none;">전체 보기</button>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;background:#E7EBF0;border-radius:11px;padding:3px;margin-top:13px;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.onPick }}" style="{{ t.style }}">{{ t.name }}</button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px;position:relative;">
+          <span style="font:700 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">{{ count }}개 <span style="color:var(--muted);font-weight:600;">· 전체 {{ totalAll }}</span></span>
+          <button onClick="{{ toggleSort }}" style="display:flex;align-items:center;gap:4px;font:700 12px Pretendard;color:var(--muted);">{{ sort }}<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <sc-if value="{{ sortOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeMenus }}" style="position:fixed;inset:0;z-index:24;"></div>
+            <div style="position:absolute;top:24px;right:0;z-index:25;width:130px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 38px rgba(28,39,51,.2);padding:5px;animation:ppDrop .12s ease;">
+              <sc-for list="{{ sorts }}" as="s" hint-placeholder-count="3">
+                <button onClick="{{ s.onPick }}" style="{{ s.style }}">{{ s.name }}<sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg></sc-if></button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- grid / empty -->
+      <div ref="{{ scrollRef }}" style="flex:1;overflow:auto;padding:4px 15px 14px;">
+        <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+          <div style="{{ gridStyle }}">
+            <sc-for list="{{ visible }}" as="a" hint-placeholder-count="6">
+              <div onClick="{{ a.onOpen }}" style="background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(28,39,51,.05);cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .12s;" style-hover="border-color:var(--primary);box-shadow:0 8px 20px rgba(196,62,28,.14);transform:translateY(-2px);">
+                <div style="position:relative;aspect-ratio:4/3;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+                  <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 12px);"></div>
+                  <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(28,39,51,.42);text-transform:uppercase;">{{ a.label }}</span>
+                  <button onClick="{{ a.onFav }}" style="position:absolute;top:8px;right:8px;width:27px;height:27px;border-radius:8px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(28,39,51,.1);">
+                    <sc-if value="{{ a.isFav }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F0566A" stroke="#F0566A" stroke-width="1.2"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                    <sc-if value="{{ a.notFav }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="1.5"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></sc-if>
+                  </button>
+                </div>
+                <div style="padding:9px 11px 11px;">
+                  <div style="font:700 13px Pretendard;color:var(--ink);">{{ a.label }}</div>
+                  <div style="font:600 11px Pretendard;color:var(--muted);margin-top:2px;">{{ a.tag }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noItems }}" hint-placeholder-val="{{ false }}">
+          <div style="height:100%;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;">
+            <div style="width:58px;height:58px;border-radius:18px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;margin-bottom:15px;box-shadow:0 4px 14px rgba(28,39,51,.05);">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C2CAD5" stroke-width="1.6"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="font:800 15px Pretendard;color:var(--ink);">{{ emptyTitle }}</div>
+            <div style="font:500 12.5px Pretendard;color:var(--muted);margin-top:6px;line-height:1.5;max-width:240px;">{{ emptySub }}</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- composer -->
+      <div style="position:relative;z-index:22;padding:11px 13px 13px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(28,39,51,.05);">
+        <sc-if value="{{ catOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeMenus }}" style="position:fixed;inset:0;z-index:23;"></div>
+          <div style="position:absolute;left:13px;bottom:74px;z-index:24;width:170px;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 14px 40px rgba(28,39,51,.2);padding:6px;animation:ppDrop .12s ease;">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+              <button onClick="{{ c.onPick }}" style="{{ c.style }}">{{ c.name }}<sc-if value="{{ c.active }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg></sc-if></button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="border:1.5px solid #DDE3EA;border-radius:16px;background:#fff;padding:10px 12px;">
+          <input value="{{ query }}" onInput="{{ onInput }}" onKeyDown="{{ onKey }}" placeholder="필요한 자료를 설명해 보세요…" style="width:100%;font:500 13.5px Pretendard;color:var(--ink);background:none;"/>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+            <button onClick="{{ toggleCat }}" style="display:flex;align-items:center;gap:5px;background:var(--primarySoft);color:var(--primary);border-radius:9px;padding:6px 10px;font:700 12px Pretendard;">{{ cat }}<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button onClick="{{ onSend }}" style="margin-left:auto;width:36px;height:36px;border-radius:11px;background:#333333;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 13px rgba(0,0,0,.22);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 19V6M6 12l6-6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- request board sheet -->
+    <sc-if value="{{ requestOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:70;background:rgba(28,39,51,.36);display:flex;flex-direction:column;justify-content:flex-end;animation:ppFade .18s ease;">
+        <div onClick="{{ closeRequest }}" style="flex:1;"></div>
+        <div style="background:#fff;border-radius:24px 24px 0 0;box-shadow:0 -12px 44px rgba(28,39,51,.24);max-height:90%;display:flex;flex-direction:column;animation:ppSheet .26s cubic-bezier(.22,.61,.36,1);">
+
+          <sc-if value="{{ reqFormShow }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;justify-content:center;padding:10px 0 2px;"><div style="width:38px;height:4px;border-radius:2px;background:#E2E7ED;"></div></div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:8px 20px 4px;">
+              <div>
+                <div style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">콘텐츠 요청</div>
+                <div style="font:500 12.5px Pretendard;color:var(--muted);margin-top:4px;line-height:1.5;">필요한 아이콘·자료를 요청하면<br>관리자가 검토 후 라이브러리에 추가해 드려요.</div>
+              </div>
+              <button onClick="{{ closeRequest }}" style="width:32px;height:32px;border-radius:10px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+
+            <div style="overflow:auto;padding:14px 20px 4px;">
+              <div style="font:700 12px Pretendard;color:var(--ink2);margin-bottom:9px;">유형</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px;">
+                <sc-for list="{{ reqTypes }}" as="t" hint-placeholder-count="5">
+                  <button onClick="{{ t.onPick }}" style="{{ t.style }}">{{ t.name }}</button>
+                </sc-for>
+              </div>
+
+              <div style="font:700 12px Pretendard;color:var(--ink2);margin:18px 0 8px;">제목 · 키워드 <span style="color:var(--coral);">*</span></div>
+              <input value="{{ reqTitle }}" onInput="{{ onReqTitle }}" placeholder="예) 친환경·ESG 관련 3D 아이콘" style="width:100%;border:1.5px solid #DDE3EA;border-radius:12px;padding:12px 13px;font:500 13.5px Pretendard;color:var(--ink);" style-focus="border-color:var(--primary);"/>
+
+              <div style="font:700 12px Pretendard;color:var(--ink2);margin:16px 0 8px;">상세 설명</div>
+              <textarea value="{{ reqDesc }}" onInput="{{ onReqDesc }}" placeholder="원하는 스타일, 색감, 용도 등을 적어주세요." rows="3" style="width:100%;border:1.5px solid #DDE3EA;border-radius:12px;padding:12px 13px;font:500 13.5px Pretendard;color:var(--ink);resize:none;line-height:1.5;" style-focus="border-color:var(--primary);"></textarea>
+
+              <div style="font:700 12px Pretendard;color:var(--ink2);margin:16px 0 8px;">참고 링크 <span style="color:var(--muted);font-weight:600;">(선택)</span></div>
+              <input value="{{ reqLink }}" onInput="{{ onReqLink }}" placeholder="https://" style="width:100%;border:1.5px solid #DDE3EA;border-radius:12px;padding:12px 13px;font:500 13.5px Pretendard;color:var(--ink);" style-focus="border-color:var(--primary);"/>
+            </div>
+
+            <div style="padding:14px 20px 20px;border-top:1px solid #F1F4F7;background:#fff;">
+              <button onClick="{{ submitRequest }}" style="{{ submitStyle }}">요청 보내기</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ reqSubmitted }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:44px 28px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+              <div style="width:66px;height:66px;border-radius:50%;background:#E7F6EC;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22B36B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></div>
+              <div style="font:800 19px Pretendard;color:var(--ink);margin-top:18px;letter-spacing:-.02em;">요청이 접수되었습니다</div>
+              <div style="font:500 13px Pretendard;color:var(--ink2);margin-top:8px;line-height:1.55;max-width:280px;">관리자가 검토 후 라이브러리에 반영해 드려요.<br>결과는 알림으로 안내됩니다.</div>
+              <div style="width:100%;margin-top:20px;background:#F4F6F9;border-radius:13px;padding:14px 16px;text-align:left;display:flex;align-items:center;gap:10px;">
+                <span style="font:800 10px Pretendard;color:var(--primary);background:var(--primarySoft);border-radius:6px;padding:4px 8px;flex:none;">{{ reqType }}</span>
+                <span style="font:700 13px Pretendard;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ reqTitle }}</span>
+              </div>
+              <button onClick="{{ closeRequest }}" style="width:100%;margin-top:14px;border:none;border-radius:13px;padding:14px;font:800 14px Pretendard;background:#333333;color:#fff;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.22);">확인</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- toast -->
+    <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:50%;bottom:96px;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:9px;background:#333333;color:#fff;border-radius:12px;padding:11px 15px;box-shadow:0 12px 34px rgba(28,39,51,.34);animation:ppToast .22s ease;white-space:nowrap;">
+        <span style="width:20px;height:20px;border-radius:50%;background:#22B36B;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span style="font:700 12.5px Pretendard;">{{ toast }}</span>
+      </div>
+    </sc-if>
+
+    <!-- logged out -->
+    <sc-if value="{{ loggedOut }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:80;background:rgba(240,243,246,.86);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;animation:ppFade .2s ease;">
+        <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(196,62,28,.32);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+        </div>
+        <div style="font:800 20px Pretendard;color:var(--ink);margin-top:18px;letter-spacing:-.02em;">로그아웃되었습니다</div>
+        <div style="font:500 13px Pretendard;color:var(--ink2);margin-top:7px;line-height:1.5;">powerPlus 에셋 라이브러리를<br>다시 이용하려면 로그인하세요.</div>
+        <button onClick="{{ login }}" style="margin-top:22px;background:#333333;color:#fff;border-radius:13px;padding:13px 28px;font:700 14px Pretendard;box-shadow:0 8px 20px rgba(0,0,0,.22);">다시 로그인</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;primary&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;orange&quot;,&quot;options&quot;:[&quot;orange&quot;,&quot;coral&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = {
+    tab: '추천', cat: '전체', query: '', activeQuery: '', sort: '인기순',
+    notifOpen: false, profileOpen: false, catOpen: false, sortOpen: false,
+    loggedOut: false, favs: [1, 5], recents: [8, 3], notifs: null, toast: null, ready: false, cols: 2, expandedNotif: null,
+    requestOpen: false, reqType: '아이콘', reqTitle: '', reqDesc: '', reqLink: '', reqSubmitted: false,
+  };
+
+  scrollRef = React.createRef();
+
+  componentDidMount() {
+    let favs = this.state.favs, recents = this.state.recents;
+    try { const f = localStorage.getItem('pplus_favs'); if (f) favs = JSON.parse(f); } catch (e) {}
+    try { const r = localStorage.getItem('pplus_recents'); if (r) recents = JSON.parse(r); } catch (e) {}
+    this.setState({ favs, recents, notifs: this.defaultNotifs(), ready: true });
+    this.setupRO();
+  }
+
+  setupRO() {
+    if (this._ro || !this.scrollRef.current) return;
+    const measure = (w) => {
+      const cols = w <= 250 ? 1 : w <= 400 ? 2 : 3;
+      if (cols !== this.state.cols) this.setState({ cols });
+    };
+    measure(this.scrollRef.current.clientWidth);
+    this._ro = new ResizeObserver((es) => measure(es[0].contentRect.width));
+    this._ro.observe(this.scrollRef.current);
+  }
+
+  componentWillUnmount() { if (this._ro) this._ro.disconnect(); }
+
+  defaultNotifs() {
+    return [
+      { id: 1, title: '새 아이콘 팩이 추가됐어요', date: '06.28', tint: '#FBEEE4', color: '#E0701F', read: false, body: '친환경·ESG 관련 3D 아이콘 24종이 라이브러리에 추가되었습니다. 카테고리 ‘아이콘’에서 확인해 보세요. — 디자인팀' },
+      { id: 2, title: '‘재고 물류’ 자료 업데이트', date: '06.28', tint: '#FEF4E2', color: '#F5A623', read: false, body: '재고·물류 일러스트 6종이 최신 스타일로 교체되었습니다. 기존 자료도 계속 사용할 수 있어요. — 콘텐츠팀' },
+    ];
+  }
+
+  ASSETS() {
+    return [
+      { id: 1, label: '팀 협업', tag: '3D 아이콘', cat: '아이콘', tint: '#FBEEE4', kw: '협업 팀 사람 그룹 미팅' },
+      { id: 2, label: '학습·도서', tag: '3D 아이콘', cat: '아이콘', tint: '#E7F6EC', kw: '책 교육 학습 도서 공부' },
+      { id: 3, label: '고객 상담', tag: '3D 아이콘', cat: '아이콘', tint: '#FBEEE4', kw: '헤드셋 상담 콜센터 고객 지원' },
+      { id: 4, label: '고객 후기', tag: '일러스트', cat: '일러스트', tint: '#FDEBEE', kw: '후기 리뷰 별점 평가 만족' },
+      { id: 5, label: '재고 물류', tag: '3D 아이콘', cat: '아이콘', tint: '#FEF4E2', kw: '재고 창고 물류 박스 배송' },
+      { id: 6, label: '대시보드', tag: '다이어그램', cat: '다이어그램', tint: '#F0EBFB', kw: '차트 그래프 분석 데이터 대시보드' },
+      { id: 7, label: '전화 문의', tag: '3D 아이콘', cat: '아이콘', tint: '#FCEAF1', kw: '전화 문의 연락 콜 상담' },
+      { id: 8, label: '업무 공간', tag: '사진', cat: '사진', tint: '#EDF0F4', kw: '데스크 사무실 워크스페이스 책상' },
+      { id: 9, label: '성장 그래프', tag: '다이어그램', cat: '다이어그램', tint: '#E7F6EC', kw: '매출 성장 상승 그래프 실적' },
+      { id: 10, label: '프로세스 흐름', tag: '다이어그램', cat: '다이어그램', tint: '#EFEAF7', kw: '프로세스 플로우 단계 흐름도' },
+      { id: 11, label: '보고서 표지', tag: '장표', cat: '장표', tint: '#F0EBFB', kw: '표지 커버 보고서 제목' },
+      { id: 12, label: '타임라인', tag: '장표', cat: '장표', tint: '#FEF4E2', kw: '로드맵 일정 타임라인 계획' },
+      { id: 13, label: '회의 미팅', tag: '사진', cat: '사진', tint: '#FBEEE4', kw: '회의 미팅 화상 컨퍼런스' },
+      { id: 14, label: '보안 점검', tag: '3D 아이콘', cat: '아이콘', tint: '#E7F6EC', kw: '보안 방패 점검 안전 보호' },
+      { id: 15, label: '결재 승인', tag: '3D 아이콘', cat: '아이콘', tint: '#FDEBEE', kw: '결재 승인 문서 사인 전자결재' },
+      { id: 16, label: '캘린더 일정', tag: '3D 아이콘', cat: '아이콘', tint: '#FBEEE4', kw: '캘린더 일정 날짜 스케줄' },
+    ];
+  }
+
+  persist() {
+    try {
+      localStorage.setItem('pplus_favs', JSON.stringify(this.state.favs));
+      localStorage.setItem('pplus_recents', JSON.stringify(this.state.recents));
+    } catch (e) {}
+  }
+
+  toggleFav(id) {
+    const s = new Set(this.state.favs);
+    s.has(id) ? s.delete(id) : s.add(id);
+    this.setState({ favs: [...s] }, () => this.persist());
+  }
+
+  openAsset(id) {
+    const a = this.ASSETS().find(x => x.id === id);
+    const r = [id, ...this.state.recents.filter(x => x !== id)].slice(0, 12);
+    this.setState({ recents: r, toast: a ? ('‘' + a.label + '’을(를) 슬라이드에 추가했어요') : null }, () => {
+      this.persist();
+      if (this._tt) clearTimeout(this._tt);
+      this._tt = setTimeout(() => this.setState({ toast: null }), 2200);
+    });
+  }
+
+  setTab(t) { this.setState({ tab: t, sortOpen: false }); }
+  setCat(c) { this.setState({ cat: c, catOpen: false }); }
+  setSort(s) { this.setState({ sort: s, sortOpen: false }); }
+  onInput(e) { this.setState({ query: e.target.value }); }
+  onKey(e) { if (e.key === 'Enter') { e.preventDefault(); this.send(); } }
+  send() { const q = this.state.query.trim(); this.setState({ activeQuery: q, tab: '추천' }); }
+  clearQuery() { this.setState({ query: '', activeQuery: '' }); }
+  toggleNotif() { this.setState(s => ({ notifOpen: !s.notifOpen, profileOpen: false, expandedNotif: null })); }
+  toggleProfile() { this.setState(s => ({ profileOpen: !s.profileOpen, notifOpen: false })); }
+  markAllRead() { this.setState(s => ({ notifs: (s.notifs || []).map(n => ({ ...n, read: true })) })); }
+  readOne(id) { this.setState(s => ({ notifs: (s.notifs || []).map(n => n.id === id ? { ...n, read: true } : n), expandedNotif: s.expandedNotif === id ? null : id })); }
+  logout() { this.setState({ loggedOut: true, profileOpen: false, notifOpen: false }); }
+  login() { this.setState({ loggedOut: false }); }
+  closeMenus() { this.setState({ notifOpen: false, profileOpen: false, catOpen: false, sortOpen: false }); }
+
+  openRequest() { this.setState({ requestOpen: true, profileOpen: false, notifOpen: false, reqSubmitted: false }); }
+  closeRequest() { this.setState({ requestOpen: false, reqSubmitted: false, reqType: '아이콘', reqTitle: '', reqDesc: '', reqLink: '' }); }
+  setReqType(t) { this.setState({ reqType: t }); }
+  onReqTitle(e) { this.setState({ reqTitle: e.target.value }); }
+  onReqDesc(e) { this.setState({ reqDesc: e.target.value }); }
+  onReqLink(e) { this.setState({ reqLink: e.target.value }); }
+  submitRequest() { if (!this.state.reqTitle.trim()) return; this.setState({ reqSubmitted: true }); }
+
+  renderVals() {
+    const S = this.state;
+    const all = this.ASSETS();
+    const favSet = new Set(S.favs);
+
+    let base;
+    if (S.tab === '즐겨찾기') base = all.filter(a => favSet.has(a.id));
+    else if (S.tab === '최근') base = (S.recents || []).map(id => all.find(a => a.id === id)).filter(Boolean);
+    else base = all.slice();
+
+    if (S.cat !== '전체') base = base.filter(a => a.cat === S.cat);
+    const q = (S.activeQuery || '').toLowerCase();
+    if (q) base = base.filter(a => (a.label + ' ' + a.kw + ' ' + a.tag).toLowerCase().includes(q));
+
+    if (S.tab !== '최근') {
+      if (S.sort === '이름순') base = base.slice().sort((a, b) => a.label.localeCompare(b.label, 'ko'));
+      else if (S.sort === '최신순') base = base.slice().sort((a, b) => b.id - a.id);
+    }
+
+    const visible = base.map(a => ({
+      ...a, isFav: favSet.has(a.id), notFav: !favSet.has(a.id),
+      onFav: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.toggleFav(a.id); },
+      onOpen: () => this.openAsset(a.id),
+    }));
+
+    let emptyTitle = null, emptySub = null;
+    if (visible.length === 0) {
+      if (q) { emptyTitle = '검색 결과가 없어요'; emptySub = '‘' + S.activeQuery + '’와 일치하는 자료를 찾지 못했어요. 다른 키워드로 검색해 보세요.'; }
+      else if (S.tab === '즐겨찾기') { emptyTitle = '즐겨찾기가 비어 있어요'; emptySub = '자료의 별을 눌러 자주 쓰는 자료를 모아보세요.'; }
+      else if (S.tab === '최근') { emptyTitle = '최근 본 자료가 없어요'; emptySub = '자료를 클릭해 슬라이드에 추가하면 여기에 쌓여요.'; }
+      else { emptyTitle = '자료가 없어요'; emptySub = '다른 카테고리를 선택해 보세요.'; }
+    }
+
+    const notifs = (S.notifs || []).slice(0, 2).map(n => ({
+      ...n, unread: !n.read, expanded: S.expandedNotif === n.id,
+      rowStyle: 'display:flex;flex-direction:column;width:100%;padding:12px 14px;border:none;cursor:pointer;border-bottom:1px solid #F1F4F7;background:' + (n.read ? '#fff' : '#FAFBFD') + ';',
+      chevStyle: 'transition:transform .18s ease;transform:rotate(' + (S.expandedNotif === n.id ? '180deg' : '0deg') + ');',
+      onClick: () => this.readOne(n.id),
+    }));
+    const unread = (S.notifs || []).filter(n => !n.read).length;
+
+    const tabActive = 'flex:1;border:none;background:#fff;border-radius:8px;padding:8px;font:700 12.5px Pretendard;color:#333333;box-shadow:0 1px 3px rgba(28,39,51,.1);cursor:pointer;';
+    const tabIdle = 'flex:1;border:none;background:none;border-radius:8px;padding:8px;font:700 12.5px Pretendard;color:#999999;cursor:pointer;';
+    const tabs = ['추천', '즐겨찾기', '최근'].map(t => ({ name: t, active: t === S.tab, onPick: () => this.setTab(t), style: t === S.tab ? tabActive : tabIdle }));
+
+    const primary = S.primaryHex || (this.props.primary === 'coral' ? '#F0566A' : '#E0701F');
+    const primarySoft = this.props.primary === 'coral' ? '#FDEBEE' : '#FBEEE4';
+
+    const menuBase = 'display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 11px;border:none;border-radius:9px;font:600 12.5px Pretendard;cursor:pointer;text-align:left;';
+    const cats = ['전체', '아이콘', '사진', '일러스트', '다이어그램', '장표'].map(c => ({
+      name: c, active: c === S.cat, onPick: () => this.setCat(c),
+      style: menuBase + (c === S.cat ? ('color:' + primary + ';background:' + primarySoft + ';font-weight:700;') : 'color:#555555;background:none;'),
+    }));
+    const sorts = ['인기순', '최신순', '이름순'].map(s => ({
+      name: s, active: s === S.sort, onPick: () => this.setSort(s),
+      style: menuBase + (s === S.sort ? ('color:' + primary + ';background:' + primarySoft + ';font-weight:700;') : 'color:#555555;background:none;'),
+    }));
+
+    const cols = this.state.cols || 2;
+    const gridStyle = 'display:grid;grid-template-columns:repeat(' + cols + ',minmax(0,1fr));gap:11px;';
+
+    const chipBase = 'border:none;border-radius:999px;padding:8px 14px;font:700 12.5px Pretendard;cursor:pointer;white-space:nowrap;';
+    const reqTypes = ['아이콘', '사진', '일러스트', '다이어그램', '장표'].map(t => ({
+      name: t, active: t === S.reqType, onPick: () => this.setReqType(t),
+      style: chipBase + (t === S.reqType ? ('background:' + primary + ';color:#fff;') : 'background:#F4F6F9;color:#555555;'),
+    }));
+    const canSubmit = !!S.reqTitle.trim();
+    const submitStyle = 'width:100%;border:none;border-radius:13px;padding:14px;font:800 14px Pretendard;' +
+      (canSubmit ? ('background:#333333;color:#fff;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.22);') : 'background:#E7EBF0;color:#AEB7C4;cursor:not-allowed;');
+
+    return {
+      primary, primarySoft, gridStyle, scrollRef: this.scrollRef,
+      requestOpen: S.requestOpen, reqSubmitted: S.reqSubmitted, reqFormShow: !S.reqSubmitted,
+      reqType: S.reqType, reqTitle: S.reqTitle, reqDesc: S.reqDesc, reqLink: S.reqLink, reqTypes, submitStyle,
+      openRequest: () => this.openRequest(), closeRequest: () => this.closeRequest(),
+      onReqTitle: (e) => this.onReqTitle(e), onReqDesc: (e) => this.onReqDesc(e), onReqLink: (e) => this.onReqLink(e),
+      submitRequest: () => this.submitRequest(),
+      visible, hasItems: visible.length > 0, noItems: visible.length === 0, emptyTitle, emptySub,
+      tab: S.tab, cat: S.cat, sort: S.sort, query: S.query,
+      hasQuery: !!S.activeQuery, activeQuery: S.activeQuery, greetingShow: !S.activeQuery,
+      totalAll: 225, count: visible.length,
+      notifs, unread, hasUnread: unread > 0,
+      notifOpen: S.notifOpen, profileOpen: S.profileOpen, catOpen: S.catOpen, sortOpen: S.sortOpen,
+      loggedOut: S.loggedOut, toast: S.toast, hasToast: !!S.toast,
+      cats, sorts, tabs,
+      onInput: (e) => this.onInput(e), onKey: (e) => this.onKey(e), onSend: () => this.send(), clearQuery: () => this.clearQuery(),
+      toggleNotif: () => this.toggleNotif(), toggleProfile: () => this.toggleProfile(),
+      toggleCat: () => this.setState(s => ({ catOpen: !s.catOpen, sortOpen: false })),
+      toggleSort: () => this.setState(s => ({ sortOpen: !s.sortOpen, catOpen: false })),
+      markAllRead: () => this.markAllRead(), logout: () => this.logout(), login: () => this.login(),
+      closeMenus: () => this.closeMenus(),
+    };
+  }
+}
+</script>
+</body>
+</html>

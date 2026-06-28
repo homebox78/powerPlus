@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;}
+button{font-family:inherit;border:none;background:none;cursor:pointer;padding:0;}
+input,textarea{font-family:inherit;outline:none;}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#EDF1F5;font-family:Pretendard,sans-serif;--ink:#333333;--ink2:#555555;--muted:#999999;--line:#DDDDDD;--primary:#E0701F;--primaryD:#C43E1C;--primarySoft:#FBEEE4;--coral:#F0566A;--coralSoft:#FDEBEE;">
+  <div style="max-width:1080px;margin:0 auto;padding:48px 32px 80px;">
+
+    <!-- masthead -->
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:56px;height:56px;border-radius:17px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(196,62,28,.34);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+      </div>
+      <div>
+        <div style="font:800 28px Pretendard;color:var(--ink);letter-spacing:-.03em;">powerPlus 디자인 시스템</div>
+        <div style="font:600 14px Pretendard;color:var(--muted);margin-top:3px;">PowerPoint 자산 라이브러리 애드인 · UI 가이드 v1.0</div>
+      </div>
+    </div>
+
+    <!-- ============ 1. LOGO ============ -->
+    <sc-for list="{{ sections }}" as="s" hint-placeholder-count="0"></sc-for>
+
+    <div style="margin-top:44px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">01</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">로고</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 2px 12px rgba(28,39,51,.04);">
+        <div style="display:flex;gap:30px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 28px rgba(196,62,28,.34);">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+            </div>
+            <span style="font:600 11.5px Pretendard;color:var(--muted);">App Icon · 80px</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:11px;">
+              <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(196,62,28,.3);">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+              </div>
+              <span style="font:800 22px Pretendard;color:var(--ink);letter-spacing:-.02em;">powerPlus</span>
+            </div>
+            <span style="font:600 11.5px Pretendard;color:var(--muted);">Horizontal Lockup</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <div style="width:64px;height:64px;border-radius:19px;background:#1A2230;display:flex;align-items:center;justify-content:center;">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+            </div>
+            <span style="font:600 11.5px Pretendard;color:var(--muted);">On Dark</span>
+          </div>
+        </div>
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid #F2F5F8;font:500 13px Pretendard;color:var(--ink2);line-height:1.6;">쌓인 장표(여러 슬라이드)에 <b style="color:var(--ink);">＋</b> 기호를 결합해 ‘PowerPoint에 자산을 더한다’는 의미를 표현합니다. PowerPoint를 연상시키는 <b style="color:#C43E1C;">오렌지 그라데이션</b> 라운드 스퀘어 위에 흰색 라인 아이콘으로 사용합니다.</div>
+      </div>
+    </div>
+
+    <!-- ============ 2. COLOR ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">02</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">컬러</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 2px 12px rgba(28,39,51,.04);">
+        <div style="font:700 13px Pretendard;color:var(--ink2);margin-bottom:12px;">Brand</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+          <sc-for list="{{ brandColors }}" as="c" hint-placeholder-count="4">
+            <div style="border:1px solid var(--line);border-radius:13px;overflow:hidden;">
+              <div style="height:74px;background:{{ c.hex }};"></div>
+              <div style="padding:10px 12px;">
+                <div style="font:700 12.5px Pretendard;color:var(--ink);">{{ c.name }}</div>
+                <div style="font:600 11px 'JetBrains Mono',monospace;color:var(--muted);margin-top:2px;text-transform:uppercase;">{{ c.hex }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font:700 13px Pretendard;color:var(--ink2);margin:22px 0 12px;">Neutral & Surface</div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;">
+          <sc-for list="{{ neutralColors }}" as="c" hint-placeholder-count="6">
+            <div style="border:1px solid var(--line);border-radius:13px;overflow:hidden;">
+              <div style="height:56px;background:{{ c.hex }};border-bottom:1px solid #EEF1F5;"></div>
+              <div style="padding:9px 10px;">
+                <div style="font:700 11.5px Pretendard;color:var(--ink);">{{ c.name }}</div>
+                <div style="font:600 10px 'JetBrains Mono',monospace;color:var(--muted);margin-top:2px;text-transform:uppercase;">{{ c.hex }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font:700 13px Pretendard;color:var(--ink2);margin:22px 0 12px;">Category Tints <span style="color:var(--muted);font-weight:600;">· 썸네일 배경</span></div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
+          <sc-for list="{{ tintColors }}" as="c" hint-placeholder-count="5">
+            <div style="border:1px solid var(--line);border-radius:13px;overflow:hidden;">
+              <div style="height:50px;background:{{ c.hex }};"></div>
+              <div style="padding:9px 10px;">
+                <div style="font:700 11.5px Pretendard;color:var(--ink);">{{ c.name }}</div>
+                <div style="font:600 10px 'JetBrains Mono',monospace;color:var(--muted);margin-top:2px;text-transform:uppercase;">{{ c.hex }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 3. TYPOGRAPHY ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">03</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">타이포그래피</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 26px;box-shadow:0 2px 12px rgba(28,39,51,.04);">
+        <div style="display:flex;align-items:center;gap:8px;padding:16px 0;font:600 12px Pretendard;color:var(--muted);">Pretendard <span style="color:#CCD4DD;">·</span> 본문/제목 전 영역</div>
+        <sc-for list="{{ typeScale }}" as="t" hint-placeholder-count="6">
+          <div style="display:flex;align-items:baseline;gap:20px;padding:14px 0;border-top:1px solid #F2F5F8;">
+            <span style="width:96px;flex:none;font:600 11px 'JetBrains Mono',monospace;color:var(--muted);">{{ t.spec }}</span>
+            <span style="{{ t.style }}">{{ t.sample }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- ============ 4. ICONS ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">04</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">아이콘</span><span style="font:600 12px Pretendard;color:var(--muted);margin-left:4px;">1.7–1.8 stroke · round cap</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 2px 12px rgba(28,39,51,.04);">
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:12px;">
+          <sc-for list="{{ icons }}" as="i" hint-placeholder-count="16">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 6px;border:1px solid var(--line);border-radius:12px;">
+              <span style="color:var(--ink2);">{{ i.svg }}</span>
+              <span style="font:600 10.5px Pretendard;color:var(--muted);">{{ i.name }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 5. BUTTONS ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">05</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">버튼</span><span style="font:600 12px Pretendard;color:var(--muted);margin-left:4px;">채움 버튼은 블랙 · 주황은 강조/활성에만</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 2px 12px rgba(28,39,51,.04);">
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
+          <button style="background:#333333;color:#fff;border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;box-shadow:0 6px 16px rgba(0,0,0,.18);">Primary</button>
+          <button style="border:1.5px solid var(--line);border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;color:var(--ink2);background:#fff;">Secondary</button>
+          <button style="background:var(--primary);color:#fff;border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;box-shadow:0 6px 16px rgba(196,62,28,.26);">Accent · 강조</button>
+          <button style="background:var(--coralSoft);color:var(--coral);border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;">Danger</button>
+          <button style="display:flex;align-items:center;gap:6px;background:#333333;color:#fff;border-radius:11px;padding:11px 18px;font:700 13.5px Pretendard;box-shadow:0 6px 16px rgba(0,0,0,.18);">With icon28,.26);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>With icon</button>
+          <button style="width:38px;height:38px;border-radius:11px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="1.7"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round"/></svg></button>
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;color:#fff;font:800 14px Pretendard;">우</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px;">
+          <div style="display:flex;background:#E7EBF0;border-radius:11px;padding:3px;">
+            <button style="border-radius:8px;padding:8px 16px;font:700 12.5px Pretendard;color:var(--ink);background:#fff;box-shadow:0 1px 3px rgba(28,39,51,.1);">추천</button>
+            <button style="border-radius:8px;padding:8px 16px;font:700 12.5px Pretendard;color:var(--muted);background:none;">즐겨찾기</button>
+            <button style="border-radius:8px;padding:8px 16px;font:700 12.5px Pretendard;color:var(--muted);background:none;">최근</button>
+          </div>
+          <button style="border-radius:999px;padding:9px 18px;font:700 13px Pretendard;background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(196,62,28,.25);">Pill 활성</button>
+          <button style="border:1px solid var(--line);border-radius:999px;padding:9px 18px;font:700 13px Pretendard;background:#fff;color:#7B8794;">Pill 기본</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 6. FORM ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">06</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">폼 요소</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 2px 12px rgba(28,39,51,.04);display:grid;grid-template-columns:1fr 1fr;gap:22px;">
+        <div>
+          <div style="font:700 12.5px Pretendard;color:var(--ink2);margin-bottom:8px;">텍스트 입력</div>
+          <input value="{{ demoText }}" onInput="{{ onDemoText }}" placeholder="태그로 검색…" style="width:100%;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:500 13.5px Pretendard;color:var(--ink);" style-focus="border-color:var(--primary);"/>
+        </div>
+        <div>
+          <div style="font:700 12.5px Pretendard;color:var(--ink2);margin-bottom:8px;">검색 필드</div>
+          <div style="display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;" style-focus-within="border-color:var(--primary);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
+            <input placeholder="필요한 자료를 설명해 보세요…" style="flex:1;border:none;font:500 13.5px Pretendard;color:var(--ink);background:none;"/>
+          </div>
+        </div>
+        <div>
+          <div style="font:700 12.5px Pretendard;color:var(--ink2);margin-bottom:8px;">셀렉트</div>
+          <div style="position:relative;">
+            <select style="width:100%;appearance:none;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:600 13.5px Pretendard;color:var(--ink);background:#fff;cursor:pointer;"><option>아이콘</option><option>사진</option><option>일러스트</option></select>
+            <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div>
+          <div style="font:700 12.5px Pretendard;color:var(--ink2);margin-bottom:8px;">체크박스 · 토글</div>
+          <div style="display:flex;align-items:center;gap:16px;padding-top:4px;">
+            <button onClick="{{ toggleCheck }}" style="display:flex;align-items:center;gap:9px;">
+              <span style="{{ checkBoxStyle }}"><sc-if value="{{ checked }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></sc-if></span>
+              <span style="font:600 13px Pretendard;color:var(--ink2);">활성</span>
+            </button>
+            <button onClick="{{ toggleSwitch }}" style="{{ switchTrackStyle }}"><span style="{{ switchKnobStyle }}"></span></button>
+          </div>
+        </div>
+        <div style="grid-column:1/3;">
+          <div style="font:700 12.5px Pretendard;color:var(--ink2);margin-bottom:8px;">키워드 칩 입력 <span style="color:var(--muted);font-weight:600;">(Enter로 추가)</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1.5px solid #DCE2E9;border-radius:12px;padding:9px 11px;" style-focus-within="border-color:var(--primary);">
+            <sc-for list="{{ demoChips }}" as="k" hint-placeholder-count="3">
+              <span style="display:inline-flex;align-items:center;gap:5px;background:var(--primarySoft);color:var(--primary);border-radius:8px;padding:5px 9px;font:700 12.5px Pretendard;">{{ k.text }}<button onClick="{{ k.onRemove }}" style="display:flex;color:var(--primary);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+            </sc-for>
+            <input value="{{ chipInput }}" onInput="{{ onChipInput }}" onKeyDown="{{ onChipKey }}" placeholder="키워드 입력…" style="flex:1;min-width:120px;border:none;font:500 13px Pretendard;color:var(--ink);background:none;padding:4px 2px;"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 7. CHIPS / BADGES ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">07</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">칩 · 뱃지 · 태그</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 2px 12px rgba(28,39,51,.04);display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+        <span style="font:600 11.5px Pretendard;color:#E0701F;background:#FBEEE4;border-radius:6px;padding:4px 9px;">국문 태그</span>
+        <span style="font:600 11.5px Pretendard;color:#8A94A3;background:#F1F4F7;border-radius:6px;padding:4px 9px;">en tag</span>
+        <span style="font:700 11px Pretendard;color:#1A9C5B;background:#E3F6EC;border-radius:7px;padding:5px 10px;">활성</span>
+        <span style="font:700 11px Pretendard;color:#999999;background:#F1F4F7;border-radius:7px;padding:5px 10px;">비활성</span>
+        <span style="font:800 9px Pretendard;color:#22B36B;background:#E7F6EC;border-radius:5px;padding:2px 6px;">PRO</span>
+        <span style="font:800 10px Pretendard;color:var(--coral);background:var(--coralSoft);border-radius:6px;padding:3px 7px;">3</span>
+        <span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--coral);color:#fff;font:800 10px Pretendard;">5</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;font:700 12px Pretendard;color:var(--coral);background:var(--coralSoft);border-radius:8px;padding:6px 11px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z"/></svg>즐겨찾기</span>
+      </div>
+    </div>
+
+    <!-- ============ 8. CARDS ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">08</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">자산 카드 · KPI</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+        <sc-for list="{{ demoCards }}" as="a" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(28,39,51,.04);">
+            <div style="position:relative;aspect-ratio:16/10;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+              <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 13px);"></div>
+              <span style="position:relative;font:600 11px 'JetBrains Mono',monospace;color:rgba(28,39,51,.4);text-transform:uppercase;">{{ a.label }}</span>
+              <span style="position:absolute;top:8px;right:8px;width:27px;height:27px;border-radius:8px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(28,39,51,.1);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AEB7C4" stroke-width="1.5"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></span>
+            </div>
+            <div style="padding:11px 13px 13px;">
+              <div style="font:700 13px Pretendard;color:var(--ink);">{{ a.label }}</div>
+              <div style="font:600 11px Pretendard;color:var(--muted);margin-top:2px;">{{ a.cat }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 2px 10px rgba(28,39,51,.04);overflow:hidden;">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--primary);"></div>
+          <div style="font:700 12.5px Pretendard;color:var(--ink2);">총 삽입 횟수</div>
+          <div style="font:800 28px Pretendard;color:var(--ink);margin-top:7px;letter-spacing:-.02em;">1,284</div>
+          <div style="font:600 11.5px Pretendard;color:var(--muted);margin-top:4px;">이번 달 누적</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 9. FEEDBACK ============ -->
+    <div style="margin-top:40px;">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;"><span style="font:800 11px 'JetBrains Mono',monospace;color:var(--primary);">09</span><span style="font:800 18px Pretendard;color:var(--ink);letter-spacing:-.02em;">피드백 · 알림</span></div>
+      <div style="background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 2px 12px rgba(28,39,51,.04);display:flex;flex-wrap:wrap;gap:18px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:9px;background:#333333;color:#fff;border-radius:12px;padding:11px 15px;box-shadow:0 12px 34px rgba(28,39,51,.2);">
+          <span style="width:20px;height:20px;border-radius:50%;background:#22B36B;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="font:700 12.5px Pretendard;">슬라이드에 추가했어요</span>
+        </div>
+        <div style="width:280px;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(28,39,51,.1);">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:#FAFBFD;">
+            <span style="width:30px;height:30px;border-radius:9px;background:#FBEEE4;display:flex;align-items:center;justify-content:center;flex:none;"><span style="width:9px;height:9px;border-radius:50%;background:#E0701F;"></span></span>
+            <span style="flex:1;min-width:0;"><span style="display:block;font:700 12.5px Pretendard;color:#333333;">새 아이콘 팩이 추가됐어요</span><span style="display:block;font:600 11px Pretendard;color:#999999;margin-top:1px;">방금 · 디자인팀</span></span>
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--coral);flex:none;"></span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:18px 24px;border:1px dashed #D6DDE5;border-radius:14px;">
+          <div style="width:44px;height:44px;border-radius:14px;background:#F4F6F9;display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C2CAD5" stroke-width="1.6"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z" stroke-linejoin="round"/></svg></div>
+          <span style="font:700 12.5px Pretendard;color:var(--ink2);">Empty state</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { demoText: '', checked: true, switchOn: true, chips: ['협업', '팀', '회의'], chipInput: '' };
+
+  ic(p, opts) {
+    opts = opts || {};
+    const fill = opts.fill || 'none';
+    const sw = opts.sw || 1.7;
+    return React.createElement('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill, stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round' },
+      p.map((d, i) => React.createElement('path', { key: i, d })));
+  }
+  icEl(children) {
+    return React.createElement('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round' }, children);
+  }
+
+  onDemoText(e) { this.setState({ demoText: e.target.value }); }
+  toggleCheck() { this.setState({ checked: !this.state.checked }); }
+  toggleSwitch() { this.setState({ switchOn: !this.state.switchOn }); }
+  onChipInput(e) { this.setState({ chipInput: e.target.value }); }
+  onChipKey(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const v = this.state.chipInput.replace(/,/g, '').trim();
+      if (v && !this.state.chips.includes(v)) this.setState({ chips: [...this.state.chips, v], chipInput: '' });
+      else this.setState({ chipInput: '' });
+    }
+  }
+  removeChip(i) { this.setState({ chips: this.state.chips.filter((_, j) => j !== i) }); }
+
+  renderVals() {
+    const R = React.createElement;
+    const brandColors = [
+      { name: 'Orange', hex: '#E0701F' }, { name: 'Orange Dark', hex: '#C43E1C' },
+      { name: 'Coral', hex: '#F0566A' }, { name: 'Black', hex: '#333333' },
+    ];
+    const neutralColors = [
+      { name: 'Ink', hex: '#333333' }, { name: 'Ink 2', hex: '#555555' }, { name: 'Muted', hex: '#999999' },
+      { name: 'Line', hex: '#DDDDDD' }, { name: 'Surface', hex: '#F0F3F6' }, { name: 'BG', hex: '#EDF1F5' },
+    ];
+    const tintColors = [
+      { name: '아이콘', hex: '#FBEEE4' }, { name: '사진', hex: '#EDF0F4' }, { name: '일러스트', hex: '#FDEBEE' },
+      { name: '다이어그램', hex: '#F0EBFB' }, { name: '장표', hex: '#FEF4E2' },
+    ];
+    const typeScale = [
+      { spec: '28 / 800', sample: '대제목 powerPlus', style: 'font:800 28px Pretendard;color:#333333;letter-spacing:-.03em;' },
+      { spec: '20 / 800', sample: '섹션 제목', style: 'font:800 20px Pretendard;color:#333333;letter-spacing:-.02em;' },
+      { spec: '16 / 800', sample: '카드 타이틀 / 강조', style: 'font:800 16px Pretendard;color:#333333;' },
+      { spec: '13.5 / 700', sample: '버튼 · 라벨 텍스트', style: 'font:700 13.5px Pretendard;color:#555555;' },
+      { spec: '13 / 500', sample: '본문 텍스트입니다. 자료 설명과 안내 문구에 사용합니다.', style: 'font:500 13px Pretendard;color:#555555;' },
+      { spec: '11 / 600 mono', sample: 'META · 2026-06-27 · userid@solideos.com', style: "font:600 12px 'JetBrains Mono',monospace;color:#999999;" },
+    ];
+
+    const icons = [
+      { name: 'logo', svg: this.icEl([R('rect', { x: 8.5, y: 3.5, width: 12, height: 12, rx: 2.5, opacity: .5 }), R('rect', { x: 3.5, y: 8.5, width: 12, height: 12, rx: 2.5 }), R('path', { d: 'M9.5 12.6v3.8M7.6 14.5h3.8' })]) },
+      { name: 'search', svg: this.icEl([R('circle', { cx: 11, cy: 11, r: 7 }), R('path', { d: 'M20 20l-3.6-3.6' })]) },
+      { name: 'bell', svg: this.icEl([R('path', { d: 'M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9' }), R('path', { d: 'M13.7 21a2 2 0 01-3.4 0' })]) },
+      { name: 'star', svg: this.ic(['M12 3.5l2.5 5.6 6.1.6-4.6 4.1 1.3 6L12 16.9 6.2 19.8l1.3-6-4.6-4.1 6.1-.6z']) },
+      { name: 'plus', svg: this.ic(['M12 6v12M6 12h12'], { sw: 2.2 }) },
+      { name: 'send', svg: this.ic(['M12 19V6M6 12l6-6 6 6'], { sw: 2 }) },
+      { name: 'check', svg: this.ic(['M5 12l5 5L20 6'], { sw: 2.2 }) },
+      { name: 'close', svg: this.ic(['M6 6l12 12M18 6L6 18'], { sw: 2.2 }) },
+      { name: 'chevron', svg: this.ic(['M6 9l6 6 6-6'], { sw: 2.2 }) },
+      { name: 'menu', svg: this.ic(['M4 6h16M4 12h16M4 18h16'], { sw: 1.8 }) },
+      { name: 'upload', svg: this.icEl([R('path', { d: 'M12 16V4M7 9l5-5 5 5' }), R('path', { d: 'M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3' })]) },
+      { name: 'image', svg: this.icEl([R('rect', { x: 3.5, y: 5, width: 17, height: 14, rx: 2.5 }), R('circle', { cx: 9, cy: 10, r: 1.6 }), R('path', { d: 'M5 17l4.5-4 3 2.5L16 12l3 3.5' })]) },
+      { name: 'doc', svg: this.icEl([R('path', { d: 'M6 3h7l5 5v13H6z' }), R('path', { d: 'M13 3v5h5' })]) },
+      { name: 'chart', svg: this.icEl([R('path', { d: 'M4 20h16' }), R('rect', { x: 6, y: 11, width: 3.2, height: 6, rx: 1 }), R('rect', { x: 11.5, y: 7, width: 3.2, height: 10, rx: 1 }), R('rect', { x: 17, y: 13, width: 3.2, height: 4, rx: 1 })]) },
+      { name: 'like', svg: this.icEl([R('path', { d: 'M7 11v9H4a1 1 0 01-1-1v-7a1 1 0 011-1h3zm0 0l4-7a2 2 0 013 2l-1 5h5a2 2 0 012 2.3l-1 6a2 2 0 01-2 1.7H7' })]) },
+      { name: 'logout', svg: this.icEl([R('path', { d: 'M15 4h3a1 1 0 011 1v14a1 1 0 01-1 1h-3' }), R('path', { d: 'M10 8l-4 4 4 4M6 12h10' })]) },
+    ];
+
+    const demoCards = [
+      { label: '팀 협업', cat: '3D 아이콘', tint: '#FBEEE4' },
+      { label: '성장 그래프', cat: '다이어그램', tint: '#F0EBFB' },
+      { label: '고객 후기', cat: '일러스트', tint: '#FDEBEE' },
+    ];
+
+    const demoChips = this.state.chips.map((t, i) => ({ text: t, onRemove: () => this.removeChip(i) }));
+
+    return {
+      brandColors, neutralColors, tintColors, typeScale, icons, demoCards, demoChips, sections: [],
+      demoText: this.state.demoText, onDemoText: e => this.onDemoText(e),
+      checked: this.state.checked, toggleCheck: () => this.toggleCheck(),
+      checkBoxStyle: 'width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;' + (this.state.checked ? 'background:#E0701F;' : 'background:#fff;border:1.5px solid #CCD4DD;'),
+      toggleSwitch: () => this.toggleSwitch(),
+      switchTrackStyle: 'position:relative;width:42px;height:24px;border-radius:13px;transition:background .15s;' + (this.state.switchOn ? 'background:#E0701F;' : 'background:#CCD4DD;'),
+      switchKnobStyle: 'position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s;transform:translateX(' + (this.state.switchOn ? '18px' : '0') + ');',
+      chipInput: this.state.chipInput, onChipInput: e => this.onChipInput(e), onChipKey: e => this.onChipKey(e),
+    };
+  }
+}
+</script>
+</body>
+</html>

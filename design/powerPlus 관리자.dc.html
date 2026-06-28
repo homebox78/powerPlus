@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap">
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;}
+button{font-family:inherit;border:none;background:none;cursor:pointer;padding:0;}
+input,textarea,select{font-family:inherit;outline:none;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:#D4DAE2;border-radius:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+@keyframes ppFade{from{opacity:0;}to{opacity:1;}}
+@keyframes ppPop{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#EDF1F5;font-family:Pretendard,sans-serif;--ink:#333333;--ink2:#555555;--muted:#999999;--line:#DDDDDD;--primary:#333333;--primaryD:#1A1A1A;--primarySoft:#FBEEE4;--accent:#E0701F;--coral:#F0566A;--coralSoft:#FDEBEE;">
+
+  <!-- ============ LOGIN ============ -->
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
+      <div style="width:380px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(28,39,51,.10);padding:34px 30px;animation:ppPop .24s ease;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="width:50px;height:50px;border-radius:15px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(196,62,28,.32);">
+            <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+          </div>
+          <div style="font:800 21px Pretendard;color:var(--ink);margin-top:14px;letter-spacing:-.02em;">powerPlus 관리자</div>
+          <div style="font:600 13px Pretendard;color:var(--muted);margin-top:5px;">자산 라이브러리 관리</div>
+        </div>
+
+        <sc-if value="{{ isEmailStep }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:26px;">
+            <div style="font:700 12.5px Pretendard;color:var(--ink2);margin-bottom:8px;">회사 이메일</div>
+            <input value="{{ email }}" onInput="{{ onEmail }}" onKeyDown="{{ onEmailKey }}" placeholder="userid@solideos.com" style="width:100%;border:1.5px solid #DCE2E9;border-radius:12px;padding:13px 14px;font:500 14px Pretendard;color:var(--ink);background:#fff;" style-focus="border-color:var(--primary);"/>
+            <button onClick="{{ sendCode }}" style="{{ sendBtnStyle }}">인증코드 받기</button>
+            <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center;font:600 12px Pretendard;color:var(--coral);margin-top:12px;">{{ loginError }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isCodeStep }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:24px;">
+            <div style="font:600 12.5px Pretendard;color:var(--ink2);text-align:center;line-height:1.5;margin-bottom:14px;"><b style="color:var(--ink);">{{ email }}</b> 로<br>전송된 6자리 인증코드를 입력하세요.</div>
+            <input value="{{ code }}" onInput="{{ onCode }}" onKeyDown="{{ onCodeKey }}" placeholder="000000" maxlength="6" style="width:100%;text-align:center;letter-spacing:.45em;border:1.5px solid #DCE2E9;border-radius:12px;padding:14px;font:800 20px 'JetBrains Mono',monospace;color:var(--ink);background:#fff;" style-focus="border-color:var(--primary);"/>
+            <button onClick="{{ verify }}" style="{{ verifyBtnStyle }}">로그인</button>
+            <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:14px;">
+              <span style="font:500 12px Pretendard;color:var(--muted);">코드를 못 받으셨나요?</span>
+              <button onClick="{{ backToEmail }}" style="font:700 12px Pretendard;color:var(--primary);">다시 보내기</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ APP ============ -->
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1240px;margin:0 auto;padding:26px 28px 60px;">
+
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(140deg,#F0894C,#C43E1C);display:flex;align-items:center;justify-content:center;flex:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+        </div>
+        <span style="font:800 20px Pretendard;color:var(--ink);letter-spacing:-.02em;">powerPlus 관리자</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
+          <span style="font:600 13px Pretendard;color:var(--ink2);">{{ email }}</span>
+          <button onClick="{{ logout }}" style="border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font:700 13px Pretendard;color:var(--ink2);background:#fff;" style-hover="border-color:#CCD4DD;">로그아웃</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.onPick }}" style="{{ t.style }}">{{ t.name }}</button>
+        </sc-for>
+      </div>
+
+      <!-- ===== 자산 ===== -->
+      <sc-if value="{{ isAssets }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:10px;margin-top:22px;">
+          <div style="position:relative;">
+            <select value="{{ filterCat }}" onChange="{{ onFilterCat }}" style="appearance:none;border:1.5px solid var(--line);border-radius:11px;padding:11px 36px 11px 14px;font:600 13px Pretendard;color:var(--ink);background:#fff;cursor:pointer;">
+              <option value="all">전체 카테고리</option>
+              <sc-for list="{{ categories }}" as="c" hint-placeholder-count="5"><option value="{{ c.name }}">{{ c.name }}</option></sc-for>
+            </select>
+            <svg style="position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="flex:1;max-width:320px;display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:11px;padding:10px 13px;background:#fff;" style-focus-within="border-color:var(--primary);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
+            <input value="{{ search }}" onInput="{{ onSearch }}" placeholder="태그로 검색…" style="flex:1;border:none;font:500 13px Pretendard;color:var(--ink);background:none;"/>
+          </div>
+          <button onClick="{{ openAssetNew }}" style="margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border-radius:11px;padding:11px 18px;font:700 13px Pretendard;box-shadow:0 6px 16px rgba(196,62,28,.26);" style-hover="background:var(--primaryD);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 자산
+          </button>
+        </div>
+
+        <div style="font:600 12.5px Pretendard;color:var(--muted);margin-top:16px;">{{ assetCount }}개 자산</div>
+
+        <sc-if value="{{ hasAssets }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:10px;">
+            <sc-for list="{{ assetsView }}" as="a" hint-placeholder-count="8">
+              <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(28,39,51,.04);">
+                <div style="position:relative;aspect-ratio:16/10;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;">
+                  <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 13px);"></div>
+                  <span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;color:rgba(28,39,51,.4);text-transform:uppercase;">{{ a.label }}</span>
+                </div>
+                <div style="padding:12px 13px 13px;">
+                  <div style="font:700 12.5px Pretendard;color:var(--ink2);">{{ a.cat }}</div>
+                  <div style="display:flex;flex-wrap:wrap;align-content:flex-start;align-items:flex-start;gap:5px;margin-top:8px;min-height:42px;">
+                    <sc-for list="{{ a.tags }}" as="g" hint-placeholder-count="4"><span style="{{ g.style }}">{{ g.text }}</span></sc-for>
+                  </div>
+                  <div style="display:flex;gap:8px;margin-top:11px;">
+                    <button onClick="{{ a.onEdit }}" style="flex:1;border:1.5px solid var(--line);border-radius:9px;padding:8px;font:700 12.5px Pretendard;color:var(--primary);background:#fff;" style-hover="border-color:var(--primary);background:var(--primarySoft);">수정</button>
+                    <button onClick="{{ a.onDelete }}" style="flex:1;border:1.5px solid var(--line);border-radius:9px;padding:8px;font:700 12.5px Pretendard;color:var(--coral);background:#fff;" style-hover="border-color:var(--coral);background:var(--coralSoft);">삭제</button>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noAssets }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:60px;text-align:center;margin-top:10px;">
+            <div style="font:800 15px Pretendard;color:var(--ink);">검색 결과가 없어요</div>
+            <div style="font:500 13px Pretendard;color:var(--muted);margin-top:7px;">다른 카테고리나 태그로 찾아보세요.</div>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ===== 카테고리 ===== -->
+      <sc-if value="{{ isCats }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;justify-content:flex-end;margin-top:22px;">
+          <button onClick="{{ openCatNew }}" style="display:flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border-radius:11px;padding:11px 18px;font:700 13px Pretendard;box-shadow:0 6px 16px rgba(196,62,28,.26);" style-hover="background:var(--primaryD);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 카테고리
+          </button>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:16px;box-shadow:0 2px 10px rgba(28,39,51,.04);">
+          <div style="display:grid;grid-template-columns:1.4fr 1.4fr 1fr 150px;gap:16px;padding:15px 22px;border-bottom:1px solid var(--line);background:#FAFBFC;font:700 12px Pretendard;color:var(--muted);text-align:center;">
+            <span>이름</span><span>key</span><span>자산 수</span><span></span>
+          </div>
+          <sc-for list="{{ categories }}" as="c" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:1.4fr 1.4fr 1fr 150px;gap:16px;align-items:center;padding:15px 22px;border-bottom:1px solid #F2F5F8;text-align:center;">
+              <span style="font:700 14px Pretendard;color:var(--ink);text-align:center;">{{ c.name }}</span>
+              <span style="font:500 13px 'JetBrains Mono',monospace;color:var(--ink2);text-align:center;">{{ c.key }}</span>
+              <span style="font:600 14px Pretendard;color:var(--ink);text-align:center;">{{ c.count }}</span>
+              <div style="display:flex;gap:7px;justify-content:center;">
+                <button onClick="{{ c.onEdit }}" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 13px;font:700 12px Pretendard;color:var(--primary);background:#fff;" style-hover="background:var(--primarySoft);">수정</button>
+                <button onClick="{{ c.onDelete }}" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 11px;font:700 12px Pretendard;color:var(--coral);background:#fff;" style-hover="background:var(--coralSoft);">삭제</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== 대시보드 ===== -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 2px 10px rgba(28,39,51,.04);overflow:hidden;">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:{{ k.color }};"></div>
+              <div style="font:700 12.5px Pretendard;color:var(--ink2);">{{ k.label }}</div>
+              <div style="font:800 28px Pretendard;color:var(--ink);margin-top:7px;letter-spacing:-.02em;">{{ k.value }}</div>
+              <div style="font:600 11.5px Pretendard;color:var(--muted);margin-top:4px;">{{ k.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-top:16px;align-items:start;">
+          <!-- 순위 (탭) -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(28,39,51,.04);">
+            <div style="padding:14px 16px 0;">
+              <div style="display:inline-flex;align-items:center;gap:4px;background:#E7EBF0;border-radius:11px;padding:3px;">
+                <button onClick="{{ pickInsertRank }}" style="{{ rankTabInsertStyle }}">인기 자산</button>
+                <button onClick="{{ pickFavRank }}" style="{{ rankTabFavStyle }}">즐겨찾기</button>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 64px 1fr 70px;gap:12px;padding:12px 22px 10px;font:700 11.5px Pretendard;color:var(--muted);">
+              <span>순위</span><span>미리보기</span><span>카테고리</span><span style="text-align:right;">{{ rankMetricLabel }}</span>
+            </div>
+            <sc-for list="{{ ranking }}" as="r" hint-placeholder-count="6">
+              <div style="display:grid;grid-template-columns:40px 64px 1fr 70px;gap:12px;align-items:center;padding:11px 22px;border-top:1px solid #F2F5F8;">
+                <span style="{{ r.rankStyle }}">{{ r.rank }}</span>
+                <div style="width:54px;height:38px;border-radius:8px;background:{{ r.tint }};position:relative;overflow:hidden;">
+                  <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 1px,transparent 1px 9px);"></div>
+                </div>
+                <div style="min-width:0;">
+                  <div style="font:700 13px Pretendard;color:var(--ink);">{{ r.cat }}</div>
+                  <div style="font:500 11.5px Pretendard;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;">{{ r.tagline }}</div>
+                </div>
+                <span style="font:800 15px Pretendard;color:var(--primary);text-align:right;">{{ r.metric }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- 카테고리별 분포 -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 22px 22px;box-shadow:0 2px 10px rgba(28,39,51,.04);">
+            <div style="font:800 15px Pretendard;color:var(--ink);">카테고리별 분포</div>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-top:18px;">
+              <sc-for list="{{ catDist }}" as="c" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+                    <span style="font:700 12.5px Pretendard;color:var(--ink);">{{ c.name }}</span>
+                    <span style="font:700 12.5px Pretendard;color:var(--ink2);">{{ c.count }}</span>
+                  </div>
+                  <div style="height:8px;border-radius:5px;background:#EEF1F5;overflow:hidden;">
+                    <div style="{{ c.barStyle }}"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== 공지 ===== -->
+      <sc-if value="{{ isNotices }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:22px;">
+          <span style="font:600 13px Pretendard;color:var(--muted);">사용자 애드인 우측 상단 알림에 표시됩니다.</span>
+          <button onClick="{{ openNoticeNew }}" style="display:flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border-radius:11px;padding:11px 18px;font:700 13px Pretendard;box-shadow:0 6px 16px rgba(196,62,28,.26);" style-hover="background:var(--primaryD);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 공지
+          </button>
+        </div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:16px;box-shadow:0 2px 10px rgba(28,39,51,.04);">
+          <div style="display:grid;grid-template-columns:1.2fr 2.4fr 80px 120px 120px;gap:16px;padding:15px 22px;border-bottom:1px solid var(--line);background:#FAFBFC;font:700 12px Pretendard;color:var(--muted);text-align:center;">
+            <span>제목</span><span>내용</span><span>상태</span><span>등록일</span><span></span>
+          </div>
+          <sc-for list="{{ notices }}" as="n" hint-placeholder-count="2">
+            <div style="display:grid;grid-template-columns:1.2fr 2.4fr 80px 120px 120px;gap:16px;align-items:center;padding:15px 22px;border-bottom:1px solid #F2F5F8;">
+              <span style="font:700 13.5px Pretendard;color:var(--ink);">{{ n.title }}</span>
+              <span style="font:500 13px Pretendard;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ n.body }}</span>
+              <span style="{{ n.statusStyle }}">{{ n.statusText }}</span>
+              <span style="font:500 12.5px 'JetBrains Mono',monospace;color:var(--muted);text-align:center;">{{ n.date }}</span>
+              <div style="display:flex;gap:7px;justify-content:flex-end;">
+                <button onClick="{{ n.onEdit }}" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 13px;font:700 12px Pretendard;color:var(--primary);background:#fff;" style-hover="background:var(--primarySoft);">수정</button>
+                <button onClick="{{ n.onDelete }}" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 11px;font:700 12px Pretendard;color:var(--coral);background:#fff;" style-hover="background:var(--coralSoft);">삭제</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ ASSET MODAL ============ -->
+  <sc-if value="{{ assetModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;background:rgba(28,39,51,.42);display:flex;align-items:center;justify-content:center;padding:24px;animation:ppFade .16s ease;">
+      <div onClick="{{ closeModal }}" style="position:absolute;inset:0;"></div>
+      <div style="position:relative;width:560px;max-height:90vh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(28,39,51,.3);padding:26px 28px;animation:ppPop .2s ease;">
+        <div style="font:800 19px Pretendard;color:var(--ink);letter-spacing:-.02em;">{{ assetModalTitle }}</div>
+
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:20px 0 8px;">카테고리</div>
+        <div style="position:relative;">
+          <select value="{{ aCat }}" onChange="{{ onACat }}" style="width:100%;appearance:none;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:600 13.5px Pretendard;color:var(--ink);background:#fff;cursor:pointer;">
+            <sc-for list="{{ categories }}" as="c" hint-placeholder-count="5"><option value="{{ c.name }}">{{ c.name }}</option></sc-for>
+          </select>
+          <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2.4"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:18px 0 8px;">이미지 (PNG·JPG)</div>
+        <div style="border:1.5px dashed #C9D2DC;border-radius:14px;padding:28px;text-align:center;background:#FAFBFC;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#A6B0BD" stroke-width="1.7" style="margin-bottom:8px;"><path d="M12 16V4M7 9l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke-linecap="round"/></svg>
+          <div style="font:600 13px Pretendard;color:var(--muted);">클릭하거나 파일을 끌어다 놓으세요</div>
+        </div>
+
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:18px 0 8px;">국문 키워드 <span style="color:var(--muted);font-weight:600;">(Enter 또는 콤마로 추가)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1.5px solid #DCE2E9;border-radius:12px;padding:9px 11px;" style-focus-within="border-color:var(--primary);">
+          <sc-for list="{{ krChips }}" as="k" hint-placeholder-count="3">
+            <span style="display:inline-flex;align-items:center;gap:5px;background:var(--primarySoft);color:var(--primary);border-radius:8px;padding:5px 9px;font:700 12.5px Pretendard;">{{ k.text }}<button onClick="{{ k.onRemove }}" style="display:flex;color:var(--primary);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+          </sc-for>
+          <input value="{{ aKrInput }}" onInput="{{ onKrInput }}" onKeyDown="{{ onKrKey }}" placeholder="예: 화살표, 상승, 증가…" style="flex:1;min-width:120px;border:none;font:500 13px Pretendard;color:var(--ink);background:none;padding:4px 2px;"/>
+        </div>
+        <div style="font:600 11.5px Pretendard;color:var(--muted);margin-top:6px;">{{ krCount }}개</div>
+
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:16px 0 8px;">영문 키워드 <span style="color:var(--muted);font-weight:600;">(Enter 또는 콤마로 추가)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1.5px solid #DCE2E9;border-radius:12px;padding:9px 11px;" style-focus-within="border-color:var(--primary);">
+          <sc-for list="{{ enChips }}" as="k" hint-placeholder-count="3">
+            <span style="display:inline-flex;align-items:center;gap:5px;background:#EEF1F4;color:var(--ink2);border-radius:8px;padding:5px 9px;font:700 12.5px Pretendard;">{{ k.text }}<button onClick="{{ k.onRemove }}" style="display:flex;color:var(--ink2);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+          </sc-for>
+          <input value="{{ aEnInput }}" onInput="{{ onEnInput }}" onKeyDown="{{ onEnKey }}" placeholder="e.g. arrow, up, increase…" style="flex:1;min-width:120px;border:none;font:500 13px Pretendard;color:var(--ink);background:none;padding:4px 2px;"/>
+        </div>
+        <div style="font:600 11.5px Pretendard;color:var(--muted);margin-top:7px;">국문+영문 합쳐 <b style="color:var(--ink2);">25개 이상</b> 권장 · 현재 {{ totalKwCount }}개</div>
+
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:24px;">
+          <button onClick="{{ closeModal }}" style="border:1.5px solid var(--line);border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;color:var(--ink2);background:#fff;">취소</button>
+          <button onClick="{{ saveAsset }}" style="border-radius:11px;padding:11px 24px;font:800 13.5px Pretendard;color:#fff;background:var(--primary);box-shadow:0 6px 16px rgba(196,62,28,.28);">저장</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ CATEGORY MODAL ============ -->
+  <sc-if value="{{ catModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;background:rgba(28,39,51,.42);display:flex;align-items:center;justify-content:center;padding:24px;animation:ppFade .16s ease;">
+      <div onClick="{{ closeModal }}" style="position:absolute;inset:0;"></div>
+      <div style="position:relative;width:400px;background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(28,39,51,.3);padding:26px 28px;animation:ppPop .2s ease;">
+        <div style="font:800 19px Pretendard;color:var(--ink);letter-spacing:-.02em;">{{ catModalTitle }}</div>
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:20px 0 8px;">key <span style="color:var(--muted);font-weight:600;">(영문 소문자/숫자, 예: sticker)</span></div>
+        <input value="{{ cKey }}" onInput="{{ onCKey }}" placeholder="icon" style="width:100%;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:500 13.5px 'JetBrains Mono',monospace;color:var(--ink);background:#fff;" style-focus="border-color:var(--primary);"/>
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:16px 0 8px;">이름 <span style="color:var(--muted);font-weight:600;">(예: 스티커)</span></div>
+        <input value="{{ cName }}" onInput="{{ onCName }}" placeholder="아이콘" style="width:100%;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:500 13.5px Pretendard;color:var(--ink);background:#fff;" style-focus="border-color:var(--primary);"/>
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:24px;">
+          <button onClick="{{ closeModal }}" style="border:1.5px solid var(--line);border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;color:var(--ink2);background:#fff;">취소</button>
+          <button onClick="{{ saveCat }}" style="border-radius:11px;padding:11px 24px;font:800 13.5px Pretendard;color:#fff;background:var(--primary);box-shadow:0 6px 16px rgba(196,62,28,.28);">저장</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ NOTICE MODAL ============ -->
+  <sc-if value="{{ noticeModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:60;background:rgba(28,39,51,.42);display:flex;align-items:center;justify-content:center;padding:24px;animation:ppFade .16s ease;">
+      <div onClick="{{ closeModal }}" style="position:absolute;inset:0;"></div>
+      <div style="position:relative;width:480px;background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(28,39,51,.3);padding:26px 28px;animation:ppPop .2s ease;">
+        <div style="font:800 19px Pretendard;color:var(--ink);letter-spacing:-.02em;">{{ noticeModalTitle }}</div>
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:20px 0 8px;">제목</div>
+        <input value="{{ nTitle }}" onInput="{{ onNTitle }}" placeholder="공지 제목" style="width:100%;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:500 13.5px Pretendard;color:var(--ink);background:#fff;" style-focus="border-color:var(--primary);"/>
+        <div style="font:700 12.5px Pretendard;color:var(--ink2);margin:16px 0 8px;">내용</div>
+        <textarea value="{{ nBody }}" onInput="{{ onNBody }}" placeholder="공지 내용을 입력하세요." rows="4" style="width:100%;border:1.5px solid #DCE2E9;border-radius:12px;padding:12px 14px;font:500 13.5px Pretendard;color:var(--ink);background:#fff;resize:none;line-height:1.55;" style-focus="border-color:var(--primary);"></textarea>
+        <button onClick="{{ toggleNActive }}" style="display:flex;align-items:center;gap:9px;margin-top:14px;">
+          <span style="{{ nActiveBoxStyle }}"><sc-if value="{{ nActive }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></sc-if></span>
+          <span style="font:600 13px Pretendard;color:var(--ink2);">활성 (사용자에게 표시)</span>
+        </button>
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:22px;">
+          <button onClick="{{ closeModal }}" style="border:1.5px solid var(--line);border-radius:11px;padding:11px 20px;font:700 13.5px Pretendard;color:var(--ink2);background:#fff;">취소</button>
+          <button onClick="{{ saveNotice }}" style="border-radius:11px;padding:11px 24px;font:800 13.5px Pretendard;color:#fff;background:var(--primary);box-shadow:0 6px 16px rgba(196,62,28,.28);">저장</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'login', loginStep: 'email', email: '', code: '', loginError: '',
+    tab: '대시보드', filterCat: 'all', search: '', rankMode: 'inserts',
+    modalType: null, modalMode: 'new',
+    aCat: '아이콘', aKr: [], aEn: [], aKrInput: '', aEnInput: '', editAssetId: null,
+    cKey: '', cName: '', editCatKey: null,
+    nTitle: '', nBody: '', nActive: true, editNoticeId: null,
+    categories: [
+      { key: 'icon', name: '아이콘', count: 102 },
+      { key: 'photo', name: '사진', count: 20 },
+      { key: 'illust', name: '일러스트', count: 97 },
+      { key: 'diagram', name: '다이어그램', count: 63 },
+      { key: 'ppt', name: '장표', count: 6 },
+    ],
+    assets: [
+      { id: 1, cat: '아이콘', label: '팀 협업', kr: ['협업', '팀', '사람'], en: ['team', 'people', 'group'], inserts: 8, fav: 5 },
+      { id: 2, cat: '아이콘', label: '보안 점검', kr: ['보안', '방패', '점검'], en: ['security', 'shield'], inserts: 5, fav: 2 },
+      { id: 3, cat: '다이어그램', label: '대시보드', kr: ['대시보드', '차트', '분석'], en: ['dashboard', 'chart', 'graph'], inserts: 12, fav: 6 },
+      { id: 4, cat: '다이어그램', label: '성장 그래프', kr: ['성장', '상승', '매출'], en: ['growth', 'up', 'increase'], inserts: 15, fav: 9 },
+      { id: 5, cat: '일러스트', label: '고객 후기', kr: ['후기', '리뷰', '별점'], en: ['review', 'rating'], inserts: 6, fav: 3 },
+      { id: 6, cat: '사진', label: '업무 공간', kr: ['사무실', '책상'], en: ['office', 'desk'], inserts: 3, fav: 1 },
+      { id: 7, cat: '아이콘', label: '전화 문의', kr: ['전화', '문의', '상담'], en: ['call', 'phone'], inserts: 4, fav: 2 },
+      { id: 8, cat: '다이어그램', label: '프로세스', kr: ['프로세스', '흐름', '단계'], en: ['process', 'flow'], inserts: 7, fav: 2 },
+      { id: 9, cat: '장표', label: '보고서 표지', kr: ['표지', '커버', '보고서'], en: ['cover', 'report'], inserts: 2, fav: 0 },
+      { id: 10, cat: '일러스트', label: '안내 직원', kr: ['직원', '안내', '캐릭터'], en: ['staff', 'character'], inserts: 9, fav: 4 },
+      { id: 11, cat: '사진', label: '회의 미팅', kr: ['회의', '미팅', '화상'], en: ['meeting', 'conference'], inserts: 1, fav: 0 },
+      { id: 12, cat: '아이콘', label: '캘린더', kr: ['캘린더', '일정', '날짜'], en: ['calendar', 'schedule'], inserts: 5, fav: 3 },
+    ],
+    notices: [
+      { id: 1, title: 'powerPlus 업데이트 안내', body: '인기순·즐겨찾기순 정렬과 알림(공지) 기능이 추가되었습니다. 작업창 상단 종 아이콘에서 공지를 확인하세요.', active: true, date: '2026-06-27' },
+      { id: 2, title: '신규 아이콘 팩 추가', body: '친환경·ESG 관련 3D 아이콘 24종이 라이브러리에 추가되었습니다.', active: false, date: '2026-06-20' },
+    ],
+    _seq: 100,
+  };
+
+  TINT(cat) {
+    const m = { '아이콘': '#FBEEE4', '사진': '#EDF0F4', '일러스트': '#FDEBEE', '다이어그램': '#F0EBFB', '장표': '#FEF4E2' };
+    return m[cat] || '#EEF1F4';
+  }
+
+  onEmail(e) { this.setState({ email: e.target.value, loginError: '' }); }
+  onEmailKey(e) { if (e.key === 'Enter') this.sendCode(); }
+  sendCode() {
+    const v = this.state.email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { this.setState({ loginError: '올바른 회사 이메일을 입력해 주세요.' }); return; }
+    this.setState({ loginStep: 'code', loginError: '' });
+  }
+  onCode(e) { this.setState({ code: e.target.value.replace(/[^0-9]/g, '').slice(0, 6) }); }
+  onCodeKey(e) { if (e.key === 'Enter') this.verify(); }
+  verify() { this.setState({ view: 'app' }); }
+  backToEmail() { this.setState({ loginStep: 'email', code: '' }); }
+  logout() { this.setState({ view: 'login', loginStep: 'email', email: '', code: '', tab: '대시보드', modalType: null }); }
+
+  setTab(t) { this.setState({ tab: t }); }
+  onFilterCat(e) { this.setState({ filterCat: e.target.value }); }
+  onSearch(e) { this.setState({ search: e.target.value }); }
+
+  openAssetNew() { const c = this.state.categories[0]; this.setState({ modalType: 'asset', modalMode: 'new', editAssetId: null, aCat: c ? c.name : '', aKr: [], aEn: [], aKrInput: '', aEnInput: '' }); }
+  openAssetEdit(a) { this.setState({ modalType: 'asset', modalMode: 'edit', editAssetId: a.id, aCat: a.cat, aKr: a.kr.slice(), aEn: a.en.slice(), aKrInput: '', aEnInput: '' }); }
+  onACat(e) { this.setState({ aCat: e.target.value }); }
+  onKrInput(e) { this.setState({ aKrInput: e.target.value }); }
+  onEnInput(e) { this.setState({ aEnInput: e.target.value }); }
+  onKrKey(e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); this.addKw('kr'); } }
+  onEnKey(e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); this.addKw('en'); } }
+  addKw(which) {
+    const raw = (which === 'kr' ? this.state.aKrInput : this.state.aEnInput).replace(/,/g, '').trim();
+    if (!raw) return;
+    if (which === 'kr') { if (!this.state.aKr.includes(raw)) this.setState({ aKr: [...this.state.aKr, raw] }); this.setState({ aKrInput: '' }); }
+    else { if (!this.state.aEn.includes(raw)) this.setState({ aEn: [...this.state.aEn, raw] }); this.setState({ aEnInput: '' }); }
+  }
+  removeKr(i) { this.setState({ aKr: this.state.aKr.filter((_, j) => j !== i) }); }
+  removeEn(i) { this.setState({ aEn: this.state.aEn.filter((_, j) => j !== i) }); }
+  saveAsset() {
+    const S = this.state;
+    if (S.modalMode === 'edit') {
+      this.setState({ assets: S.assets.map(a => a.id === S.editAssetId ? { ...a, cat: S.aCat, kr: S.aKr, en: S.aEn } : a), modalType: null });
+    } else {
+      const id = S._seq + 1;
+      const label = S.aKr[0] || S.aEn[0] || '새 자산';
+      this.setState({ assets: [{ id, cat: S.aCat, label, kr: S.aKr, en: S.aEn, inserts: 0, fav: 0 }, ...S.assets], _seq: id, modalType: null });
+    }
+  }
+  deleteAsset(id) { this.setState({ assets: this.state.assets.filter(a => a.id !== id) }); }
+
+  openCatNew() { this.setState({ modalType: 'category', modalMode: 'new', editCatKey: null, cKey: '', cName: '' }); }
+  openCatEdit(c) { this.setState({ modalType: 'category', modalMode: 'edit', editCatKey: c.key, cKey: c.key, cName: c.name }); }
+  onCKey(e) { this.setState({ cKey: e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '') }); }
+  onCName(e) { this.setState({ cName: e.target.value }); }
+  saveCat() {
+    const S = this.state;
+    if (!S.cKey.trim() || !S.cName.trim()) return;
+    if (S.modalMode === 'edit') {
+      this.setState({ categories: S.categories.map(c => c.key === S.editCatKey ? { ...c, key: S.cKey, name: S.cName } : c), modalType: null });
+    } else {
+      this.setState({ categories: [...S.categories, { key: S.cKey, name: S.cName, count: 0 }], modalType: null });
+    }
+  }
+  deleteCat(key) { this.setState({ categories: this.state.categories.filter(c => c.key !== key) }); }
+
+  openNoticeNew() { this.setState({ modalType: 'notice', modalMode: 'new', editNoticeId: null, nTitle: '', nBody: '', nActive: true }); }
+  openNoticeEdit(n) { this.setState({ modalType: 'notice', modalMode: 'edit', editNoticeId: n.id, nTitle: n.title, nBody: n.body, nActive: n.active }); }
+  onNTitle(e) { this.setState({ nTitle: e.target.value }); }
+  onNBody(e) { this.setState({ nBody: e.target.value }); }
+  toggleNActive() { this.setState({ nActive: !this.state.nActive }); }
+  saveNotice() {
+    const S = this.state;
+    if (!S.nTitle.trim()) return;
+    if (S.modalMode === 'edit') {
+      this.setState({ notices: S.notices.map(n => n.id === S.editNoticeId ? { ...n, title: S.nTitle, body: S.nBody, active: S.nActive } : n), modalType: null });
+    } else {
+      const id = S._seq + 1;
+      const d = new Date();
+      const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      this.setState({ notices: [{ id, title: S.nTitle, body: S.nBody, active: S.nActive, date }, ...S.notices], _seq: id, modalType: null });
+    }
+  }
+  deleteNotice(id) { this.setState({ notices: this.state.notices.filter(n => n.id !== id) }); }
+
+  closeModal() { this.setState({ modalType: null }); }
+
+  buildTags(a) {
+    const kr = a.kr.map(t => ({ text: t, style: 'font:600 11.5px Pretendard;color:#E0701F;background:#FBEEE4;border-radius:6px;padding:3px 7px;' }));
+    const en = a.en.map(t => ({ text: t, style: 'font:600 11.5px Pretendard;color:#8A94A3;background:#F1F4F7;border-radius:6px;padding:3px 7px;' }));
+    return kr.concat(en);
+  }
+
+  renderVals() {
+    const S = this.state;
+    const isLogin = S.view === 'login';
+    const sendBtnBase = 'width:100%;margin-top:18px;border-radius:12px;padding:14px;font:800 14px Pretendard;cursor:pointer;border:none;';
+    const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email.trim());
+    const okCode = S.code.length === 6;
+
+    let assetsView = S.assets.slice();
+    if (S.filterCat !== 'all') assetsView = assetsView.filter(a => a.cat === S.filterCat);
+    const q = S.search.trim().toLowerCase();
+    if (q) assetsView = assetsView.filter(a => (a.label + ' ' + a.kr.join(' ') + ' ' + a.en.join(' ')).toLowerCase().includes(q));
+    const assetsVM = assetsView.map(a => ({
+      id: a.id, cat: a.cat, label: a.label, tint: this.TINT(a.cat), tags: this.buildTags(a),
+      onEdit: () => this.openAssetEdit(a), onDelete: () => this.deleteAsset(a.id),
+    }));
+
+    const catsVM = S.categories.map(c => ({
+      key: c.key, name: c.name, count: c.count,
+      onEdit: () => this.openCatEdit(c), onDelete: () => this.deleteCat(c.key),
+    }));
+
+    const rankPalette = ['#F0566A', '#F5A623', '#E0701F'];
+    const rankBy = S.rankMode === 'favs' ? 'fav' : 'inserts';
+    const ranking = S.assets.slice().sort((a, b) => (b[rankBy] || 0) - (a[rankBy] || 0)).slice(0, 7).map((a, i) => ({
+      rank: i + 1, cat: a.cat, tint: this.TINT(a.cat), metric: (a[rankBy] || 0),
+      tagline: a.kr.concat(a.en).slice(0, 5).join(' · '),
+      rankStyle: 'font:800 14px Pretendard;text-align:center;border-radius:8px;padding:4px 0;' + (i < 3 ? ('color:#fff;background:' + rankPalette[i] + ';') : 'color:#7B8794;background:#F1F4F7;'),
+    }));
+    const rankTabOn = 'display:inline-flex;align-items:center;gap:5px;line-height:1;border:none;border-radius:9px;padding:9px 15px;font:700 12.5px Pretendard;background:linear-gradient(140deg,#F0894C,#C43E1C);color:#fff;box-shadow:0 3px 8px rgba(196,62,28,.3);cursor:pointer;';
+    const rankTabOff = 'display:inline-flex;align-items:center;gap:5px;line-height:1;border:none;border-radius:9px;padding:9px 15px;font:700 12.5px Pretendard;background:none;color:#7B8794;cursor:pointer;';
+    const totalInserts = S.assets.reduce((s, a) => s + a.inserts, 0);
+    const usedAssets = S.assets.filter(a => a.inserts > 0).length;
+    const totalFavs = S.assets.reduce((s, a) => s + (a.fav || 0), 0);
+    const totalAssets = S.categories.reduce((s, c) => s + c.count, 0);
+    const kpis = [
+      { label: '총 삽입 횟수', value: totalInserts.toLocaleString(), sub: '이번 달 누적', color: '#E0701F' },
+      { label: '전체 자산 수', value: totalAssets.toLocaleString(), sub: S.categories.length + '개 카테고리', color: '#555555' },
+      { label: '사용된 자산', value: usedAssets + ' / ' + S.assets.length, sub: '1회 이상 삽입', color: '#1A9C5B' },
+      { label: '총 즐겨찾기', value: totalFavs.toLocaleString(), sub: '사용자 즐겨찾기 합계', color: '#F0566A' },
+    ];
+    const distPalette = { '아이콘': '#E0701F', '사진': '#888888', '일러스트': '#F0566A', '다이어그램': '#555555', '장표': '#F5A623' };
+    const maxCount = Math.max(1, ...S.categories.map(c => c.count));
+    const catDist = S.categories.map(c => {
+      const col = distPalette[c.name] || '#94A3B8';
+      return { name: c.name, count: c.count, barStyle: 'height:100%;border-radius:5px;width:' + Math.round(c.count / maxCount * 100) + '%;background:' + col + ';' };
+    });
+
+    const noticesVM = S.notices.map(n => ({
+      title: n.title, body: n.body, date: n.date,
+      statusText: n.active ? '활성' : '비활성',
+      statusStyle: n.active ? 'font:700 11px Pretendard;color:#1A9C5B;background:#E3F6EC;border-radius:7px;padding:5px 0;text-align:center;' : 'font:700 11px Pretendard;color:#999999;background:#F1F4F7;border-radius:7px;padding:5px 0;text-align:center;',
+      onEdit: () => this.openNoticeEdit(n), onDelete: () => this.deleteNotice(n.id),
+    }));
+
+    const tabActive = 'border:none;border-radius:999px;padding:9px 18px;font:700 13.5px Pretendard;background:#E0701F;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(196,62,28,.25);';
+    const tabIdle = 'border:1px solid #E1E6EC;border-radius:999px;padding:9px 18px;font:700 13.5px Pretendard;background:#fff;color:#7B8794;cursor:pointer;';
+    const tabs = ['대시보드', '자산', '카테고리', '공지'].map(t => ({ name: t, onPick: () => this.setTab(t), style: t === S.tab ? tabActive : tabIdle }));
+
+    const krChips = S.aKr.map((t, i) => ({ text: t, onRemove: () => this.removeKr(i) }));
+    const enChips = S.aEn.map((t, i) => ({ text: t, onRemove: () => this.removeEn(i) }));
+
+    return {
+      isLogin, isApp: S.view === 'app',
+      isEmailStep: isLogin && S.loginStep === 'email', isCodeStep: isLogin && S.loginStep === 'code',
+      email: S.email, code: S.code, loginError: S.loginError,
+      onEmail: e => this.onEmail(e), onEmailKey: e => this.onEmailKey(e), sendCode: () => this.sendCode(),
+      onCode: e => this.onCode(e), onCodeKey: e => this.onCodeKey(e), verify: () => this.verify(), backToEmail: () => this.backToEmail(), logout: () => this.logout(),
+      sendBtnStyle: sendBtnBase + (okEmail ? 'background:#333333;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.22);' : 'background:#333333;color:#fff;opacity:.5;'),
+      verifyBtnStyle: sendBtnBase + (okCode ? 'background:#333333;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.22);' : 'background:#E7EBF0;color:#AEB7C4;cursor:not-allowed;'),
+
+      tabs,
+      isDashboard: S.tab === '대시보드', isAssets: S.tab === '자산', isCats: S.tab === '카테고리', isNotices: S.tab === '공지',
+      kpis, catDist,
+      categories: catsVM, assetsView: assetsVM, assetCount: assetsVM.length, hasAssets: assetsVM.length > 0, noAssets: assetsVM.length === 0,
+      filterCat: S.filterCat, search: S.search, onFilterCat: e => this.onFilterCat(e), onSearch: e => this.onSearch(e),
+      openAssetNew: () => this.openAssetNew(), openCatNew: () => this.openCatNew(), openNoticeNew: () => this.openNoticeNew(),
+      ranking, totalInserts, usedAssets, totalFavs,
+      rankMetricLabel: S.rankMode === 'favs' ? '즐겨찾기' : '삽입',
+      rankTabInsertStyle: S.rankMode === 'favs' ? rankTabOff : rankTabOn,
+      rankTabFavStyle: S.rankMode === 'favs' ? rankTabOn : rankTabOff,
+      pickInsertRank: () => this.setState({ rankMode: 'inserts' }),
+      pickFavRank: () => this.setState({ rankMode: 'favs' }),
+      notices: noticesVM,
+
+      assetModalOpen: S.modalType === 'asset', catModalOpen: S.modalType === 'category', noticeModalOpen: S.modalType === 'notice',
+      assetModalTitle: S.modalMode === 'edit' ? '자산 수정' : '새 자산',
+      catModalTitle: S.modalMode === 'edit' ? '카테고리 수정' : '새 카테고리',
+      noticeModalTitle: S.modalMode === 'edit' ? '공지 수정' : '새 공지',
+      closeModal: () => this.closeModal(),
+      aCat: S.aCat, onACat: e => this.onACat(e), krChips, enChips, aKrInput: S.aKrInput, aEnInput: S.aEnInput,
+      onKrInput: e => this.onKrInput(e), onEnInput: e => this.onEnInput(e), onKrKey: e => this.onKrKey(e), onEnKey: e => this.onEnKey(e),
+      krCount: S.aKr.length, totalKwCount: S.aKr.length + S.aEn.length, saveAsset: () => this.saveAsset(),
+      cKey: S.cKey, cName: S.cName, onCKey: e => this.onCKey(e), onCName: e => this.onCName(e), saveCat: () => this.saveCat(),
+      nTitle: S.nTitle, nBody: S.nBody, nActive: S.nActive, onNTitle: e => this.onNTitle(e), onNBody: e => this.onNBody(e), toggleNActive: () => this.toggleNActive(), saveNotice: () => this.saveNotice(),
+      nActiveBoxStyle: 'width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;' + (S.nActive ? 'background:#E0701F;' : 'background:#fff;border:1.5px solid #CCD4DD;'),
+    };
+  }
+}
+</script>
+</body>
+</html>

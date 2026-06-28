@@ -106,6 +106,7 @@ export default function App() {
   // 공지(알림)
   const [announcements, setAnnouncements] = React.useState<Announcement[]>([]);
   const [annSeen, setAnnSeenState] = React.useState<number>(() => getAnnSeen());
+  const [annExpanded, setAnnExpanded] = React.useState<number | null>(null); // 알림 아코디언
   const unreadAnn = announcements.filter((a) => a.id > annSeen).length;
 
   // 콘텐츠 요청 시트
@@ -343,18 +344,27 @@ export default function App() {
             {announcements.length === 0 ? (
               <div className="notif__empty">새 알림이 없습니다.</div>
             ) : (
-              announcements.map((a) => (
-                <div key={a.id} className="notif__item">
-                  <span className="notif__dot" aria-hidden>
-                    <span />
-                  </span>
-                  <span className="notif__body">
-                    <span className="notif__item-title">{a.title}</span>
-                    <span className="notif__item-meta">{a.created_at?.slice(0, 10)}</span>
-                    {a.body && <span className="notif__item-text">{a.body}</span>}
-                  </span>
-                </div>
-              ))
+              announcements.slice(0, 2).map((a) => {
+                const open = annExpanded === a.id;
+                return (
+                  <div key={a.id} className={"notif__item" + (open ? " notif__item--open" : "")}>
+                    <button
+                      className="notif__row"
+                      onClick={() => setAnnExpanded(open ? null : a.id)}
+                      aria-expanded={open}
+                    >
+                      <span className="notif__body">
+                        <span className="notif__item-title">{a.title}</span>
+                        <span className="notif__item-meta">{a.created_at?.slice(0, 10)}</span>
+                      </span>
+                      <span className="notif__chev" aria-hidden>
+                        {open ? "▴" : "▾"}
+                      </span>
+                    </button>
+                    {open && a.body && <div className="notif__item-text">{a.body}</div>}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -385,8 +395,10 @@ export default function App() {
           <div className="profile__divider" />
           <div className="profile__section">
             <button className="profile__logout" onClick={handleLogout}>
-              {Ic.logout}
               로그아웃
+              <span className="profile__logout-ic" aria-hidden>
+                {Ic.logout}
+              </span>
             </button>
           </div>
         </div>

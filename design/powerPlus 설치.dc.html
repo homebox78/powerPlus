@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;}
+button{font-family:inherit;border:none;background:none;cursor:pointer;padding:0;}
+input{font-family:inherit;outline:none;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:#CBD3DC;border-radius:4px;}
+@keyframes ppBar{from{transform:translateX(-100%);}to{transform:translateX(100%);}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#C8CFD8;display:flex;align-items:center;justify-content:center;padding:32px;font-family:Pretendard,sans-serif;--ink:#1C2733;--ink2:#566070;--muted:#98A2B0;--line:#E6EAEF;--orange:#E8703A;--orangeD:#C43E1C;--primary:#2B8AF5;--primarySoft:#E9F2FE;">
+
+  <!-- installer window -->
+  <div style="width:720px;height:512px;background:#fff;border-radius:13px;box-shadow:0 30px 80px rgba(28,39,51,.4);overflow:hidden;display:flex;flex-direction:column;">
+
+    <!-- title bar -->
+    <div style="display:flex;align-items:center;gap:9px;height:40px;padding:0 14px;background:#F4F6F9;border-bottom:1px solid #E3E8ED;flex:none;">
+      <div style="display:flex;gap:7px;">
+        <span style="width:12px;height:12px;border-radius:50%;background:#FF5F57;"></span>
+        <span style="width:12px;height:12px;border-radius:50%;background:#FEBC2E;"></span>
+        <span style="width:12px;height:12px;border-radius:50%;background:#28C840;"></span>
+      </div>
+      <span style="margin-left:6px;font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">powerPlus 설치 마법사</span>
+      <span style="margin-left:auto;font:500 11px 'JetBrains Mono',monospace;color:var(--muted);">v1.0.3</span>
+    </div>
+
+    <div style="flex:1;display:flex;min-height:0;">
+
+      <!-- sidebar -->
+      <div style="width:230px;flex:none;background:linear-gradient(165deg,#E8703A,#C43E1C);padding:26px 22px;display:flex;flex-direction:column;color:#fff;">
+        <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.16);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.25);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".55"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+        </div>
+        <div style="font:800 21px Pretendard;margin-top:16px;letter-spacing:-.02em;">powerPlus</div>
+        <div style="font:600 12px Pretendard;color:rgba(255,255,255,.82);margin-top:4px;line-height:1.5;">PowerPoint 자산 라이브러리 애드인</div>
+
+        <div style="display:flex;flex-direction:column;gap:3px;margin-top:30px;">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px;padding:8px 0;">
+              <span style="{{ s.dotStyle }}">
+                <sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C43E1C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></sc-if>
+                <sc-if value="{{ s.showNum }}" hint-placeholder-val="{{ true }}"><span style="{{ s.numStyle }}">{{ s.num }}</span></sc-if>
+              </span>
+              <span style="{{ s.labelStyle }}">{{ s.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:auto;font:500 10.5px Pretendard;color:rgba(255,255,255,.6);line-height:1.5;">© 2026 solideos<br>All rights reserved.</div>
+      </div>
+
+      <!-- content -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+        <div style="flex:1;padding:34px 36px;overflow:auto;">
+
+          <!-- STEP 0 welcome -->
+          <sc-if value="{{ isWelcome }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;">
+              <div style="font:800 24px Pretendard;color:var(--ink);letter-spacing:-.03em;">powerPlus 설치를 시작합니다</div>
+              <div style="font:500 13.5px Pretendard;color:var(--ink2);line-height:1.7;margin-top:14px;">이 마법사는 PowerPoint용 <b style="color:var(--ink);">powerPlus 애드인</b>을 설치합니다.<br>아이콘·사진·일러스트·다이어그램·장표를 작업창에서 바로 검색해 슬라이드에 삽입할 수 있습니다.</div>
+              <div style="margin-top:22px;background:#F7F9FB;border:1px solid var(--line);border-radius:13px;padding:18px 20px;">
+                <div style="font:700 12px Pretendard;color:var(--muted);margin-bottom:12px;">설치 전 확인</div>
+                <sc-for list="{{ reqs }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px;padding:5px 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A9C5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>
+                    <span style="font:600 12.5px Pretendard;color:var(--ink2);">{{ r.text }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 1 license -->
+          <sc-if value="{{ isLicense }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;height:100%;">
+              <div style="font:800 20px Pretendard;color:var(--ink);letter-spacing:-.02em;">라이선스 동의</div>
+              <div style="font:500 12.5px Pretendard;color:var(--muted);margin-top:6px;">계속하려면 아래 약관에 동의해야 합니다.</div>
+              <div style="flex:1;margin-top:16px;border:1px solid var(--line);border-radius:12px;background:#FAFBFC;padding:16px 18px;overflow:auto;font:500 12px Pretendard;color:var(--ink2);line-height:1.75;min-height:0;">
+                <b style="color:var(--ink);">최종 사용자 사용권 계약 (EULA)</b><br><br>
+                본 소프트웨어 powerPlus(이하 “소프트웨어”)는 solideos가 제공하며, 사내 PowerPoint 자산 관리 목적에 한해 사용이 허가됩니다.<br><br>
+                1. 사용자는 회사 계정으로 인증된 범위 내에서 소프트웨어를 사용합니다.<br>
+                2. 소프트웨어에 포함된 자산의 저작권은 각 제작자 및 회사에 있으며, 외부 무단 배포를 금합니다.<br>
+                3. 사용 과정에서 수집되는 삽입·즐겨찾기 통계는 서비스 개선 목적에 한해 활용됩니다.<br>
+                4. 본 소프트웨어는 “있는 그대로” 제공되며, 회사는 관련 법령이 허용하는 범위 내에서 책임을 제한합니다.<br><br>
+                자세한 내용은 사내 포털의 소프트웨어 사용 정책을 참고하세요.
+              </div>
+              <button onClick="{{ toggleAgree }}" style="display:flex;align-items:center;gap:10px;margin-top:16px;flex:none;">
+                <span style="{{ agreeBoxStyle }}"><sc-if value="{{ agreed }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></sc-if></span>
+                <span style="font:600 13px Pretendard;color:var(--ink);">위 라이선스 계약에 동의합니다</span>
+              </button>
+            </div>
+          </sc-if>
+
+          <!-- STEP 2 options -->
+          <sc-if value="{{ isOptions }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;">
+              <div style="font:800 20px Pretendard;color:var(--ink);letter-spacing:-.02em;">설치 옵션</div>
+              <div style="font:500 12.5px Pretendard;color:var(--muted);margin-top:6px;">설치 경로와 추가 옵션을 선택하세요.</div>
+
+              <div style="font:700 12px Pretendard;color:var(--ink2);margin:20px 0 8px;">설치 위치</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;background:#FAFBFC;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#98A2B0" stroke-width="1.7"><path d="M4 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2z" stroke-linejoin="round"/></svg>
+                  <span style="flex:1;font:500 12.5px 'JetBrains Mono',monospace;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ installPath }}</span>
+                </div>
+                <button style="border:1.5px solid var(--line);border-radius:11px;padding:0 16px;font:700 12.5px Pretendard;color:var(--ink2);background:#fff;">찾아보기</button>
+              </div>
+              <div style="font:500 11.5px Pretendard;color:var(--muted);margin-top:7px;">필요 공간 48.2 MB · 사용 가능 124 GB</div>
+
+              <div style="font:700 12px Pretendard;color:var(--ink2);margin:22px 0 10px;">추가 옵션</div>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <sc-for list="{{ optionList }}" as="o" hint-placeholder-count="3">
+                  <button onClick="{{ o.onToggle }}" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;text-align:left;" style-hover="background:#F4F6F9;">
+                    <span style="{{ o.boxStyle }}"><sc-if value="{{ o.on }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></sc-if></span>
+                    <span style="flex:1;min-width:0;"><span style="display:block;font:700 13px Pretendard;color:var(--ink);">{{ o.title }}</span><span style="display:block;font:500 11.5px Pretendard;color:var(--muted);margin-top:1px;">{{ o.desc }}</span></span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 3 installing -->
+          <sc-if value="{{ isInstalling }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;justify-content:center;height:100%;">
+              <div style="font:800 20px Pretendard;color:var(--ink);letter-spacing:-.02em;">설치하는 중…</div>
+              <div style="font:500 12.5px Pretendard;color:var(--ink2);margin-top:8px;">{{ installTask }}</div>
+
+              <div style="margin-top:22px;height:10px;border-radius:6px;background:#EAEEF2;overflow:hidden;position:relative;">
+                <div style="{{ progressBarStyle }}"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+                <span style="font:600 11.5px 'JetBrains Mono',monospace;color:var(--muted);">{{ installFile }}</span>
+                <span style="font:800 13px Pretendard;color:var(--orangeD);">{{ progressPct }}%</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- STEP 4 done -->
+          <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;">
+              <div style="width:74px;height:74px;border-radius:50%;background:#E3F6EC;display:flex;align-items:center;justify-content:center;">
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1A9C5B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>
+              </div>
+              <div style="font:800 22px Pretendard;color:var(--ink);margin-top:20px;letter-spacing:-.02em;white-space:nowrap;">설치가 완료되었습니다</div>
+              <div style="font:500 13px Pretendard;color:var(--ink2);margin-top:9px;line-height:1.6;">PowerPoint를 실행하고 <b style="color:var(--ink);">[삽입 → powerPlus]</b> 에서<br>자산 라이브러리를 바로 사용할 수 있습니다.</div>
+              <button onClick="{{ toggleLaunch }}" style="display:flex;align-items:center;gap:9px;margin-top:20px;">
+                <span style="{{ launchBoxStyle }}"><sc-if value="{{ launch }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></sc-if></span>
+                <span style="font:600 12.5px Pretendard;color:var(--ink2);white-space:nowrap;">지금 PowerPoint 실행하기</span>
+              </button>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- footer nav -->
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid #EEF1F4;background:#FAFBFC;">
+          <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ back }}" style="flex:none;white-space:nowrap;border:1.5px solid var(--line);border-radius:10px;padding:10px 20px;font:700 13px Pretendard;color:var(--ink2);background:#fff;">이전</button>
+          </sc-if>
+          <span style="margin-left:auto;"></span>
+          <button onClick="{{ cancel }}" style="flex:none;white-space:nowrap;border-radius:10px;padding:10px 18px;font:700 13px Pretendard;color:var(--muted);background:none;">{{ cancelLabel }}</button>
+          <button onClick="{{ next }}" style="{{ nextBtnStyle }}">{{ nextLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    step: 0, agreed: false,
+    options: [
+      { id: 'desktop', title: 'PowerPoint 리본에 바로가기 추가', desc: '[삽입] 탭에 powerPlus 버튼을 고정합니다', on: true },
+      { id: 'startup', title: '시작 시 자동 로그인', desc: '회사 계정으로 자동 연결합니다', on: true },
+      { id: 'sample', title: '샘플 자산 팩 포함', desc: '아이콘·다이어그램 기본 100종을 함께 설치', on: false },
+    ],
+    progress: 0, launch: true, installPath: 'C:\\Program Files\\solideos\\powerPlus',
+  };
+
+  STEP_LABELS = ['시작', '라이선스', '옵션', '설치', '완료'];
+
+  next() {
+    const s = this.state.step;
+    if (s === 1 && !this.state.agreed) return;
+    if (s === 4) { this.cancel(); return; }
+    if (s === 2) { this.setState({ step: 3, progress: 0 }, () => this.runInstall()); return; }
+    if (s === 3) return;
+    this.setState({ step: s + 1 });
+  }
+  back() { if (this.state.step > 0 && this.state.step !== 3) this.setState({ step: this.state.step - 1 }); }
+  cancel() { this.setState({ step: 0, agreed: false, progress: 0 }); }
+  toggleAgree() { this.setState({ agreed: !this.state.agreed }); }
+  toggleLaunch() { this.setState({ launch: !this.state.launch }); }
+  toggleOption(id) { this.setState({ options: this.state.options.map(o => o.id === id ? { ...o, on: !o.on } : o) }); }
+
+  runInstall() {
+    if (this._iv) clearInterval(this._iv);
+    this._iv = setInterval(() => {
+      this.setState(st => {
+        const p = st.progress + Math.random() * 9 + 3;
+        if (p >= 100) { clearInterval(this._iv); this._iv = null; setTimeout(() => this.setState({ step: 4 }), 450); return { progress: 100 }; }
+        return { progress: p };
+      });
+    }, 230);
+  }
+  componentWillUnmount() { if (this._iv) clearInterval(this._iv); }
+
+  renderVals() {
+    const S = this.state;
+    const step = S.step;
+    const pct = Math.min(100, Math.round(S.progress));
+
+    const steps = this.STEP_LABELS.map((label, i) => {
+      const done = i < step, current = i === step;
+      return {
+        label, num: i + 1, done, showNum: !done,
+        dotStyle: 'width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;' + (done ? 'background:rgba(255,255,255,.95);' : current ? 'background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.9);' : 'background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);'),
+        numStyle: 'font:800 11px Pretendard;color:' + (current ? '#fff' : 'rgba(255,255,255,.6)') + ';',
+        labelStyle: 'font:' + (current ? '800' : '600') + ' 13px Pretendard;color:' + (current || done ? '#fff' : 'rgba(255,255,255,.62)') + ';',
+      };
+    });
+
+    const reqs = [
+      { text: 'Microsoft PowerPoint 2019 이상 또는 Microsoft 365' },
+      { text: 'Windows 10/11 또는 macOS 12 이상' },
+      { text: '인터넷 연결 및 회사 계정' },
+    ];
+
+    const optionList = S.options.map(o => ({
+      title: o.title, desc: o.desc, on: o.on, onToggle: () => this.toggleOption(o.id),
+      boxStyle: 'width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;' + (o.on ? 'background:#E8703A;' : 'background:#fff;border:1.5px solid #CCD4DD;'),
+    }));
+
+    const installTasks = ['파일 압축 해제 중', '레지스트리 등록 중', 'PowerPoint 추가 기능 연결 중', '자산 인덱스 생성 중'];
+    const installFiles = ['core.dll', 'manifest.xml', 'assets.idx', 'ribbon.json'];
+    const ti = Math.min(installTasks.length - 1, Math.floor(pct / 25));
+
+    const nextBase = 'flex:none;white-space:nowrap;border-radius:10px;padding:10px 24px;font:800 13px Pretendard;color:#fff;';
+    const canNext = !(step === 1 && !S.agreed);
+    const nextActive = nextBase + 'background:#333333;box-shadow:0 5px 14px rgba(0,0,0,.22);cursor:pointer;';
+    const nextDisabled = nextBase + 'background:#E2E7ED;color:#AEB7C4;cursor:not-allowed;';
+
+    return {
+      steps, reqs, optionList,
+      isWelcome: step === 0, isLicense: step === 1, isOptions: step === 2, isInstalling: step === 3, isDone: step === 4,
+      agreed: S.agreed, toggleAgree: () => this.toggleAgree(),
+      agreeBoxStyle: 'width:21px;height:21px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;' + (S.agreed ? 'background:#E8703A;' : 'background:#fff;border:1.5px solid #CCD4DD;'),
+      installPath: S.installPath,
+      installTask: installTasks[ti], installFile: installFiles[ti], progressPct: pct,
+      progressBarStyle: 'height:100%;border-radius:6px;background:linear-gradient(90deg,#E8703A,#C43E1C);width:' + pct + '%;transition:width .22s ease;',
+      launch: S.launch, toggleLaunch: () => this.toggleLaunch(),
+      launchBoxStyle: 'width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none;' + (S.launch ? 'background:#E8703A;' : 'background:#fff;border:1.5px solid #CCD4DD;'),
+      showBack: step > 0 && step !== 3 && step !== 4,
+      back: () => this.back(), next: () => this.next(), cancel: () => this.cancel(),
+      cancelLabel: step === 4 ? '닫기' : '취소',
+      nextLabel: step === 0 ? '다음' : step === 1 ? '동의 및 다음' : step === 2 ? '설치' : step === 4 ? '완료' : '설치 중…',
+      nextBtnStyle: (step === 3 ? nextDisabled : canNext ? nextActive : nextDisabled),
+    };
+  }
+}
+</script>
+</body>
+</html>
