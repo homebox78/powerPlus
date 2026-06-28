@@ -28,6 +28,28 @@ public class MainForm : Form
 
     [DllImport("user32.dll")] static extern bool ReleaseCapture();
     [DllImport("user32.dll")] static extern IntPtr SendMessage(IntPtr h, int msg, int wp, int lp);
+    [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int val, int size);
+    [DllImport("gdi32.dll")] static extern IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int w, int h);
+
+    const int CS_DROPSHADOW = 0x20000;
+    protected override CreateParams CreateParams
+    {
+        get { var cp = base.CreateParams; cp.ClassStyle |= CS_DROPSHADOW; return cp; } // 연한 시스템 그림자
+    }
+
+    void ApplyRoundedCorners()
+    {
+        int r = (int)Math.Round(8 * (DeviceDpi / 96.0)); // 8px (DPI 보정)
+        if (Environment.OSVersion.Version.Build >= 22000)
+        {
+            int pref = 2; // DWMWCP_ROUND (Win11, 부드러운 AA 라운드 + 그림자)
+            DwmSetWindowAttribute(Handle, 33, ref pref, sizeof(int));
+        }
+        else
+        {
+            Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, Width + 1, Height + 1, r * 2, r * 2)); // Win10 폴백
+        }
+    }
 
     public MainForm()
     {
@@ -41,7 +63,7 @@ public class MainForm : Form
 
         _web.Dock = DockStyle.Fill;
         Controls.Add(_web);
-        Load += async (_, __) => await InitAsync();
+        Load += async (_, __) => { ApplyRoundedCorners(); await InitAsync(); };
     }
 
     async Task InitAsync()
