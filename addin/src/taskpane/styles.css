@@ -822,7 +822,7 @@ body {
   position: absolute;
   left: 13px;
   bottom: 74px;
-  z-index: 24;
+  z-index: 42; /* menu-scrim(40) 위 — 안 그러면 컴포저와 겹치는 마지막 항목(장표)이 scrim에 가려 클릭 안 됨 */
   width: 172px;
   background: #fff;
   border: 1px solid var(--line);
