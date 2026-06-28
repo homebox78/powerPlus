@@ -8,13 +8,13 @@
 
   <!-- 운영 배포용 manifest — 애드인 화면을 hom2box.com/powerPlus/app 에 호스팅 -->
   <Id>629c04eb-661e-43a4-abc4-21a298eb92db</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.1.0</Version>
   <ProviderName>powerPlus</ProviderName>
   <DefaultLocale>ko-KR</DefaultLocale>
   <DisplayName DefaultValue="powerPlus 자산 라이브러리" />
   <Description DefaultValue="사내 아이콘/이미지/템플릿을 PowerPoint 슬라이드에 바로 삽입하는 자산 라이브러리" />
-  <IconUrl DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-80.png" />
+  <IconUrl DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-32.png?v=2" />
+  <HighResolutionIconUrl DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-80.png?v=2" />
   <SupportUrl DefaultValue="https://hom2box.com/powerPlus/" />
 
   <AppDomains>
@@ -75,9 +75,9 @@
 
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-16.png" />
-        <bt:Image id="Icon.32x32" DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-32.png" />
-        <bt:Image id="Icon.80x80" DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-80.png" />
+        <bt:Image id="Icon.16x16" DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-16.png?v=2" />
+        <bt:Image id="Icon.32x32" DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-32.png?v=2" />
+        <bt:Image id="Icon.80x80" DefaultValue="https://hom2box.com/powerPlus/app/assets/icon-80.png?v=2" />
       </bt:Images>
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://hom2box.com/powerPlus/app/commands.html" />
