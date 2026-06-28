@@ -13,6 +13,7 @@ export async function fetchAnnouncements(): Promise<Announcement[]> {
   const token = getToken();
   try {
     const res = await fetch(`${API_BASE}/announcements`, {
+      cache: "no-store",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     if (!res.ok) return [];

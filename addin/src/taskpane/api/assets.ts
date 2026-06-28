@@ -42,6 +42,7 @@ export async function fetchAssets(
   try {
     const res = await fetch(`${API_BASE}/assets?${params.toString()}`, {
       signal,
+      cache: "no-store",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     if (res.status === 401) throw new AuthRequiredError("로그인이 필요합니다.");

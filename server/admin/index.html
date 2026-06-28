@@ -383,7 +383,7 @@
       const headers = { ...(opts.headers || {}) };
       if (token()) headers.Authorization = "Bearer " + token();
       if (opts.body && !(opts.body instanceof FormData)) headers["Content-Type"] = "application/json";
-      const res = await fetch(API + path, { ...opts, headers });
+      const res = await fetch(API + path, { ...opts, headers, cache: "no-store" }); // 항상 최신(카테고리 등 stale 방지)
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || ("오류 " + res.status));
       return body;

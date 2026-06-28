@@ -11,6 +11,7 @@ interface CategoryRow {
 export async function fetchCategories(): Promise<Category[]> {
   const token = getToken();
   const res = await fetch(`${API_BASE}/categories`, {
+    cache: "no-store",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!res.ok) throw new Error("카테고리 로드 실패");
