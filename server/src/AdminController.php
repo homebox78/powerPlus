@@ -61,6 +61,10 @@ final class AdminController
                 return;
             }
             $data['slide_path'] = $slide['path'];
+            // 세분화: 유형(package/single) + 페이지 종류(single일 때만)
+            $kind = ($post['slide_kind'] ?? '') === 'single' ? 'single' : 'package';
+            $data['slide_kind'] = $kind;
+            $data['slide_page'] = $kind === 'single' ? (($post['slide_page'] ?? '') ?: 'etc') : null;
             if ($this->hasUpload($files['image'] ?? null)) {
                 $img = $this->saveImage($files['image'], $category, $id);
                 if (isset($img['error'])) {
@@ -99,6 +103,11 @@ final class AdminController
                 return;
             }
             $patch['category'] = $category;
+        }
+        if (isset($post['slide_kind'])) {
+            $kind = $post['slide_kind'] === 'single' ? 'single' : 'package';
+            $patch['slide_kind'] = $kind;
+            $patch['slide_page'] = $kind === 'single' ? (($post['slide_page'] ?? '') ?: 'etc') : null;
         }
         if (isset($post['tags_ko']) || isset($post['tags_en'])) {
             $ko = $this->parseTags($post['tags_ko'] ?? '');

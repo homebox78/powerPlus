@@ -73,6 +73,17 @@ foreach (['tags_ko', 'tags_en'] as $c) {
     }
 }
 
+// 장표(ppt) 세분화: 유형(패키지/단일) + 페이지 종류(표지/목차/간지/콘텐츠/인사말/qa/기타)
+foreach (['slide_kind' => 'VARCHAR(16)', 'slide_page' => 'VARCHAR(32)'] as $col => $type) {
+    $has = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='assets' AND COLUMN_NAME='$col'"
+    )->fetchColumn();
+    if ($has === 0) {
+        $pdo->exec("ALTER TABLE assets ADD COLUMN $col $type NULL AFTER slide_path");
+    }
+}
+
 // 공지(알람) 테이블 — 관리자가 등록, 사용자 애드인 우측상단 알람에 표시
 $pdo->exec("CREATE TABLE IF NOT EXISTS announcements (
   id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,

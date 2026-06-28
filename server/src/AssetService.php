@@ -7,7 +7,7 @@ require_once __DIR__ . '/Config.php';
 /** 자산 조회/검색/CRUD. SQL은 모두 prepared statement. */
 final class AssetService
 {
-    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path';
+    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path, slide_kind, slide_page';
 
     /** 자산별 조회수(삽입 횟수) 및 즐겨찾기 수 서브쿼리 — 모든 응답에 노출(인기/즐겨찾기 순위용) */
     private const COUNT_COLS =
@@ -109,8 +109,8 @@ final class AssetService
         $ko = $d['tags_ko'] ?? [];
         $en = $d['tags_en'] ?? [];
         Database::pdo()->prepare(
-            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path)
-             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :thumb_path, :slide_path)'
+            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path, slide_kind, slide_page)
+             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :thumb_path, :slide_path, :slide_kind, :slide_page)'
         )->execute([
             ':id'         => $d['id'],
             ':name'       => $d['name'] ?? null,
@@ -122,6 +122,8 @@ final class AssetService
             ':image_path' => $d['image_path'] ?? null,
             ':thumb_path' => $d['thumb_path'] ?? null,
             ':slide_path' => $d['slide_path'] ?? null,
+            ':slide_kind' => $d['slide_kind'] ?? null,
+            ':slide_page' => $d['slide_page'] ?? null,
         ]);
         return $this->find($d['id']) ?? [];
     }
@@ -143,9 +145,11 @@ final class AssetService
             ? $d['slide_path'] : ($cur['slide_path'] ?? null);
         $thumb_path = array_key_exists('thumb_path', $d) && $d['thumb_path'] !== null
             ? $d['thumb_path'] : ($cur['thumb_path'] ?? null);
+        $slide_kind = array_key_exists('slide_kind', $d) ? $d['slide_kind'] : ($cur['slide_kind'] ?? null);
+        $slide_page = array_key_exists('slide_page', $d) ? $d['slide_page'] : ($cur['slide_page'] ?? null);
 
         Database::pdo()->prepare(
-            'UPDATE assets SET name = :name, category = :category, tags = :tags, tags_ko = :tags_ko, tags_en = :tags_en, image_path = :image_path, thumb_path = :thumb_path, slide_path = :slide_path WHERE id = :id'
+            'UPDATE assets SET name = :name, category = :category, tags = :tags, tags_ko = :tags_ko, tags_en = :tags_en, image_path = :image_path, thumb_path = :thumb_path, slide_path = :slide_path, slide_kind = :slide_kind, slide_page = :slide_page WHERE id = :id'
         )->execute([
             ':id'         => $id,
             ':name'       => $name,
@@ -156,6 +160,8 @@ final class AssetService
             ':image_path' => $image_path,
             ':thumb_path' => $thumb_path,
             ':slide_path' => $slide_path,
+            ':slide_kind' => $slide_kind,
+            ':slide_page' => $slide_page,
         ]);
         return true;
     }

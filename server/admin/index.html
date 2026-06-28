@@ -300,6 +300,23 @@
         </div>
         <input id="f-slide" type="file" accept=".ppt,.pptx" class="hidden" />
       </div>
+      <div class="field hidden" id="slidekind-field"><label>장표 유형</label>
+        <select id="f-slide-kind">
+          <option value="package">패키지 (발표장표 전체 · 표지·목차·간지·콘텐츠·인사말·Q&amp;A)</option>
+          <option value="single">단일 페이지</option>
+        </select>
+      </div>
+      <div class="field hidden" id="slidepage-field"><label>페이지 종류</label>
+        <select id="f-slide-page">
+          <option value="cover">표지</option>
+          <option value="toc">목차</option>
+          <option value="divider">간지</option>
+          <option value="content">콘텐츠</option>
+          <option value="greeting">인사말</option>
+          <option value="qa">Q&amp;A</option>
+          <option value="etc">기타</option>
+        </select>
+      </div>
       <div class="field"><label id="image-label">이미지 (PNG·JPG)</label>
         <div class="drop" id="drop">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
@@ -611,10 +628,13 @@
         // 국문 태그=파랑, 영문 태그=회색 (시안)
         const ko = (a.tags_ko || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
         const en = (a.tags_en || []).map((t) => `<span class="tag tag--en">${esc(t)}</span>`).join("");
+        const sub = a.category === "ppt" && a.slide_kind
+          ? (a.slide_kind === "package" ? " · 패키지" : " · 단일·" + (PAGE_LABELS[a.slide_page] || "기타"))
+          : "";
         return `<div class="card">
           <div class="card__img" style="background:${TINT_BG[a.category] || '#f4f6f9'}">${thumb}</div>
           <div class="card__body">
-            <div class="card__cat">${esc(catLabel(a.category))}</div>
+            <div class="card__cat">${esc(catLabel(a.category))}${esc(sub)}</div>
             <div class="card__tags">${ko}${en}</div>
             <div class="card__actions">
               <button class="btn btn--ghost" data-e="${esc(a.id)}">수정</button>
@@ -653,13 +673,18 @@
     $("slide-drop").ondragleave = () => $("slide-drop").classList.remove("drop--over");
     $("slide-drop").ondrop = (e) => { e.preventDefault(); $("slide-drop").classList.remove("drop--over"); setSlide(e.dataTransfer.files[0]); };
     function setSlide(f) { if (!f) return; pickedSlide = f; $("slide-name").textContent = "📎 " + f.name; }
-    // 카테고리가 '장표(ppt)'면 장표 파일 입력 표시 + 이미지는 썸네일(선택)
+    // 장표 페이지 종류 라벨
+    const PAGE_LABELS = { cover:"표지", toc:"목차", divider:"간지", content:"콘텐츠", greeting:"인사말", qa:"Q&A", etc:"기타" };
+    // 카테고리가 '장표(ppt)'면 장표 파일/유형 입력 표시 + 이미지는 썸네일(선택)
     function applyCatUI() {
       const isPpt = $("f-category").value === "ppt";
       $("slide-field").classList.toggle("hidden", !isPpt);
+      $("slidekind-field").classList.toggle("hidden", !isPpt);
+      $("slidepage-field").classList.toggle("hidden", !(isPpt && $("f-slide-kind").value === "single"));
       $("image-label").textContent = isPpt ? "썸네일 이미지 (PNG·JPG · 선택)" : "이미지 (PNG·JPG)";
     }
     $("f-category").onchange = applyCatUI;
+    $("f-slide-kind").onchange = applyCatUI;
     // 칩 입력 박스 설정: 국문/영문 공통 로직
     function setupTagbox(boxId, inputId, countId, getArr) {
       const box = $(boxId), input = $(inputId);
@@ -699,8 +724,10 @@
       if (a && a.image_url) { pv.innerHTML = `<img src="${esc(a.image_url)}">`; pv.style.display = "block"; }
       else if (a && a.svg) { pv.innerHTML = a.svg; pv.style.display = "block"; }
       else { pv.innerHTML = ""; pv.style.display = "none"; }
-      // 장표: 기존 파일명 표시(있으면)
+      // 장표: 기존 파일명 + 유형/페이지 종류
       $("slide-name").textContent = (a && a.slide_path) ? "📎 " + a.slide_path.split("/").pop() : "";
+      $("f-slide-kind").value = (a && a.slide_kind) ? a.slide_kind : "package";
+      $("f-slide-page").value = (a && a.slide_page) ? a.slide_page : "cover";
       applyCatUI();
       $("f-tag-ko").value = ""; $("f-tag-en").value = "";
       renderChips("tagbox-ko", "f-tag-ko", "ko-count", () => tagsKo);
@@ -723,6 +750,10 @@
       fd.append("tags_en", JSON.stringify(tagsEn));
       if (pickedFile) fd.append("image", pickedFile);
       if (pickedSlide) fd.append("slide", pickedSlide);
+      if (isPpt) {
+        fd.append("slide_kind", $("f-slide-kind").value);
+        if ($("f-slide-kind").value === "single") fd.append("slide_page", $("f-slide-page").value);
+      }
       try {
         const path = editingId ? "/admin/assets/" + encodeURIComponent(editingId) : "/admin/assets";
         await api(path, { method: "POST", body: fd });
