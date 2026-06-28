@@ -230,7 +230,9 @@ export default function App() {
   function openNotif() {
     setNotifOpen((v) => !v);
     setProfileOpen(false);
-    // 알림 열면 모두 읽음 처리
+  }
+  // "모두 읽음" — 미확인 표시(코랄 점/벨 배지) 해제
+  function markAllNotifRead() {
     const maxId = announcements.reduce((m, a) => Math.max(m, a.id), 0);
     if (maxId > annSeen) {
       setAnnSeen(maxId);
@@ -339,6 +341,9 @@ export default function App() {
         <div className="dropdown notif" role="dialog" aria-label="알림">
           <div className="notif__head">
             <span className="notif__title">알림</span>
+            {unreadAnn > 0 && (
+              <button className="notif__readall" onClick={markAllNotifRead}>모두 읽음</button>
+            )}
           </div>
           <div className="notif__list">
             {announcements.length === 0 ? (
@@ -346,6 +351,7 @@ export default function App() {
             ) : (
               announcements.slice(0, 2).map((a) => {
                 const open = annExpanded === a.id;
+                const unread = a.id > annSeen;
                 return (
                   <div key={a.id} className={"notif__item" + (open ? " notif__item--open" : "")}>
                     <button
@@ -353,13 +359,15 @@ export default function App() {
                       onClick={() => setAnnExpanded(open ? null : a.id)}
                       aria-expanded={open}
                     >
-                      <span className="notif__body">
-                        <span className="notif__item-title">{a.title}</span>
-                        <span className="notif__item-meta">{a.created_at?.slice(0, 10)}</span>
-                      </span>
-                      <span className="notif__chev" aria-hidden>
-                        {open ? "▴" : "▾"}
-                      </span>
+                      <span className="notif__item-title">{a.title}</span>
+                      {unread && <span className="notif__dot" aria-hidden />}
+                      <svg
+                        className={"notif__chev" + (open ? " notif__chev--open" : "")}
+                        width="13" height="13" viewBox="0 0 24 24" fill="none"
+                        stroke="#aeb7c4" strokeWidth="2.4" aria-hidden
+                      >
+                        <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </button>
                     {open && a.body && <div className="notif__item-text">{a.body}</div>}
                   </div>

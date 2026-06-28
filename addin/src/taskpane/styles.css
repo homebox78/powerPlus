@@ -351,7 +351,7 @@ body {
 .notif__row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
   padding: 12px 14px;
   border: none;
@@ -364,31 +364,34 @@ body {
   min-width: 0;
 }
 .notif__item-title {
-  display: block;
+  flex: 1;
+  min-width: 0;
   font-size: 12.5px;
   font-weight: 700;
-  color: var(--ink);
+  color: #333333;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.notif__item-meta {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  margin-top: 1px;
+.notif__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--coral);
+  flex: 0 0 auto;
 }
 .notif__chev {
   flex: 0 0 auto;
-  color: var(--muted);
-  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+.notif__chev--open {
+  transform: rotate(180deg);
 }
 .notif__item-text {
-  font-size: 12.5px;
-  color: var(--ink2);
-  line-height: 1.5;
-  padding: 0 14px 12px;
+  font-size: 12px;
+  color: #555555;
+  line-height: 1.6;
+  padding: 2px 14px 13px;
   white-space: pre-wrap;
 }
 .notif__unread-dot {
