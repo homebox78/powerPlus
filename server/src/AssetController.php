@@ -20,7 +20,7 @@ final class AssetController
         $q        = isset($query['q']) ? (string) $query['q'] : '';
         $page     = max(1, (int) ($query['page'] ?? 1));
         $limit    = (int) ($query['limit'] ?? 50);
-        $limit    = max(1, min(500, $limit ?: 50));
+        $limit    = max(1, min(2000, $limit ?: 50));
         $sort     = isset($query['sort']) ? (string) $query['sort'] : 'latest';
 
         $this->json($this->service->list($category, $q, $page, $limit, $sort));
