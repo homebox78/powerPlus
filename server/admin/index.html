@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>powerPlus 관리자</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;800&display=swap" />
   <style>
     :root {
       --bg:#f0f3f6; --surface:#fff; --border:#e8ecf1; --text:#1c2733;
@@ -24,8 +26,11 @@
     textarea { resize:vertical; line-height:1.5; }
     input[type=checkbox],input[type=radio] { width:18px; height:18px; padding:0; accent-color:var(--accent);
       cursor:pointer; vertical-align:middle; flex:none; }
-    .btn { border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:11px;
-      padding:10px 16px; font-weight:700; box-shadow:0 6px 16px rgba(43,138,245,.22); transition:.12s; }
+    .mono { font-family:"JetBrains Mono",monospace; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--accent);
+      background:var(--accent); color:#fff; border-radius:11px; padding:10px 16px; font-size:13px; font-weight:700;
+      box-shadow:0 6px 16px rgba(43,138,245,.22); transition:.12s; }
+    .btn svg { display:block; }
     .btn:hover { background:var(--accent-d); border-color:var(--accent-d); }
     .btn--ghost { background:var(--surface); color:var(--accent); box-shadow:none; }
     .btn--ghost:hover { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
@@ -43,12 +48,13 @@
     .login__sub { margin:4px 0 18px; text-align:center; color:var(--muted); font-size:13px; }
     .field { margin-bottom:10px; }
     .field>label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+    .code-input { text-align:center; letter-spacing:.4em; font-size:22px; font-weight:800; padding:14px; }
 
     /* 레이아웃 */
     .wrap { max-width:1080px; margin:0 auto; padding:16px; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
-    .topbar h1 { font-size:18px; margin:0; }
-    .topbar__user { font-size:12px; color:var(--muted); margin-right:8px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:20px; }
+    .topbar h1 { font-size:20px; font-weight:800; letter-spacing:-.02em; margin:0; }
+    .topbar__user { font-size:13px; color:var(--ink2); font-weight:600; margin-right:12px; }
     .tabs { display:flex; gap:6px; margin-bottom:14px; }
     .tab { border:1px solid var(--border); background:var(--surface); color:var(--ink2);
       border-radius:999px; padding:7px 16px; font-weight:700; font-size:13px; transition:.12s; }
@@ -74,17 +80,22 @@
     .card__cat { font-size:12.5px; color:var(--ink2); font-weight:700; }
     .card__tags { display:flex; flex-wrap:wrap; gap:5px; min-height:42px; align-content:flex-start; }
     .tag { background:var(--accent-soft); color:var(--accent); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600; }
+    .tag--en { background:#f1f4f7; color:#8a94a3; }
     .tag--more { background:#f1f4f7; color:var(--muted); }
     .card__actions { display:flex; gap:8px; margin-top:3px; }
     .card__actions button { flex:1; padding:8px; border-radius:9px; font-size:12.5px; }
     .empty { color:var(--muted); text-align:center; padding:40px 0; grid-column:1/-1; }
 
-    /* 카테고리 테이블 */
+    /* 테이블 (카테고리/공지/요청) */
     table { width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border);
-      border-radius:10px; overflow:hidden; }
-    th,td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--border); }
-    th { font-size:12px; color:var(--muted); background:#f8fafc; }
+      border-radius:16px; overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); table-layout:fixed; }
+    th,td { text-align:left; padding:15px 22px; border-bottom:1px solid #f2f5f8; vertical-align:middle;
+      overflow:hidden; text-overflow:ellipsis; }
+    th { font-size:12px; font-weight:700; color:var(--muted); background:#fafbfc; }
     tr:last-child td { border-bottom:none; }
+    td code, .mono { font-family:"JetBrains Mono",monospace; }
+    .col-actions { text-align:right; white-space:nowrap; overflow:visible; }
+    .col-actions .btn { padding:7px 13px; font-size:12px; box-shadow:none; }
 
     /* 모달 */
     .modal { position:fixed; inset:0; background:rgba(15,23,42,.5); display:flex; align-items:center;
@@ -111,24 +122,42 @@
     .hint { font-size:11px; color:var(--muted); margin-top:4px; }
     .modal__actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
     /* 대시보드 */
-    .dash-kpi { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+    .dash-kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; }
+    @media (max-width:900px){ .dash-kpi { grid-template-columns:repeat(2,1fr); } }
     .kpi { position:relative; background:var(--surface); border:1px solid var(--border); border-radius:16px;
-      padding:18px 20px; overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); }
+      padding:20px 22px; overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); }
     .kpi::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); }
-    .kpi__label { font-size:12.5px; color:var(--ink2); font-weight:700; display:flex; align-items:center; gap:6px; }
-    .kpi__value { font-size:30px; font-weight:800; margin-top:6px; letter-spacing:-0.5px; }
-    .kpi__value small { font-size:14px; font-weight:600; color:var(--muted); }
-    .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-bottom:16px; }
-    .dash-h { margin:0 0 12px; font-size:15px; }
-    .dash-h__sub { font-size:12px; color:var(--muted); font-weight:600; }
-    .dash-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    @media (max-width:860px){ .dash-grid2 { grid-template-columns:1fr; } }
-    .dash-card table { border:none; }
-    .dash-bars { display:flex; flex-direction:column; gap:10px; }
-    .bar-row { display:grid; grid-template-columns:90px 1fr 48px; align-items:center; gap:10px; font-size:13px; }
-    .bar-track { background:var(--bg); border-radius:999px; height:12px; overflow:hidden; }
-    .bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),#60a5fa); border-radius:999px; }
-    .bar-val { text-align:right; font-weight:700; }
+    .kpi__label { font-size:12.5px; color:var(--ink2); font-weight:700; }
+    .kpi__value { font-size:28px; font-weight:800; margin-top:7px; letter-spacing:-.02em; color:var(--text); }
+    .kpi__sub { font-size:11.5px; font-weight:600; color:var(--muted); margin-top:4px; }
+    .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 22px;
+      margin-bottom:16px; box-shadow:0 2px 10px rgba(28,39,51,.04); }
+    .dash-card--pad0 { padding:0; overflow:hidden; }
+    .dash-h { font:800 15px Pretendard; color:var(--text); }
+    .dash-h--pad { padding:18px 22px 4px; }
+    .dash-grid2 { display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start; }
+    @media (max-width:900px){ .dash-grid2 { grid-template-columns:1fr; } }
+    /* 인기/즐겨찾기 순위 */
+    .rank-head { display:grid; grid-template-columns:48px 64px 1fr 70px; gap:12px; padding:10px 22px;
+      font:700 11.5px Pretendard; color:var(--muted); }
+    .rank-row { display:grid; grid-template-columns:48px 64px 1fr 70px; gap:12px; align-items:center;
+      padding:11px 22px; border-top:1px solid #f2f5f8; }
+    .rank-badge { width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font:800 13px Pretendard; color:#fff; }
+    .rank-badge--gray { background:#eef1f5; color:var(--muted); }
+    .rank-thumb { width:54px; height:38px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+    .rank-thumb img { max-height:100%; max-width:100%; object-fit:contain; }
+    .rank-cat { font:700 13px Pretendard; color:var(--text); }
+    .rank-tagline { font:500 11.5px Pretendard; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:1px; }
+    .rank-count { font:800 15px Pretendard; color:var(--accent); text-align:right; }
+    .rank-empty { padding:28px 22px; text-align:center; color:var(--muted); border-top:1px solid #f2f5f8; }
+    /* 카테고리별 분포 */
+    .dash-bars { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+    .bar-row > .bar-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+    .bar-name { font:700 12.5px Pretendard; color:var(--text); }
+    .bar-num { font:700 12.5px Pretendard; color:var(--ink2); }
+    .bar-track { background:#eef1f5; border-radius:5px; height:8px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:5px; }
     .ann-link { color:var(--accent); cursor:pointer; text-decoration:none; }
     .ann-link:hover { text-decoration:underline; }
   </style>
@@ -148,9 +177,12 @@
         <button id="btn-request" class="btn" style="width:100%">인증코드 받기</button>
       </div>
       <div id="step-code" class="hidden">
-        <div class="field"><label>인증코드</label>
-          <input id="code" inputmode="numeric" maxlength="6" placeholder="000000" /></div>
+        <div class="field"><label style="text-align:center;display:block">인증코드 6자리를 입력하세요</label>
+          <input id="code" class="code-input mono" inputmode="numeric" maxlength="6" placeholder="000000" /></div>
         <button id="btn-verify" class="btn" style="width:100%">로그인</button>
+        <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted)">코드를 못 받으셨나요?
+          <button id="btn-back" style="border:none;background:none;color:var(--accent);font-weight:700;cursor:pointer">다시 보내기</button>
+        </div>
       </div>
       <p id="login-msg" class="msg" style="text-align:center;margin-top:10px"></p>
     </div>
@@ -159,12 +191,17 @@
   <!-- 메인 -->
   <div id="main" class="wrap hidden">
     <div class="topbar">
-      <h1>powerPlus 관리자</h1>
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#3d9bff,#1b7bef);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 5px 12px rgba(43,138,245,.28)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+        </span>
+        <h1>powerPlus 관리자</h1>
+      </div>
       <div><span class="topbar__user" id="who"></span>
         <button id="btn-logout" class="btn btn--ghost">로그아웃</button></div>
     </div>
     <div class="tabs">
-      <button class="tab tab--active" data-tab="stats">📊 대시보드</button>
+      <button class="tab tab--active" data-tab="stats">대시보드</button>
       <button class="tab" data-tab="assets">자산</button>
       <button class="tab" data-tab="cats">카테고리</button>
       <button class="tab" data-tab="ann">공지</button>
@@ -174,21 +211,21 @@
     <!-- 대시보드 탭 -->
     <section id="tab-stats">
       <div id="dash-kpi" class="dash-kpi"></div>
-      <div class="dash-card">
-        <h3 class="dash-h">📦 카테고리별 자산</h3>
-        <div id="dash-cats" class="dash-bars"></div>
-      </div>
       <div class="dash-grid2">
-        <div class="dash-card">
-          <h3 class="dash-h">🔥 뷰(삽입) 순위 <span class="dash-h__sub">Top 10</span></h3>
-          <table><thead><tr><th>#</th><th>미리보기</th><th>카테고리</th><th>삽입 수</th></tr></thead>
-            <tbody id="stats-rows"></tbody></table>
+        <div class="dash-card dash-card--pad0">
+          <div class="dash-h dash-h--pad">🔥 인기 자산 순위</div>
+          <div class="rank-head"><span>순위</span><span>미리보기</span><span>카테고리</span><span style="text-align:right">삽입</span></div>
+          <div id="rank-rows"></div>
         </div>
         <div class="dash-card">
-          <h3 class="dash-h">⭐ 즐겨찾기 순위 <span class="dash-h__sub">Top 10</span></h3>
-          <table><thead><tr><th>#</th><th>미리보기</th><th>카테고리</th><th>즐겨찾기 수</th></tr></thead>
-            <tbody id="fav-rows"></tbody></table>
+          <div class="dash-h">카테고리별 분포</div>
+          <div id="dist-bars" class="dash-bars"></div>
         </div>
+      </div>
+      <div class="dash-card dash-card--pad0">
+        <div class="dash-h dash-h--pad">⭐ 즐겨찾기 순위</div>
+        <div class="rank-head"><span>순위</span><span>미리보기</span><span>카테고리</span><span style="text-align:right">즐겨찾기</span></div>
+        <div id="fav-rows"></div>
       </div>
     </section>
 
@@ -198,15 +235,15 @@
         <select id="filter-cat"><option value="all">전체 카테고리</option></select>
         <input id="search" placeholder="태그로 검색…" style="max-width:220px" />
         <div class="spacer"></div>
-        <button id="btn-new" class="btn">+ 새 자산</button>
+        <button id="btn-new" class="btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 자산</button>
       </div>
       <div id="asset-grid" class="grid"></div>
     </section>
 
     <!-- 카테고리 탭 -->
     <section id="tab-cats" class="hidden">
-      <div class="toolbar"><div class="spacer"></div><button id="btn-new-cat" class="btn">+ 새 카테고리</button></div>
-      <table><thead><tr><th>이름</th><th>key</th><th>자산 수</th><th></th></tr></thead>
+      <div class="toolbar"><div class="spacer"></div><button id="btn-new-cat" class="btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 카테고리</button></div>
+      <table><thead><tr><th style="width:30%">이름</th><th style="width:28%">key</th><th style="width:16%">자산 수</th><th style="width:26%"></th></tr></thead>
         <tbody id="cat-rows"></tbody></table>
     </section>
 
@@ -214,9 +251,9 @@
     <section id="tab-ann" class="hidden">
       <div class="toolbar">
         <span style="color:var(--muted);font-size:13px">사용자 애드인 우측상단 알람에 표시됩니다.</span>
-        <div class="spacer"></div><button id="btn-new-ann" class="btn">+ 새 공지</button>
+        <div class="spacer"></div><button id="btn-new-ann" class="btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 공지</button>
       </div>
-      <table><thead><tr><th>제목</th><th>내용</th><th>상태</th><th>등록일</th><th></th></tr></thead>
+      <table><thead><tr><th style="width:20%">제목</th><th style="width:38%">내용</th><th style="width:9%">상태</th><th style="width:14%">등록일</th><th style="width:19%"></th></tr></thead>
         <tbody id="ann-rows"></tbody></table>
     </section>
 
@@ -225,7 +262,7 @@
       <div class="toolbar">
         <span style="color:var(--muted);font-size:13px">사용자가 보낸 콘텐츠 요청입니다.</span>
       </div>
-      <table><thead><tr><th>유형</th><th>제목 · 설명</th><th>요청자</th><th>상태</th><th>등록일</th><th></th></tr></thead>
+      <table><thead><tr><th style="width:9%">유형</th><th style="width:34%">제목 · 설명</th><th style="width:16%">요청자</th><th style="width:9%">상태</th><th style="width:12%">등록일</th><th style="width:20%"></th></tr></thead>
         <tbody id="req-rows"></tbody></table>
     </section>
   </div>
@@ -242,7 +279,9 @@
         <input id="f-slide" type="file" accept=".ppt,.pptx" class="hidden" />
       </div>
       <div class="field"><label id="image-label">이미지 (PNG·JPG)</label>
-        <div class="drop" id="drop">클릭하거나 파일을 끌어다 놓으세요
+        <div class="drop" id="drop">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#98a2b0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg>
+          클릭하거나 파일을 끌어다 놓으세요
           <div class="drop__preview" id="drop-preview"></div>
         </div>
         <input id="f-image" type="file" accept="image/png,image/jpeg" class="hidden" />
@@ -325,6 +364,7 @@
         localStorage.setItem(TOKEN_KEY, r.token); await enter();
       } catch (e) { setMsg("login-msg", e.message, "err"); }
     };
+    $("btn-back").onclick = () => { $("step-code").classList.add("hidden"); $("step-email").classList.remove("hidden"); setMsg("login-msg",""); };
     $("btn-logout").onclick = async () => { try { await api("/auth/logout",{method:"POST"}); } catch {}
       localStorage.removeItem(TOKEN_KEY); location.reload(); };
 
@@ -369,11 +409,11 @@
         <td><div style="font-weight:700">${esc(r.title)}</div>${r.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${esc(r.description)}</div>` : ""}${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px">${esc(r.link)}</a>` : ""}</td>
         <td style="color:var(--muted);font-size:12px">${esc(r.email || "-")}</td>
         <td>${badge(r.status)}</td>
-        <td style="white-space:nowrap;color:var(--muted)">${esc((r.created_at||"").slice(0,10))}</td>
-        <td style="text-align:right;white-space:nowrap">
-          <button class="btn btn--ghost" data-rdone="${r.id}" style="padding:5px 10px;font-size:12px">완료</button>
-          <button class="btn btn--ghost" data-rrej="${r.id}" style="padding:5px 10px;font-size:12px">거절</button>
-          <button class="btn btn--danger" data-rdel="${r.id}" style="padding:5px 9px;font-size:12px">삭제</button>
+        <td class="mono" style="color:var(--muted);font-size:12px">${esc((r.created_at||"").slice(0,10))}</td>
+        <td class="col-actions">
+          <button class="btn btn--ghost" data-rdone="${r.id}">완료</button>
+          <button class="btn btn--ghost" data-rrej="${r.id}">거절</button>
+          <button class="btn btn--danger" data-rdel="${r.id}">삭제</button>
         </td></tr>`).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:36px">접수된 요청이 없습니다.</td></tr>`;
       const setStatus = async (id, status) => { try { await api("/admin/requests/" + id, { method:"PUT", body: JSON.stringify({ status }) }); await loadReqs(); } catch (e) { alert(e.message); } };
       $("req-rows").querySelectorAll("[data-rdone]").forEach((b) => b.onclick = () => setStatus(b.dataset.rdone, "done"));
@@ -397,10 +437,10 @@
           : `<span class="tag" style="background:#f1f5f9;color:#64748b">숨김</span>`;
         return `<tr>
           <td><a class="ann-link" data-av="${a.id}"><b>${esc(a.title)}</b></a></td><td style="color:var(--muted)">${body}</td>
-          <td>${badge}</td><td style="white-space:nowrap;color:var(--muted)">${esc((a.created_at||"").slice(0,10))}</td>
-          <td style="text-align:right;white-space:nowrap">
-            <button class="btn btn--ghost" data-ae="${a.id}" style="padding:4px 10px;font-size:12px">수정</button>
-            <button class="btn btn--danger" data-ad="${a.id}" style="padding:4px 10px;font-size:12px">삭제</button>
+          <td>${badge}</td><td class="mono" style="color:var(--muted);font-size:12px">${esc((a.created_at||"").slice(0,10))}</td>
+          <td class="col-actions">
+            <button class="btn btn--ghost" data-ae="${a.id}">수정</button>
+            <button class="btn btn--danger" data-ad="${a.id}">삭제</button>
           </td></tr>`;
       }).join("") : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:36px">등록된 공지가 없습니다.</td></tr>`;
       $("ann-rows").querySelectorAll("[data-av]").forEach((b) => b.onclick = () => openAnn(anns.find((a)=>a.id==b.dataset.av)));
@@ -433,37 +473,48 @@
       catch (e) { alert(e.message); }
     }
 
+    // 카테고리 틴트(썸네일 배경) / 분포 막대 색상 (시안)
+    const TINT_BG = { icon:"#e9f2fe", photo:"#edf0f4", illust:"#fdebee", diagram:"#f0ebfb", ppt:"#fef4e2" };
+    const DIST_COLORS = { icon:"#2b8af5", photo:"#98a2b0", illust:"#f0566a", diagram:"#8b5cf6", ppt:"#f5a623" };
     async function loadStats() {
       const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
-      const kpi = (icon, label, value) =>
-        `<div class="kpi"><div class="kpi__label">${icon} ${label}</div><div class="kpi__value">${value}</div></div>`;
+      const kpi = (label, value, sub, color) =>
+        `<div class="kpi"><div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${color}"></div>` +
+        `<div class="kpi__label">${label}</div><div class="kpi__value">${value}</div><div class="kpi__sub">${sub}</div></div>`;
       const rankRows = (list, emptyMsg) => {
-        const rows = (list || []).filter((r) => r.asset).slice(0, 10); // 삭제된 자산 제외 · Top10
-        return rows.length ? rows.map((row, i) => {
+        const rows = (list || []).filter((r) => r.asset).slice(0, 7);
+        if (!rows.length) return `<div class="rank-empty">${emptyMsg}</div>`;
+        const badgeColor = ["#f0566a", "#f5a623", "#2b8af5"];
+        return rows.map((row, i) => {
           const a = row.asset;
-          const thumb = a.image_url ? `<img src="${esc(a.image_url)}" style="height:40px;width:auto">`
-            : `<span style="display:inline-flex;height:40px;width:40px;align-items:center">${a.svg || ""}</span>`;
-          return `<tr><td><b>${i + 1}</b></td><td>${thumb}</td><td>${esc(catLabel(a.category))}</td><td><b style="font-size:15px">${row.count}</b></td></tr>`;
-        }).join("") : `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:28px">${emptyMsg}</td></tr>`;
+          const tint = DIST_COLORS[a.category] ? (TINT_BG[a.category] || "#f4f6f9") : "#f4f6f9";
+          const thumb = a.thumb_url || a.image_url ? `<img src="${esc(a.thumb_url || a.image_url)}">` : (a.svg || "");
+          const badge = i < 3
+            ? `<span class="rank-badge" style="background:${badgeColor[i]}">${i + 1}</span>`
+            : `<span class="rank-badge rank-badge--gray">${i + 1}</span>`;
+          const tagline = (a.tags || []).slice(0, 5).join(" · ");
+          return `<div class="rank-row">${badge}
+            <div class="rank-thumb" style="background:${tint}">${thumb}</div>
+            <div style="min-width:0"><div class="rank-cat">${esc(catLabel(a.category))}</div><div class="rank-tagline">${esc(tagline)}</div></div>
+            <div class="rank-count">${row.count}</div></div>`;
+        }).join("");
       };
       try {
         const r = await api("/admin/stats");
-        let annCount = 0, reqCount = 0;
-        try { annCount = ((await api("/admin/announcements")).data || []).filter((a) => a.is_active).length; } catch {}
-        try { reqCount = ((await api("/admin/requests")).data || []).filter((x) => x.status === "new").length; } catch {}
+        const usedTotal = assets.length || r.summary.unique;
         $("dash-kpi").innerHTML =
-          kpi("📦", "총 자산", assets.length) +
-          kpi("🗂️", "카테고리", categories.length) +
-          kpi("🔥", "총 삽입", r.summary.total) +
-          kpi("⭐", "총 즐겨찾기", r.summary.favorites ?? 0) +
-          kpi("📮", "대기 요청", reqCount);
-        // 카테고리별 자산 분포 (막대)
-        const counts = categories.map((c) => ({ label: c.label, n: assets.filter((a) => a.category === c.key).length }));
+          kpi("총 삽입 횟수", r.summary.total, "누적 삽입", "#2b8af5") +
+          kpi("전체 자산 수", assets.length, categories.length + "개 카테고리", "#2b8af5") +
+          kpi("사용된 자산", r.summary.unique, "1회 이상 삽입", "#1a9c5b") +
+          kpi("총 즐겨찾기", r.summary.favorites ?? 0, "사용자 즐겨찾기 합계", "#f0566a");
+        // 카테고리별 분포 (시안: 카테고리별 색상)
+        const counts = categories.map((c) => ({ key: c.key, label: c.label, n: assets.filter((a) => a.category === c.key).length }));
         const max = Math.max(1, ...counts.map((c) => c.n));
-        $("dash-cats").innerHTML = counts.length ? counts.map((c) =>
-          `<div class="bar-row"><div>${esc(c.label)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(c.n / max * 100)}%"></div></div><div class="bar-val">${c.n}</div></div>`
+        $("dist-bars").innerHTML = counts.length ? counts.map((c) =>
+          `<div class="bar-row"><div class="bar-top"><span class="bar-name">${esc(c.label)}</span><span class="bar-num">${c.n}</span></div>` +
+          `<div class="bar-track"><div class="bar-fill" style="width:${Math.round(c.n / max * 100)}%;background:${DIST_COLORS[c.key] || '#2b8af5'}"></div></div></div>`
         ).join("") : `<div style="color:var(--muted)">카테고리가 없습니다.</div>`;
-        $("stats-rows").innerHTML = rankRows(r.top, "아직 삽입 기록이 없습니다.");
+        $("rank-rows").innerHTML = rankRows(r.top, "아직 삽입 기록이 없습니다.");
         $("fav-rows").innerHTML = rankRows(r.topFavorites, "아직 즐겨찾기가 없습니다.");
       } catch (e) { $("dash-kpi").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
     }
@@ -479,10 +530,10 @@
     function catCount(key) { return assets.filter((a) => a.category === key).length; }
     function renderCats() {
       $("cat-rows").innerHTML = categories.map((c) => `<tr>
-        <td>${esc(c.label)}</td><td><code>${esc(c.key)}</code></td><td>${catCount(c.key)}</td>
-        <td style="text-align:right;white-space:nowrap">
-          <button class="btn btn--ghost" data-ce="${esc(c.key)}" style="padding:4px 10px;font-size:12px">수정</button>
-          <button class="btn btn--danger" data-cd="${esc(c.key)}" style="padding:4px 10px;font-size:12px">삭제</button>
+        <td style="font-weight:700">${esc(c.label)}</td><td><code>${esc(c.key)}</code></td><td style="font-weight:600">${catCount(c.key)}</td>
+        <td class="col-actions">
+          <button class="btn btn--ghost" data-ce="${esc(c.key)}">수정</button>
+          <button class="btn btn--danger" data-cd="${esc(c.key)}">삭제</button>
         </td></tr>`).join("");
       $("cat-rows").querySelectorAll("[data-ce]").forEach((b) => b.onclick = () => openCat(categories.find((c)=>c.key===b.dataset.ce)));
       $("cat-rows").querySelectorAll("[data-cd]").forEach((b) => b.onclick = () => delCat(b.dataset.cd));
@@ -522,19 +573,19 @@
       const list = assets.filter((a) => (cat === "all" || a.category === cat) &&
         (!q || (a.tags || []).some((t) => t.toLowerCase().includes(q))));
       const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
-      const TINT = { icon:"#e9f2fe", photo:"#edf0f4", illust:"#fdebee", diagram:"#f0ebfb", ppt:"#fef4e2" };
       $("asset-grid").innerHTML = list.length ? list.map((a) => {
-        const thumb = a.image_url ? `<img src="${esc(a.image_url)}" alt="">`
+        const src = a.thumb_url || a.image_url;
+        const thumb = src ? `<img src="${esc(src)}" alt="">`
           : a.svg ? a.svg
           : `<span style="font:600 11px 'JetBrains Mono',monospace;color:rgba(28,39,51,.4);text-transform:uppercase">${esc(a.category)}</span>`;
-        const tg = (a.tags || []);
-        const shown = tg.slice(0, 8).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
-        const more = tg.length > 8 ? `<span class="tag tag--more">+${tg.length - 8}</span>` : "";
+        // 국문 태그=파랑, 영문 태그=회색 (시안)
+        const ko = (a.tags_ko || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
+        const en = (a.tags_en || []).map((t) => `<span class="tag tag--en">${esc(t)}</span>`).join("");
         return `<div class="card">
-          <div class="card__img" style="background:${TINT[a.category] || '#f4f6f9'}">${thumb}</div>
+          <div class="card__img" style="background:${TINT_BG[a.category] || '#f4f6f9'}">${thumb}</div>
           <div class="card__body">
             <div class="card__cat">${esc(catLabel(a.category))}</div>
-            <div class="card__tags">${shown}${more}</div>
+            <div class="card__tags">${ko}${en}</div>
             <div class="card__actions">
               <button class="btn btn--ghost" data-e="${esc(a.id)}">수정</button>
               <button class="btn btn--danger" data-d="${esc(a.id)}">삭제</button>
