@@ -12,5 +12,4 @@ deploy.env
 # 원본 자산 대용량 폴더 — git 아닌 서버(uploads)에 보관
 /data/
 
-# 배포 폴더의 설치 exe(빌드 산출물)
-배포/사용자/*.exe
+# 설치 exe는 git에 포함(다른 PC에서 pull하면 바로 받도록) — 배포/사용자/powerPlus_Setup.exe 추적
