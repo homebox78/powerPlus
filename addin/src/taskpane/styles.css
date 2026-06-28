@@ -312,7 +312,7 @@ body {
 
 /* 알림 드롭다운 */
 .notif {
-  width: 312px;
+  width: min(312px, calc(100vw - 28px)); /* 좁은 작업창에서 잘리지 않게 화면폭에 맞춤 */
 }
 .notif__head {
   display: flex;
@@ -1004,7 +1004,7 @@ body {
   color: var(--ink);
 }
 .sheet__desc {
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--muted);
   margin-top: 4px;
@@ -1049,7 +1049,7 @@ body {
   border: none;
   border-radius: 999px;
   padding: 8px 14px;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   background: #f4f6f9;

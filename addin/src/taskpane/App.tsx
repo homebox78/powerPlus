@@ -376,7 +376,6 @@ export default function App() {
               {avatarChar}
             </span>
             <span style={{ minWidth: 0 }}>
-              <span className="profile__name">{local}</span>
               <span className="profile__email">{email}</span>
             </span>
           </div>
