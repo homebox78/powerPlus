@@ -12,15 +12,8 @@ interface Props {
   loading?: boolean;
 }
 
-// 카테고리별 썸네일 배경 틴트 (디자인 시스템)
-const TINTS: Record<string, string> = {
-  icon: "#fbeee4",
-  photo: "#edf0f4",
-  illust: "#fdebee",
-  diagram: "#f0ebfb",
-  ppt: "#fef4e2",
-};
-const tintOf = (cat: string) => TINTS[cat] || "#f4f6f9";
+// 카드 썸네일 배경: 흰색 (사용자 요청)
+const CARD_BG = "#ffffff";
 
 const StarIcon = ({ on }: { on: boolean }) => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill={on ? "#f0566a" : "none"} stroke={on ? "#f0566a" : "#aeb7c4"} strokeWidth={on ? 1.2 : 1.5}>
@@ -80,7 +73,7 @@ export default function AssetGrid({
               disabled={inserting}
               onClick={() => onInsert(a)}
             >
-              <div className="card__thumb" style={{ background: tintOf(a.category) }}>
+              <div className="card__thumb" style={{ background: CARD_BG }}>
                 {a.image_url || a.thumb_url ? (
                   // 목록은 썸네일(빠른 로딩), 삽입은 원본(useInsert가 image_url 사용)
                   <img src={a.thumb_url || a.image_url} alt={label} loading="lazy" decoding="async" />
