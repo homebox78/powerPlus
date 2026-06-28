@@ -191,12 +191,18 @@ final class AssetService
             $row['tags_ko'] = $row['tags'];
         }
         $base = rtrim((string) Config::get('public_base_url', 'https://hom2box.com/powerPlus'), '/');
+        // 이미지 수정 시 같은 파일명이라 브라우저가 옛 이미지를 캐시 → 파일 수정시각을 ?v= 로 붙여 자동 갱신
+        $root = __DIR__ . '/../';
+        $ver = static function ($rel) use ($root) {
+            $m = @filemtime($root . ltrim((string) $rel, '/'));
+            return $m ? '?v=' . $m : '';
+        };
         $row['image_url'] = !empty($row['image_path'])
-            ? $base . '/' . ltrim((string) $row['image_path'], '/')
+            ? $base . '/' . ltrim((string) $row['image_path'], '/') . $ver($row['image_path'])
             : null;
         // 목록 표시용 썸네일 URL (없으면 원본으로 폴백). 삽입은 항상 image_url(원본) 사용.
         $row['thumb_url'] = !empty($row['thumb_path'])
-            ? $base . '/' . ltrim((string) $row['thumb_path'], '/')
+            ? $base . '/' . ltrim((string) $row['thumb_path'], '/') . $ver($row['thumb_path'])
             : $row['image_url'];
         // 장표(ppt) 자산: 슬라이드 파일 URL (삽입 시 슬라이드로 추가)
         $row['slide_url'] = !empty($row['slide_path'])

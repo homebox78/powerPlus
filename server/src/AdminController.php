@@ -193,6 +193,15 @@ final class AdminController
         if (!@move_uploaded_file($file['tmp_name'], $absRoot . $rel)) {
             return ['error' => '파일 저장에 실패했습니다. (서버 권한 확인)'];
         }
+        // 본체도 카테고리별 최대변으로 리사이즈(원본 대용량 업로드 방지, 투명 유지) — Thumb::make 재활용
+        $maxByCat = ['icon' => 512, 'illust' => 700, 'diagram' => 900, 'photo' => 1600, 'ppt' => 900];
+        $max = $maxByCat[$category] ?? 1200;
+        $tmpResized = $absRoot . $rel . '.tmp';
+        if (Thumb::make($absRoot . $rel, $tmpResized, $max)) {
+            @rename($tmpResized, $absRoot . $rel);
+        } else {
+            @unlink($tmpResized);
+        }
         // 목록 표시용 썸네일 생성 (실패해도 원본으로 폴백되므로 치명적 아님)
         $thumbRel = Thumb::pathFor($rel);
         $thumb = Thumb::make($absRoot . $rel, $absRoot . $thumbRel, 360) ? $thumbRel : null;
