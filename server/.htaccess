@@ -3,6 +3,16 @@
 # 디렉터리 리스팅 차단
 Options -Indexes
 
+# 장표(.ppt/.pptx) 업로드를 위한 한도 상향 (mod_php 환경)
+<IfModule mod_php7.c>
+  php_value upload_max_filesize 40M
+  php_value post_max_size 42M
+</IfModule>
+<IfModule mod_php.c>
+  php_value upload_max_filesize 40M
+  php_value post_max_size 42M
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 

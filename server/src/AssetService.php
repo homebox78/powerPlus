@@ -138,9 +138,11 @@ final class AssetService
         $en         = array_key_exists('tags_en', $d) ? $d['tags_en'] : ($cur['tags_en'] ?? []);
         $image_path = array_key_exists('image_path', $d) && $d['image_path'] !== null
             ? $d['image_path'] : ($cur['image_path'] ?? null);
+        $slide_path = array_key_exists('slide_path', $d) && $d['slide_path'] !== null
+            ? $d['slide_path'] : ($cur['slide_path'] ?? null);
 
         Database::pdo()->prepare(
-            'UPDATE assets SET name = :name, category = :category, tags = :tags, tags_ko = :tags_ko, tags_en = :tags_en, image_path = :image_path WHERE id = :id'
+            'UPDATE assets SET name = :name, category = :category, tags = :tags, tags_ko = :tags_ko, tags_en = :tags_en, image_path = :image_path, slide_path = :slide_path WHERE id = :id'
         )->execute([
             ':id'         => $id,
             ':name'       => $name,
@@ -149,6 +151,7 @@ final class AssetService
             ':tags_ko'    => json_encode(array_values($ko), JSON_UNESCAPED_UNICODE),
             ':tags_en'    => json_encode(array_values($en), JSON_UNESCAPED_UNICODE),
             ':image_path' => $image_path,
+            ':slide_path' => $slide_path,
         ]);
         return true;
     }

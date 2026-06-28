@@ -220,7 +220,13 @@
     <div class="modal__card">
       <h2 class="modal__title" id="modal-title">새 자산</h2>
       <div class="field"><label>카테고리</label><select id="f-category"></select></div>
-      <div class="field"><label>이미지 (PNG·JPG)</label>
+      <div class="field hidden" id="slide-field"><label>장표 파일 (.ppt · .pptx) <b style="color:var(--danger)">*</b></label>
+        <div class="drop" id="slide-drop">클릭하거나 .ppt / .pptx 파일을 끌어다 놓으세요
+          <div id="slide-name" style="margin-top:8px;font-weight:700;color:var(--accent)"></div>
+        </div>
+        <input id="f-slide" type="file" accept=".ppt,.pptx" class="hidden" />
+      </div>
+      <div class="field"><label id="image-label">이미지 (PNG·JPG)</label>
         <div class="drop" id="drop">클릭하거나 파일을 끌어다 놓으세요
           <div class="drop__preview" id="drop-preview"></div>
         </div>
@@ -525,7 +531,7 @@
     }
 
     /* ── 자산 추가/수정 ── */
-    let pickedFile = null;
+    let pickedFile = null, pickedSlide = null;
     $("btn-new").onclick = () => openAsset(null);
     $("btn-cancel").onclick = () => $("modal").classList.add("hidden");
     $("drop").onclick = () => $("f-image").click();
@@ -539,6 +545,20 @@
       const pv = $("drop-preview");
       pv.innerHTML = `<img src="${URL.createObjectURL(f)}">`; pv.style.display = "block";
     }
+    // 장표 파일(.ppt/.pptx)
+    $("slide-drop").onclick = () => $("f-slide").click();
+    $("f-slide").onchange = (e) => setSlide(e.target.files[0]);
+    $("slide-drop").ondragover = (e) => { e.preventDefault(); $("slide-drop").classList.add("drop--over"); };
+    $("slide-drop").ondragleave = () => $("slide-drop").classList.remove("drop--over");
+    $("slide-drop").ondrop = (e) => { e.preventDefault(); $("slide-drop").classList.remove("drop--over"); setSlide(e.dataTransfer.files[0]); };
+    function setSlide(f) { if (!f) return; pickedSlide = f; $("slide-name").textContent = "📎 " + f.name; }
+    // 카테고리가 '장표(ppt)'면 장표 파일 입력 표시 + 이미지는 썸네일(선택)
+    function applyCatUI() {
+      const isPpt = $("f-category").value === "ppt";
+      $("slide-field").classList.toggle("hidden", !isPpt);
+      $("image-label").textContent = isPpt ? "썸네일 이미지 (PNG·JPG · 선택)" : "이미지 (PNG·JPG)";
+    }
+    $("f-category").onchange = applyCatUI;
     // 칩 입력 박스 설정: 국문/영문 공통 로직
     function setupTagbox(boxId, inputId, countId, getArr) {
       const box = $(boxId), input = $(inputId);
@@ -569,7 +589,7 @@
     setupTagbox("tagbox-en", "f-tag-en", "en-count", () => tagsEn);
 
     function openAsset(a) {
-      editingId = a ? a.id : null; pickedFile = null;
+      editingId = a ? a.id : null; pickedFile = null; pickedSlide = null;
       tagsKo = a ? [...(a.tags_ko || [])] : [];
       tagsEn = a ? [...(a.tags_en || [])] : [];
       $("modal-title").textContent = a ? "자산 수정" : "새 자산";
@@ -578,6 +598,9 @@
       if (a && a.image_url) { pv.innerHTML = `<img src="${esc(a.image_url)}">`; pv.style.display = "block"; }
       else if (a && a.svg) { pv.innerHTML = a.svg; pv.style.display = "block"; }
       else { pv.innerHTML = ""; pv.style.display = "none"; }
+      // 장표: 기존 파일명 표시(있으면)
+      $("slide-name").textContent = (a && a.slide_path) ? "📎 " + a.slide_path.split("/").pop() : "";
+      applyCatUI();
       $("f-tag-ko").value = ""; $("f-tag-en").value = "";
       renderChips("tagbox-ko", "f-tag-ko", "ko-count", () => tagsKo);
       renderChips("tagbox-en", "f-tag-en", "en-count", () => tagsEn);
@@ -587,12 +610,18 @@
     $("btn-save").onclick = async () => {
       setMsg("modal-msg", "");
       if (tagsKo.length + tagsEn.length === 0) return setMsg("modal-msg", "국문/영문 키워드를 한 개 이상 입력하세요.", "err");
-      if (!editingId && !pickedFile) return setMsg("modal-msg", "이미지를 올려주세요 (PNG·JPG).", "err");
+      const isPpt = $("f-category").value === "ppt";
+      if (isPpt) {
+        if (!editingId && !pickedSlide) return setMsg("modal-msg", "장표 파일(.ppt·.pptx)을 올려주세요.", "err");
+      } else {
+        if (!editingId && !pickedFile) return setMsg("modal-msg", "이미지를 올려주세요 (PNG·JPG).", "err");
+      }
       const fd = new FormData();
       fd.append("category", $("f-category").value);
       fd.append("tags_ko", JSON.stringify(tagsKo));
       fd.append("tags_en", JSON.stringify(tagsEn));
       if (pickedFile) fd.append("image", pickedFile);
+      if (pickedSlide) fd.append("slide", pickedSlide);
       try {
         const path = editingId ? "/admin/assets/" + encodeURIComponent(editingId) : "/admin/assets";
         await api(path, { method: "POST", body: fd });

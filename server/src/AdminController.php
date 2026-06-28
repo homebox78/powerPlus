@@ -8,7 +8,8 @@ require_once __DIR__ . '/Config.php';
 /** 관리자용 자산 CRUD. 이미지는 PNG/JPG 파일 업로드, ID는 카테고리별 자동 생성. */
 final class AdminController
 {
-    private const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+    private const MAX_BYTES = 5 * 1024 * 1024;        // 이미지 5MB
+    private const MAX_SLIDE_BYTES = 40 * 1024 * 1024; // 장표(ppt/pptx) 40MB
     private AssetService $service;
     private CategoryService $categories;
 
@@ -43,19 +44,40 @@ final class AdminController
             return;
         }
         $id = $this->service->nextId($category);
-        $imagePath = $this->saveImage($files['image'] ?? null, $category, $id);
-        if (isset($imagePath['error'])) {
-            $this->json(['error' => $imagePath['error'], 'code' => 400], 400);
-            return;
+        $data = [
+            'id'       => $id,
+            'name'     => ($post['name'] ?? '') !== '' ? (string) $post['name'] : null,
+            'category' => $category,
+            'tags_ko'  => $ko,
+            'tags_en'  => $en,
+        ];
+
+        if ($category === 'ppt') {
+            // 장표: .ppt/.pptx 파일 필수(slide_path), 썸네일 이미지(image_path)는 선택
+            $slide = $this->saveSlide($files['slide'] ?? null, $id);
+            if (isset($slide['error'])) {
+                $this->json(['error' => $slide['error'], 'code' => 400], 400);
+                return;
+            }
+            $data['slide_path'] = $slide['path'];
+            if ($this->hasUpload($files['image'] ?? null)) {
+                $img = $this->saveImage($files['image'], $category, $id);
+                if (isset($img['error'])) {
+                    $this->json(['error' => $img['error'], 'code' => 400], 400);
+                    return;
+                }
+                $data['image_path'] = $img['path'];
+            }
+        } else {
+            $img = $this->saveImage($files['image'] ?? null, $category, $id);
+            if (isset($img['error'])) {
+                $this->json(['error' => $img['error'], 'code' => 400], 400);
+                return;
+            }
+            $data['image_path'] = $img['path'];
         }
-        $asset = $this->service->create([
-            'id'         => $id,
-            'name'       => ($post['name'] ?? '') !== '' ? (string) $post['name'] : null,
-            'category'   => $category,
-            'tags_ko'    => $ko,
-            'tags_en'    => $en,
-            'image_path' => $imagePath['path'],
-        ]);
+
+        $asset = $this->service->create($data);
         $this->json(['data' => $asset], 201);
     }
 
@@ -88,15 +110,24 @@ final class AdminController
         if (array_key_exists('name', $post)) {
             $patch['name'] = $post['name'] !== '' ? (string) $post['name'] : null;
         }
-        // 새 이미지가 올라온 경우에만 교체
-        if (isset($files['image']) && ($files['image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-            $cat = $patch['category'] ?? (string) ($this->service->find($id)['category']);
+        $cat = $patch['category'] ?? (string) ($this->service->find($id)['category']);
+        // 새 이미지(썸네일)가 올라온 경우에만 교체
+        if ($this->hasUpload($files['image'] ?? null)) {
             $saved = $this->saveImage($files['image'], $cat, $id);
             if (isset($saved['error'])) {
                 $this->json(['error' => $saved['error'], 'code' => 400], 400);
                 return;
             }
             $patch['image_path'] = $saved['path'];
+        }
+        // 장표 파일(.ppt/.pptx)이 올라온 경우에만 교체
+        if ($this->hasUpload($files['slide'] ?? null)) {
+            $saved = $this->saveSlide($files['slide'], $id);
+            if (isset($saved['error'])) {
+                $this->json(['error' => $saved['error'], 'code' => 400], 400);
+                return;
+            }
+            $patch['slide_path'] = $saved['path'];
         }
         $this->service->update($id, $patch);
         $this->json(['data' => $this->service->find($id)]);
@@ -112,6 +143,9 @@ final class AdminController
         }
         if (!empty($asset['image_path'])) {
             @unlink(__DIR__ . '/../' . $asset['image_path']);
+        }
+        if (!empty($asset['slide_path'])) {
+            @unlink(__DIR__ . '/../' . $asset['slide_path']);
         }
         $this->service->delete($id);
         $this->json(['ok' => true]);
@@ -141,6 +175,37 @@ final class AdminController
         $rel = "uploads/$category/$id.$ext";
         if (!@move_uploaded_file($file['tmp_name'], __DIR__ . '/../' . $rel)) {
             return ['error' => '파일 저장에 실패했습니다. (서버 권한 확인)'];
+        }
+        return ['path' => $rel];
+    }
+
+    /** 업로드 파일이 실제로 존재하는지(선택 필드 판별). */
+    private function hasUpload(?array $file): bool
+    {
+        return $file !== null && ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    }
+
+    /** 장표 파일(.ppt/.pptx) 검증 후 uploads/ppt/{id}.{ext} 로 저장. */
+    private function saveSlide(?array $file, string $id): array
+    {
+        if ($file === null || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return ['error' => '장표 파일(.ppt 또는 .pptx)을 올려주세요.'];
+        }
+        if (($file['size'] ?? 0) > self::MAX_SLIDE_BYTES) {
+            return ['error' => '장표 파일이 너무 큽니다 (최대 40MB).'];
+        }
+        // Office 파일은 finfo mime가 불안정(pptx=zip 등) → 확장자로 검증(관리자 전용)
+        $ext = strtolower((string) pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
+        if (!in_array($ext, ['ppt', 'pptx'], true)) {
+            return ['error' => '.ppt 또는 .pptx 파일만 업로드할 수 있습니다.'];
+        }
+        $dir = __DIR__ . '/../uploads/ppt';
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return ['error' => '업로드 폴더를 만들 수 없습니다. (권한 확인)'];
+        }
+        $rel = "uploads/ppt/$id.$ext";
+        if (!@move_uploaded_file($file['tmp_name'], __DIR__ . '/../' . $rel)) {
+            return ['error' => '장표 파일 저장에 실패했습니다. (서버 권한 확인)'];
         }
         return ['path' => $rel];
     }
