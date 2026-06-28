@@ -84,6 +84,11 @@
 
     /* 자산 카드 그리드 */
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+    /* 자산 목록: 가로 5개 고정(30개 = 5×6줄). 좁은 화면은 단계적 축소 */
+    #asset-grid { grid-template-columns:repeat(5,1fr); }
+    @media (max-width:1180px){ #asset-grid { grid-template-columns:repeat(4,1fr); } }
+    @media (max-width:820px){ #asset-grid { grid-template-columns:repeat(3,1fr); } }
+    @media (max-width:560px){ #asset-grid { grid-template-columns:repeat(2,1fr); } }
     .card { background:var(--surface); border:1px solid var(--border); border-radius:16px;
       overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); transition:.12s;
       display:flex; flex-direction:column; }
