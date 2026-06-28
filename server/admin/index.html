@@ -18,14 +18,19 @@
       -webkit-font-smoothing:antialiased; }
     .hidden { display:none !important; }
     button { font:inherit; cursor:pointer; }
-    input,select { font:inherit; width:100%; padding:9px 11px; border:1px solid var(--border);
-      border-radius:8px; outline:none; background:var(--surface); }
-    input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft); }
+    input,select,textarea { font:inherit; width:100%; padding:10px 12px; border:1.5px solid var(--border);
+      border-radius:11px; outline:none; background:var(--surface); color:var(--text); }
+    input:focus,select:focus,textarea:focus { border-color:var(--accent); }
+    textarea { resize:vertical; line-height:1.5; }
+    input[type=checkbox],input[type=radio] { width:18px; height:18px; padding:0; accent-color:var(--accent);
+      cursor:pointer; vertical-align:middle; flex:none; }
     .btn { border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:11px;
-      padding:10px 16px; font-weight:700; box-shadow:0 6px 16px rgba(43,138,245,.22); }
-    .btn:hover { background:var(--accent-d); }
+      padding:10px 16px; font-weight:700; box-shadow:0 6px 16px rgba(43,138,245,.22); transition:.12s; }
+    .btn:hover { background:var(--accent-d); border-color:var(--accent-d); }
     .btn--ghost { background:var(--surface); color:var(--accent); box-shadow:none; }
+    .btn--ghost:hover { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
     .btn--danger { background:var(--surface); color:var(--danger); border-color:var(--border); box-shadow:none; }
+    .btn--danger:hover { background:var(--danger-soft); color:var(--danger); border-color:var(--danger); }
     .btn:disabled { opacity:.5; cursor:default; }
     .msg { font-size:12px; }
     .msg--err { color:var(--danger); } .msg--ok { color:var(--ok); }
@@ -45,28 +50,33 @@
     .topbar h1 { font-size:18px; margin:0; }
     .topbar__user { font-size:12px; color:var(--muted); margin-right:8px; }
     .tabs { display:flex; gap:6px; margin-bottom:14px; }
-    .tab { border:1px solid var(--border); background:var(--surface); color:var(--muted);
-      border-radius:999px; padding:6px 16px; }
-    .tab--active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .tab { border:1px solid var(--border); background:var(--surface); color:var(--ink2);
+      border-radius:999px; padding:7px 16px; font-weight:700; font-size:13px; transition:.12s; }
+    .tab:hover { border-color:var(--accent); color:var(--accent); }
+    .tab--active, .tab--active:hover { background:var(--accent); border-color:var(--accent); color:#fff;
+      box-shadow:0 4px 12px rgba(43,138,245,.25); }
 
     .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
     .toolbar select { width:auto; min-width:140px; }
     .toolbar .spacer { flex:1; }
 
     /* 자산 카드 그리드 */
-    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
-    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px;
-      display:flex; flex-direction:column; gap:8px; }
-    .card__img { height:100px; display:flex; align-items:center; justify-content:center; background:#f8fafc;
-      border-radius:8px; overflow:hidden; }
-    .card__img img { height:100px; width:auto; }       /* 미리보기: 높이 100px, 가로 auto */
-    .card__img svg { height:100px; width:auto; }
-    .card__cat { font-size:11px; color:var(--accent); font-weight:600; }
-    .card__tags { display:flex; flex-wrap:wrap; gap:3px; min-height:20px; }
-    .tag { background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:1px 8px; font-size:11px; }
-    .tag--more { background:#f1f5f9; color:var(--muted); }
-    .card__actions { display:flex; gap:6px; margin-top:auto; }
-    .card__actions button { flex:1; padding:6px; border-radius:7px; font-size:12px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:16px;
+      overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); transition:.12s;
+      display:flex; flex-direction:column; }
+    .card:hover { border-color:var(--accent); box-shadow:0 8px 20px rgba(43,138,245,.12); }
+    .card__img { aspect-ratio:16/10; display:flex; align-items:center; justify-content:center;
+      background:#f4f6f9; overflow:hidden; }
+    .card__img img { max-height:86%; max-width:90%; width:auto; object-fit:contain; }
+    .card__img svg { height:78%; width:auto; }
+    .card__body { padding:12px 13px 13px; display:flex; flex-direction:column; gap:8px; }
+    .card__cat { font-size:12.5px; color:var(--ink2); font-weight:700; }
+    .card__tags { display:flex; flex-wrap:wrap; gap:5px; min-height:42px; align-content:flex-start; }
+    .tag { background:var(--accent-soft); color:var(--accent); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600; }
+    .tag--more { background:#f1f4f7; color:var(--muted); }
+    .card__actions { display:flex; gap:8px; margin-top:3px; }
+    .card__actions button { flex:1; padding:8px; border-radius:9px; font-size:12.5px; }
     .empty { color:var(--muted); text-align:center; padding:40px 0; grid-column:1/-1; }
 
     /* 카테고리 테이블 */
@@ -102,8 +112,10 @@
     .modal__actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
     /* 대시보드 */
     .dash-kpi { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
-    .kpi { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
-    .kpi__label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+    .kpi { position:relative; background:var(--surface); border:1px solid var(--border); border-radius:16px;
+      padding:18px 20px; overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); }
+    .kpi::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); }
+    .kpi__label { font-size:12.5px; color:var(--ink2); font-weight:700; display:flex; align-items:center; gap:6px; }
     .kpi__value { font-size:30px; font-weight:800; margin-top:6px; letter-spacing:-0.5px; }
     .kpi__value small { font-size:14px; font-weight:600; color:var(--muted); }
     .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-bottom:16px; }
@@ -125,7 +137,10 @@
   <!-- 로그인 -->
   <div id="login" class="login">
     <div class="login__card">
-      <h1 class="login__title">powerPlus 관리자</h1>
+      <div style="width:50px;height:50px;border-radius:15px;margin:0 auto;background:linear-gradient(135deg,#3d9bff,#1b7bef);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(43,138,245,.3)">
+        <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="3.5" width="12" height="12" rx="2.5" opacity=".5"/><rect x="3.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M9.5 12.6v3.8M7.6 14.5h3.8"/></svg>
+      </div>
+      <h1 class="login__title" style="margin-top:14px">powerPlus 관리자</h1>
       <p class="login__sub">자산 라이브러리 관리</p>
       <div id="step-email">
         <div class="field"><label>회사 이메일</label>
@@ -507,18 +522,23 @@
       const list = assets.filter((a) => (cat === "all" || a.category === cat) &&
         (!q || (a.tags || []).some((t) => t.toLowerCase().includes(q))));
       const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
+      const TINT = { icon:"#e9f2fe", photo:"#edf0f4", illust:"#fdebee", diagram:"#f0ebfb", ppt:"#fef4e2" };
       $("asset-grid").innerHTML = list.length ? list.map((a) => {
-        const thumb = a.image_url ? `<img src="${esc(a.image_url)}" alt="">` : (a.svg || "");
+        const thumb = a.image_url ? `<img src="${esc(a.image_url)}" alt="">`
+          : a.svg ? a.svg
+          : `<span style="font:600 11px 'JetBrains Mono',monospace;color:rgba(28,39,51,.4);text-transform:uppercase">${esc(a.category)}</span>`;
         const tg = (a.tags || []);
         const shown = tg.slice(0, 8).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
         const more = tg.length > 8 ? `<span class="tag tag--more">+${tg.length - 8}</span>` : "";
         return `<div class="card">
-          <div class="card__img">${thumb}</div>
-          <div class="card__cat">${esc(catLabel(a.category))}</div>
-          <div class="card__tags">${shown}${more}</div>
-          <div class="card__actions">
-            <button class="btn btn--ghost" data-e="${esc(a.id)}">수정</button>
-            <button class="btn btn--danger" data-d="${esc(a.id)}">삭제</button>
+          <div class="card__img" style="background:${TINT[a.category] || '#f4f6f9'}">${thumb}</div>
+          <div class="card__body">
+            <div class="card__cat">${esc(catLabel(a.category))}</div>
+            <div class="card__tags">${shown}${more}</div>
+            <div class="card__actions">
+              <button class="btn btn--ghost" data-e="${esc(a.id)}">수정</button>
+              <button class="btn btn--danger" data-d="${esc(a.id)}">삭제</button>
+            </div>
           </div></div>`;
       }).join("") : `<div class="empty">자산이 없습니다. "+ 새 자산"으로 추가하세요.</div>`;
       $("asset-grid").querySelectorAll("[data-e]").forEach((b) => b.onclick = () => openAsset(assets.find((a)=>a.id===b.dataset.e)));
