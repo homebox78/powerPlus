@@ -39,12 +39,23 @@ final class UsageController
     /** GET /api/admin/stats/series?period=day|month|year — 기간별 방문/삽입 추세 */
     public function series(): void
     {
-        $period = (string) ($_GET['period'] ?? 'day');
-        if (!in_array($period, ['day', 'month', 'year'], true)) {
-            $period = 'day';
-        }
+        $period = $this->period();
         $limit = (int) ($_GET['limit'] ?? ($period === 'day' ? 30 : ($period === 'month' ? 24 : 8)));
         $this->json($this->service->series($period, $limit));
+    }
+
+    /** GET /api/admin/stats/analytics?period=day|month|year — 통계 탭 종합 분석 */
+    public function analytics(): void
+    {
+        $period = $this->period();
+        $limit = (int) ($_GET['limit'] ?? ($period === 'day' ? 30 : ($period === 'month' ? 24 : 8)));
+        $this->json($this->service->analytics($period, $limit));
+    }
+
+    private function period(): string
+    {
+        $p = (string) ($_GET['period'] ?? 'day');
+        return in_array($p, ['day', 'month', 'year'], true) ? $p : 'day';
     }
 
     private function json(mixed $payload, int $status = 200): void
