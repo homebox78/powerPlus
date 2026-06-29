@@ -67,7 +67,7 @@ export default function AssetGrid({
       <div className="empty">
         <img src="assets/state-empty.png" alt="" style={{ width: 150, height: "auto", marginBottom: 6 }} />
         <div className="empty__title">{emptyTitle}</div>
-        <div className="empty__sub">{emptySub}</div>
+        <div className="empty__sub" style={{ whiteSpace: "pre-line" }}>{emptySub}</div>
       </div>
     );
   }

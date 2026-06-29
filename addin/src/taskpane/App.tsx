@@ -352,7 +352,7 @@ export default function App() {
         ? "최근 본 자료가 없어요"
         : "자료가 없어요";
   const emptySub = activeQuery
-    ? `‘${activeQuery}’와 일치하는 자료를 찾지 못했어요. 다른 키워드로 검색해 보세요.`
+    ? `‘${activeQuery}’와 일치하는 자료를 찾지 못했어요.\n다른 키워드로 검색해 보세요.`
     : view === "favorites"
       ? "카드의 별을 눌러 자주 쓰는 자료를 모아보세요."
       : view === "recent"
