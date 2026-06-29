@@ -27,7 +27,9 @@ export async function fetchAssets(
   page = 1,
   limit = 60,
   signal?: AbortSignal,
-  sort: string = "latest"
+  sort: string = "latest",
+  kind: string = "",
+  ptype: string = ""
 ): Promise<FetchResult> {
   const params = new URLSearchParams({
     category,
@@ -36,6 +38,8 @@ export async function fetchAssets(
     limit: String(limit),
     sort,
   });
+  if (kind) params.set("kind", kind);
+  if (ptype) params.set("ptype", ptype);
 
   const token = getToken();
 

@@ -22,8 +22,10 @@ final class AssetController
         $limit    = (int) ($query['limit'] ?? 50);
         $limit    = max(1, min(2000, $limit ?: 50));
         $sort     = isset($query['sort']) ? (string) $query['sort'] : 'latest';
+        $kind     = isset($query['kind']) ? (string) $query['kind'] : '';   // package|single
+        $ptype    = isset($query['ptype']) ? (string) $query['ptype'] : ''; // cover|toc|divider|content|greeting|qa|etc
 
-        $this->json($this->service->list($category, $q, $page, $limit, $sort));
+        $this->json($this->service->list($category, $q, $page, $limit, $sort, $kind, $ptype));
     }
 
     /** GET /api/assets/{id}/similar — 유사 자산 추천 */

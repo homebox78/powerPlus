@@ -85,6 +85,7 @@ export default function App() {
 
   const [view, setView] = React.useState<string>("all"); // 추천/즐겨찾기/최근
   const [cat, setCat] = React.useState("all"); // 컴포저 카테고리 pill
+  const [pptFilter, setPptFilter] = React.useState("all"); // 장표 서브필터(전체/패키지/표지/간지/콘텐츠…)
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
   const [sort, setSort] = React.useState("popular");
@@ -135,6 +136,24 @@ export default function App() {
   const PAGE_SIZE = 60;
   const isSpecial = view === "favorites" || view === "recent";
   const serverCategory = isSpecial ? "all" : cat;
+  // 장표(ppt) 서브필터: 유형/페이지 그룹핑
+  const PPT_FILTERS: { key: string; label: string; kind?: string; ptype?: string }[] = [
+    { key: "all", label: "전체" },
+    { key: "package", label: "패키지", kind: "package" },
+    { key: "cover", label: "표지", ptype: "cover" },
+    { key: "toc", label: "목차", ptype: "toc" },
+    { key: "divider", label: "간지", ptype: "divider" },
+    { key: "content", label: "콘텐츠", ptype: "content" },
+    { key: "greeting", label: "인사말", ptype: "greeting" },
+    { key: "qa", label: "Q&A", ptype: "qa" },
+    { key: "etc", label: "기타", ptype: "etc" },
+  ];
+  const isPpt = !isSpecial && cat === "ppt";
+  const pf = PPT_FILTERS.find((f) => f.key === pptFilter);
+  const pptKind = isPpt ? pf?.kind ?? "" : "";
+  const pptType = isPpt ? pf?.ptype ?? "" : "";
+  // 카테고리 바뀌면 장표 서브필터 초기화
+  React.useEffect(() => { setPptFilter("all"); }, [cat]);
 
   // 카테고리 + 전체 수 + 공지 로드
   React.useEffect(() => {
@@ -154,7 +173,7 @@ export default function App() {
     const ctrl = new AbortController();
     pageRef.current = 1;
     setLoading(true);
-    fetchAssets(serverCategory, activeQuery, 1, isSpecial ? 500 : PAGE_SIZE, ctrl.signal, sort)
+    fetchAssets(serverCategory, activeQuery, 1, isSpecial ? 500 : PAGE_SIZE, ctrl.signal, sort, pptKind, pptType)
       .then((r) => {
         setRawAssets(r.assets);
         setTotal(r.total);
@@ -170,13 +189,13 @@ export default function App() {
         if (!ctrl.signal.aborted) setLoading(false);
       });
     return () => ctrl.abort();
-  }, [view, cat, activeQuery, email, sort]);
+  }, [view, cat, activeQuery, email, sort, pptFilter]);
 
   async function loadMore() {
     setLoadingMore(true);
     try {
       pageRef.current += 1;
-      const r = await fetchAssets(serverCategory, activeQuery, pageRef.current, PAGE_SIZE, undefined, sort);
+      const r = await fetchAssets(serverCategory, activeQuery, pageRef.current, PAGE_SIZE, undefined, sort, pptKind, pptType);
       setRawAssets((prev) => [...prev, ...r.assets]);
       setTotal(r.total);
     } catch (e) {
@@ -205,7 +224,7 @@ export default function App() {
     );
     io.observe(sentinel);
     return () => io.disconnect();
-  }, [hasMore, loadingMore, serverCategory, activeQuery, sort]);
+  }, [hasMore, loadingMore, serverCategory, activeQuery, sort, pptFilter]);
 
   const displayed = React.useMemo(() => {
     if (view === "favorites") return rawAssets.filter((a) => favorites.has(a.id));
@@ -516,6 +535,29 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {/* 장표 서브필터: 유형/페이지 그룹핑 */}
+      {isPpt && !similarOf && (
+        <div className="ppt-subfilter" style={{ display: "flex", gap: 6, overflowX: "auto", padding: "0 12px 8px", WebkitOverflowScrolling: "touch" }}>
+          {PPT_FILTERS.map((f) => {
+            const on = pptFilter === f.key;
+            return (
+              <button
+                key={f.key}
+                onClick={() => setPptFilter(f.key)}
+                style={{
+                  flex: "0 0 auto", padding: "5px 13px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+                  border: "1px solid " + (on ? "#E0701F" : "#E8ECF1"),
+                  background: on ? "#E0701F" : "#fff", color: on ? "#fff" : "#566070",
+                  cursor: "pointer", whiteSpace: "nowrap",
+                }}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* 그리드 */}
       <div className="app__body" ref={bodyRef}>

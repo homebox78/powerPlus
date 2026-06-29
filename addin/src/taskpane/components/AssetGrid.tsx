@@ -17,6 +17,17 @@ interface Props {
 // 카드 썸네일 배경: 흰색 (사용자 요청)
 const CARD_BG = "#ffffff";
 
+// 장표(ppt) 유형 배지 라벨
+const PPT_PAGE_LABEL: Record<string, string> = {
+  cover: "표지", toc: "목차", divider: "간지", content: "콘텐츠",
+  greeting: "인사말", qa: "Q&A", etc: "기타",
+};
+function pptBadge(a: Asset): string | null {
+  if (a.slide_kind === "package") return "패키지";
+  if (a.slide_kind === "single" && a.slide_page) return PPT_PAGE_LABEL[a.slide_page] || "기타";
+  return null;
+}
+
 // 즐겨찾기 = 북마크(스크랩) 아이콘
 const StarIcon = ({ on }: { on: boolean }) => (
   <svg width="14" height="15" viewBox="0 0 24 24" fill={on ? "#f0566a" : "none"} stroke={on ? "#f0566a" : "#aeb7c4"} strokeWidth={on ? 1.2 : 1.6}>
@@ -34,7 +45,6 @@ export default function AssetGrid({
   onInsert,
   isFavorite,
   onToggleFavorite,
-  onShowSimilar,
   emptyTitle = "자료가 없어요",
   emptySub = "다른 카테고리를 선택해 보세요.",
   loading = false,
@@ -101,30 +111,32 @@ export default function AssetGrid({
             >
               <StarIcon on={fav} />
             </button>
-            {onShowSimilar && (
-              <button
-                className="card__similar"
-                title="비슷한 자산 보기"
-                aria-label="비슷한 자산 보기"
-                onClick={() => onShowSimilar(a)}
-                style={{
-                  position: "absolute",
-                  left: 6,
-                  top: 6,
-                  border: "none",
-                  borderRadius: 6,
-                  padding: "2px 7px",
-                  fontSize: 11,
-                  lineHeight: "16px",
-                  color: "#3b4757",
-                  background: "rgba(255,255,255,0.88)",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-                  cursor: "pointer",
-                }}
-              >
-                유사
-              </button>
-            )}
+            {(() => {
+              const badge = pptBadge(a);
+              if (!badge) return null;
+              const isPkg = a.slide_kind === "package";
+              return (
+                <span
+                  className="card__type"
+                  style={{
+                    position: "absolute",
+                    left: 6,
+                    top: 6,
+                    padding: "2px 8px",
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: "16px",
+                    color: "#fff",
+                    background: isPkg ? "#E0701F" : "#3A6EA5",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {badge}
+                </span>
+              );
+            })()}
           </div>
         );
       })}

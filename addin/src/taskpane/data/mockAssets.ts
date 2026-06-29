@@ -14,6 +14,8 @@ export interface Asset {
   image_url?: string; // 서버 업로드 자산: PNG/JPG 원본 URL (삽입에 사용)
   thumb_url?: string; // 목록 표시용 축소 썸네일 URL (없으면 image_url 폴백)
   slide_url?: string; // 장표(ppt) 자산: .pptx URL (있으면 슬라이드로 삽입)
+  slide_kind?: string; // 장표: 'package' | 'single'
+  slide_page?: string; // 장표 single: 'cover'|'toc'|'divider'|'content'|'greeting'|'qa'|'etc'
 }
 
 export interface Category {

@@ -32,7 +32,7 @@ final class AssetService
      * 카테고리 + 검색어(태그/이름) 필터 + 정렬 + 페이지네이션.
      * @return array{data:array<int,array>,total:int,page:int,limit:int}
      */
-    public function list(string $category, string $q, int $page, int $limit, string $sort = 'latest'): array
+    public function list(string $category, string $q, int $page, int $limit, string $sort = 'latest', string $slideKind = '', string $slidePage = ''): array
     {
         $pdo = Database::pdo();
         $where = [];
@@ -41,6 +41,15 @@ final class AssetService
         if ($category !== '' && $category !== 'all') {
             $where[] = 'a.category = :category';
             $whereParams[':category'] = $category;
+        }
+        // 장표(ppt) 세부 필터: 유형(package/single) · 페이지 종류(cover/toc/divider/…)
+        if ($slideKind !== '') {
+            $where[] = 'a.slide_kind = :skind';
+            $whereParams[':skind'] = $slideKind;
+        }
+        if ($slidePage !== '') {
+            $where[] = 'a.slide_page = :spage';
+            $whereParams[':spage'] = $slidePage;
         }
 
         // 자연어 질의: 토큰화 → 동의어/한↔영/색상 확장 → 가중 관련도 점수
