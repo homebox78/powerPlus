@@ -7,6 +7,8 @@ interface Props {
   onInsert: (asset: Asset) => void;
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (id: string) => void;
+  /** 전달 시 카드에 "유사" 버튼 노출 → 비슷한 자산 추천 */
+  onShowSimilar?: (asset: Asset) => void;
   emptyTitle?: string;
   emptySub?: string;
   loading?: boolean;
@@ -32,6 +34,7 @@ export default function AssetGrid({
   onInsert,
   isFavorite,
   onToggleFavorite,
+  onShowSimilar,
   emptyTitle = "자료가 없어요",
   emptySub = "다른 카테고리를 선택해 보세요.",
   loading = false,
@@ -98,6 +101,30 @@ export default function AssetGrid({
             >
               <StarIcon on={fav} />
             </button>
+            {onShowSimilar && (
+              <button
+                className="card__similar"
+                title="비슷한 자산 보기"
+                aria-label="비슷한 자산 보기"
+                onClick={() => onShowSimilar(a)}
+                style={{
+                  position: "absolute",
+                  left: 6,
+                  top: 6,
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "2px 7px",
+                  fontSize: 11,
+                  lineHeight: "16px",
+                  color: "#3b4757",
+                  background: "rgba(255,255,255,0.88)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+                  cursor: "pointer",
+                }}
+              >
+                유사
+              </button>
+            )}
           </div>
         );
       })}

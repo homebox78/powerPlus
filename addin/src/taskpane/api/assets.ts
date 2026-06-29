@@ -59,3 +59,29 @@ export async function fetchAssets(
     return { assets: page === 1 ? all : [], total: all.length, offline: true };
   }
 }
+
+/** 특정 자산과 유사한 자산 추천 목록(태그 중첩 기반). 실패 시 빈 배열. */
+export async function fetchSimilar(
+  id: string,
+  limit = 12,
+  signal?: AbortSignal
+): Promise<Asset[]> {
+  const token = getToken();
+  try {
+    const res = await fetch(
+      `${API_BASE}/assets/${encodeURIComponent(id)}/similar?limit=${limit}`,
+      {
+        signal,
+        cache: "no-store",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
+    if (res.status === 401) throw new AuthRequiredError("로그인이 필요합니다.");
+    if (!res.ok) throw new Error(`서버 응답 ${res.status}`);
+    const body = (await res.json()) as { data: Asset[] };
+    return body.data ?? [];
+  } catch (e) {
+    if (signal?.aborted || e instanceof AuthRequiredError) throw e;
+    return [];
+  }
+}

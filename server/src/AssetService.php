@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Config.php';
+require_once __DIR__ . '/SearchLexicon.php';
 
 /** 자산 조회/검색/CRUD. SQL은 모두 prepared statement. */
 final class AssetService
@@ -35,34 +36,78 @@ final class AssetService
     {
         $pdo = Database::pdo();
         $where = [];
-        $params = [];
+        $whereParams = [];   // COUNT/WHERE 용
+        $scoreParams = [];   // 관련도 점수식 전용(SELECT 에서만 사용)
         if ($category !== '' && $category !== 'all') {
             $where[] = 'a.category = :category';
-            $params[':category'] = $category;
+            $whereParams[':category'] = $category;
         }
+
+        // 자연어 질의: 토큰화 → 동의어/한↔영/색상 확장 → 가중 관련도 점수
+        $scoreExpr = null;
         $q = trim($q);
         if ($q !== '') {
-            // 태그(JSON 텍스트) 또는 이름 부분일치.
-            // ATTR_EMULATE_PREPARES=false 에서는 같은 명명 파라미터 재사용 불가 → :q1/:q2 분리.
-            $where[] = '(a.tags LIKE :q1 OR a.name LIKE :q2)';
-            $params[':q1'] = '%' . $q . '%';
-            $params[':q2'] = '%' . $q . '%';
+            $tokens = SearchLexicon::tokenize($q);
+            $terms = [];
+            foreach ($tokens as $tok) {
+                foreach (SearchLexicon::expand($tok) as $t) {
+                    $t = trim($t);
+                    if ($t !== '' && !in_array($t, $terms, true)) $terms[] = $t;
+                }
+            }
+            $terms = array_slice($terms, 0, 24);
+            $catHints = SearchLexicon::categoryHints($tokens);
+
+            $scoreParts = [];
+            $orParts = [];
+            $i = 0;
+            foreach ($terms as $t) {
+                $like = '%' . $t . '%';
+                $quoted = '%"' . $t . '"%';          // JSON 태그 거의-정확 매칭
+                $a = ":a$i"; $b = ":b$i"; $c = ":c$i"; $d = ":d$i"; $e = ":e$i";
+                $scoreParams[$a] = $like;            // name 부분일치(점수)
+                $scoreParams[$b] = $quoted;          // tags 정확태그(점수)
+                $scoreParams[$c] = $like;            // tags 부분일치(점수)
+                $whereParams[$d] = $like;            // tags 부분일치(조건)
+                $whereParams[$e] = $like;            // name 부분일치(조건)
+                $scoreParts[] = "(a.name LIKE $a)*4 + (a.tags LIKE $b)*3 + (a.tags LIKE $c)*1";
+                $orParts[] = "a.tags LIKE $d OR a.name LIKE $e";
+                $i++;
+            }
+            $j = 0;
+            foreach ($catHints as $ch) {
+                $cs = ":cs$j"; $cw = ":cw$j";
+                $scoreParams[$cs] = $ch;             // 카테고리 힌트 가점
+                $whereParams[$cw] = $ch;             // 카테고리 힌트도 결과에 포함
+                $scoreParts[] = "(a.category = $cs)*5";
+                $orParts[] = "a.category = $cw";
+                $j++;
+            }
+            if ($orParts) {
+                $where[] = '(' . implode(' OR ', $orParts) . ')';
+                $scoreExpr = '(' . implode(' + ', $scoreParts) . ')';
+            }
         }
+
         $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
         $countStmt = $pdo->prepare("SELECT COUNT(*) FROM assets a $whereSql");
-        $countStmt->execute($params);
+        $countStmt->execute($whereParams);
         $total = (int) $countStmt->fetchColumn();
 
         $cols = preg_replace('/(^|,\s*)/', '$1a.', self::COLS); // 모든 컬럼에 a. 별칭
         $offset = ($page - 1) * $limit;
+        // 검색어가 있으면 관련도 우선 정렬, 그다음 선택한 정렬을 타이브레이크로.
+        $orderSql = $scoreExpr
+            ? ('ORDER BY _score DESC, ' . substr(self::orderBy($sort), strlen('ORDER BY ')))
+            : self::orderBy($sort);
+        $scoreSel = $scoreExpr ? ", $scoreExpr AS _score" : '';
         $stmt = $pdo->prepare(
-            "SELECT $cols, " . self::COUNT_COLS . " FROM assets a $whereSql "
-            . self::orderBy($sort) . ' LIMIT :limit OFFSET :offset'
+            "SELECT $cols, " . self::COUNT_COLS . "$scoreSel FROM assets a $whereSql "
+            . $orderSql . ' LIMIT :limit OFFSET :offset'
         );
-        foreach ($params as $k => $v) {
-            $stmt->bindValue($k, $v);
-        }
+        foreach ($whereParams as $k => $v) $stmt->bindValue($k, $v);
+        foreach ($scoreParams as $k => $v) $stmt->bindValue($k, $v);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -73,6 +118,58 @@ final class AssetService
             'page'  => $page,
             'limit' => $limit,
         ];
+    }
+
+    /**
+     * 유사 자산 추천: 대상 자산의 태그를 공유하는 자산을 태그 중첩 수로 점수화.
+     * 같은 카테고리 가점. 자기 자신 제외. (임베딩 도입 시 이 메서드를 벡터 검색으로 교체)
+     */
+    public function similar(string $id, int $limit = 12): array
+    {
+        $asset = $this->find($id);
+        if ($asset === null) return ['data' => []];
+        $tags = array_slice(array_values(array_unique($asset['tags'] ?? [])), 0, 16);
+        $pdo = Database::pdo();
+
+        $scoreParts = []; $orParts = [];
+        $whereParams = [':self' => $id];
+        $scoreParams = [];
+        $i = 0;
+        foreach ($tags as $t) {
+            $t = trim((string) $t);
+            if ($t === '') continue;
+            $quoted = '%"' . $t . '"%';
+            $s = ":s$i"; $w = ":w$i";
+            $scoreParams[$s] = $quoted;
+            $whereParams[$w] = $quoted;
+            $scoreParts[] = "(a.tags LIKE $s)*1";
+            $orParts[] = "a.tags LIKE $w";
+            $i++;
+        }
+        // 카테고리 가점(+ 태그가 없으면 같은 카테고리로 폴백)
+        $scoreParams[':cats'] = $asset['category'];
+        $scoreParts[] = "(a.category = :cats)*2";
+        if (!$orParts) {
+            $whereParams[':catw'] = $asset['category'];
+            $orParts[] = 'a.category = :catw';
+        }
+        $scoreExpr = $scoreParts ? '(' . implode(' + ', $scoreParts) . ')' : '0';
+        $whereOr = '(' . implode(' OR ', $orParts) . ')';
+
+        $cols = preg_replace('/(^|,\s*)/', '$1a.', self::COLS);
+        $stmt = $pdo->prepare(
+            "SELECT $cols, " . self::COUNT_COLS . ", $scoreExpr AS _score
+             FROM assets a
+             WHERE a.id <> :self AND $whereOr
+             ORDER BY _score DESC, views DESC, a.id
+             LIMIT :limit"
+        );
+        foreach ($whereParams as $k => $v) $stmt->bindValue($k, $v);
+        foreach ($scoreParams as $k => $v) $stmt->bindValue($k, $v);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return ['data' => array_map([$this, 'hydrate'], $stmt->fetchAll())];
     }
 
     public function find(string $id): ?array
@@ -176,6 +273,7 @@ final class AssetService
     /** tags(통합/ko/en) → 배열, image_path → 전체 URL(image_url). svg(구 mock)도 그대로 유지. */
     private function hydrate(array $row): array
     {
+        unset($row['_score']); // 관련도 점수는 내부용 — 응답에서 제외
         // 인기/즐겨찾기 순위용 카운트 (list 쿼리에서만 존재)
         if (array_key_exists('views', $row)) {
             $row['views'] = (int) $row['views'];

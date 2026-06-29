@@ -3,7 +3,7 @@ import AssetGrid from "./components/AssetGrid";
 import Login from "./components/Login";
 import { CATEGORIES } from "./data/mockAssets";
 import type { Asset, Category } from "./data/mockAssets";
-import { fetchAssets, AuthRequiredError } from "./api/assets";
+import { fetchAssets, fetchSimilar, AuthRequiredError } from "./api/assets";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
 import { recordUsage } from "./api/usage";
 import { fetchCategories } from "./api/categories";
@@ -118,6 +118,10 @@ export default function App() {
   const [reqSubmitted, setReqSubmitted] = React.useState(false);
 
   const [rawAssets, setRawAssets] = React.useState<Asset[]>([]);
+  // 유사 자산 추천 모드
+  const [similarOf, setSimilarOf] = React.useState<Asset | null>(null);
+  const [similarList, setSimilarList] = React.useState<Asset[]>([]);
+  const [similarLoading, setSimilarLoading] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [offline, setOffline] = React.useState(false);
   const [total, setTotal] = React.useState(0);
@@ -219,6 +223,27 @@ export default function App() {
       recordUsage(asset.id);
     }
   }
+
+  // 비슷한 자산 보기
+  async function handleShowSimilar(asset: Asset) {
+    setSimilarOf(asset);
+    setSimilarLoading(true);
+    try {
+      setSimilarList(await fetchSimilar(asset.id, 24));
+    } finally {
+      setSimilarLoading(false);
+    }
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+  }
+  function clearSimilar() {
+    setSimilarOf(null);
+    setSimilarList([]);
+  }
+  // 카테고리/검색/세그먼트가 바뀌면 유사 모드 해제
+  React.useEffect(() => {
+    setSimilarOf(null);
+    setSimilarList([]);
+  }, [cat, activeQuery, view]);
 
   async function handleLogout() {
     await logout();
@@ -413,7 +438,16 @@ export default function App() {
 
       {/* 홈 (인사말/검색바 + 세그먼트 + 카운트/정렬) */}
       <div className="home">
-        {activeQuery ? (
+        {similarOf ? (
+          <div className="querybar">
+            <span className="querybar__text">
+              ‘<b>{similarOf.name || similarOf.tags?.[0] || similarOf.id}</b>’와 비슷한 자산 {similarList.length}개
+            </span>
+            <button className="querybar__clear" onClick={clearSimilar}>
+              닫기
+            </button>
+          </div>
+        ) : activeQuery ? (
           <div className="querybar">
             <span className="querybar__text">
               ‘<b>{activeQuery}</b>’ 검색 결과 {count}개
@@ -486,14 +520,15 @@ export default function App() {
       {/* 그리드 */}
       <div className="app__body" ref={bodyRef}>
         <AssetGrid
-          assets={displayed}
+          assets={similarOf ? similarList : displayed}
           insertingId={insertingId}
           onInsert={handleInsert}
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
-          emptyTitle={emptyTitle}
-          emptySub={emptySub}
-          loading={loading}
+          onShowSimilar={handleShowSimilar}
+          emptyTitle={similarOf ? "비슷한 자산이 없어요" : emptyTitle}
+          emptySub={similarOf ? "다른 자산에서 다시 시도해 보세요." : emptySub}
+          loading={similarOf ? similarLoading : loading}
         />
         <div ref={sentinelRef} className="scroll-sentinel" aria-hidden />
         {loadingMore && (

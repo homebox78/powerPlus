@@ -26,6 +26,13 @@ final class AssetController
         $this->json($this->service->list($category, $q, $page, $limit, $sort));
     }
 
+    /** GET /api/assets/{id}/similar — 유사 자산 추천 */
+    public function similar(string $id, array $query = []): void
+    {
+        $limit = max(1, min(50, (int) ($query['limit'] ?? 12)));
+        $this->json($this->service->similar($id, $limit));
+    }
+
     /** GET /api/assets/{id} */
     public function get(string $id): void
     {
