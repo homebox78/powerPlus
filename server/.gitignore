@@ -1,5 +1,5 @@
-/config/config.php
-/config/deploy.env
+# config 폴더 전체 비추적 — 비밀 설정(DB·메일·FTP)·SSH 키 포함, 절대 커밋 금지
+/config/
 vendor/
 *.log
 .env
