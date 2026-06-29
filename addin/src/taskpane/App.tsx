@@ -475,11 +475,7 @@ export default function App() {
               전체 보기
             </button>
           </div>
-        ) : (
-          <div className="greeting">
-            무엇을 찾아드릴까요? <span style={{ fontSize: 16 }}>👋</span>
-          </div>
-        )}
+        ) : null}
 
         <div className="segmented">
           {VIEWS.map((v) => (
