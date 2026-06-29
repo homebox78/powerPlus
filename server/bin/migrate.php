@@ -12,7 +12,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS categories (
   sort_order INT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 $pdo->exec("INSERT IGNORE INTO categories (`key`,label,sort_order) VALUES
-  ('icon','아이콘',1),('photo','사진',2),('illust','일러스트',3),('diagram','다이어그램',4),('ppt','장표',5)");
+  ('icon','아이콘',1),('photo','사진',2),('illust','일러스트',3),('diagram','다이어그램',4),('ppt','장표',5),('logo','로고',6)");
 
 // 썸네일 경로 컬럼 (목록 표시용 축소 이미지 — 삽입은 원본 image_path 사용)
 $hasThumb = (int) $pdo->query(
