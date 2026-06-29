@@ -14,8 +14,8 @@ interface Props {
   loading?: boolean;
 }
 
-// 카드 썸네일 배경: 흰색 (사용자 요청)
-const CARD_BG = "#ffffff";
+// 카드 썸네일 배경: 약간의 미색 — 흰색 로고도 묻히지 않고 보이도록 (사용자 요청)
+const CARD_BG = "#f3f2ee";
 
 // 장표(ppt) 유형 배지 라벨
 const PPT_PAGE_LABEL: Record<string, string> = {

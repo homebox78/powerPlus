@@ -45,4 +45,8 @@ Options -Indexes
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
+  # 애드인 본체(app/)는 항상 재검증 — 배포 후 캐시로 옛 화면이 남는 문제 방지
+  <FilesMatch "^(taskpane|commands)\.(html|js)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
 </IfModule>
