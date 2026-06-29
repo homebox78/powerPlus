@@ -8,6 +8,9 @@ dist/
 *.pem
 *.key
 deploy.env
+ftp.env
+# 루트 config/ 는 시크릿 포함·미사용(코드는 server/config/ 를 읽음) — git 제외
+/config/
 
 # 원본 자산 대용량 폴더 — git 아닌 서버(uploads)에 보관
 /data/
