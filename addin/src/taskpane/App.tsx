@@ -15,13 +15,12 @@ import type { Announcement } from "./api/announcements";
 import { submitRequest } from "./api/requests";
 
 const SORTS = [
-  { key: "default", label: "등록순" },
-  { key: "popular", label: "인기순" },
   { key: "latest", label: "최신순" },
+  { key: "popular", label: "인기순" },
   { key: "favorites", label: "즐겨찾기순" },
   { key: "name", label: "이름순" },
 ];
-const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "등록순";
+const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "최신순";
 
 const VIEWS = [
   { key: "all", label: "전체" },
@@ -92,7 +91,7 @@ export default function App() {
   const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
-  const [sort, setSort] = React.useState("default"); // 디폴트=등록순
+  const [sort, setSort] = React.useState("latest"); // 디폴트=최신순(새 자료 먼저)
   const [cats, setCats] = React.useState<Category[]>(CATEGORIES);
   const [grandTotal, setGrandTotal] = React.useState<number | null>(null);
 
@@ -197,18 +196,17 @@ export default function App() {
 
   // 검색 완료 → "N개 찾았어요" 플래시. **검색 버튼을 눌렀을 때(searchAnim)만** — 탭/카테고리 이동 제외.
   const prevLoadingRef = React.useRef(false);
+  const flashTimer = React.useRef<number | undefined>(undefined); // 자동 사라짐 타이머(ref로 보관 → effect 재실행에 취소되지 않음)
   React.useEffect(() => {
     if (prevLoadingRef.current && !loading && searchAnim) {
       setSearchAnim(false); // 한 번만 — 이후 탭 이동 시 재발동 방지
       if (total > 0) {
         setFoundFlash(total);
-        const t = window.setTimeout(() => setFoundFlash(null), 1700);
-        prevLoadingRef.current = loading;
-        return () => window.clearTimeout(t);
+        if (flashTimer.current) window.clearTimeout(flashTimer.current);
+        flashTimer.current = window.setTimeout(() => setFoundFlash(null), 1700);
       }
     }
     prevLoadingRef.current = loading;
-    return undefined;
   }, [loading, searchAnim, total]);
 
   async function loadMore() {
@@ -605,6 +603,7 @@ export default function App() {
           emptyTitle={similarOf ? "비슷한 자산이 없어요" : emptyTitle}
           emptySub={similarOf ? "다른 자산에서 다시 시도해 보세요." : emptySub}
           loading={similarOf ? similarLoading : loading}
+          cols={!isSpecial && (cat === "icon" || cat === "illust") ? 3 : 2}
         />
         <div ref={sentinelRef} className="scroll-sentinel" aria-hidden />
         {loadingMore && (

@@ -12,6 +12,8 @@ interface Props {
   emptyTitle?: string;
   emptySub?: string;
   loading?: boolean;
+  /** 한 줄에 몇 개(아이콘/일러스트=3, 그 외=2) */
+  cols?: number;
 }
 
 // 카드 썸네일 배경: 약간의 미색 — 흰색 로고도 묻히지 않고 보이도록 (사용자 요청)
@@ -48,11 +50,13 @@ export default function AssetGrid({
   emptyTitle = "자료가 없어요",
   emptySub = "다른 카테고리를 선택해 보세요.",
   loading = false,
+  cols = 2,
 }: Props) {
+  const gridStyle = { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } as React.CSSProperties;
   // 첫 로딩 → 스켈레톤
   if (loading && assets.length === 0) {
     return (
-      <div className="grid" aria-busy="true" aria-label="불러오는 중">
+      <div className="grid" style={gridStyle} aria-busy="true" aria-label="불러오는 중">
         {Array.from({ length: 9 }).map((_, i) => (
           <div key={i} className="card card--skeleton">
             <div className="skel skel--thumb" />
@@ -73,7 +77,7 @@ export default function AssetGrid({
   }
 
   return (
-    <div className="grid">
+    <div className="grid" style={gridStyle}>
       {assets.map((a) => {
         const fav = isFavorite(a.id);
         const label = a.name || a.tags?.[0] || a.id;
@@ -82,7 +86,7 @@ export default function AssetGrid({
           <div key={a.id} className="card">
             <button
               className="card__btn"
-              title={`${label} — 클릭하면 슬라이드에 삽입`}
+              title={a.tags?.length ? a.tags.slice(0, 4).join(" · ") : label}
               disabled={inserting}
               onClick={() => onInsert(a)}
             >
@@ -98,6 +102,16 @@ export default function AssetGrid({
                     <span className="spinner" />
                   </span>
                 )}
+                {/* 호버 시 등록된 태그 미리보기(이미지만으론 모를 때) */}
+                {a.tags?.length ? (
+                  <span className="card__tags" aria-hidden>
+                    {a.tags.slice(0, 4).map((t, i) => (
+                      <span key={i} className="card__tag">
+                        {t}
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
               </div>
             </button>
             <button
