@@ -10,6 +10,8 @@ declare(strict_types=1);
  *       curl "https://.../enrich-colors.php?key=pp_enrich_7Yq2"
  */
 if (($_GET['key'] ?? '') !== 'pp_enrich_7Yq2') { http_response_code(404); exit; }
+@set_time_limit(0);
+@ignore_user_abort(true);
 header('Content-Type: text/plain; charset=utf-8');
 require __DIR__ . '/src/Database.php';
 require __DIR__ . '/src/AssetService.php';

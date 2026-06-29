@@ -21,6 +21,8 @@ declare(strict_types=1);
  *       처리한 파일은 _imported/ppt/ 로 이동(중복 등록 방지).
  */
 if (($_GET['key'] ?? '') !== 'pp_import_ppt_7Yq2') { http_response_code(404); exit; }
+@set_time_limit(0);          // 618개 처리 — 실행시간 제한 해제
+@ignore_user_abort(true);    // curl 끊겨도 끝까지 진행
 header('Content-Type: text/plain; charset=utf-8');
 require __DIR__ . '/src/Database.php';
 require __DIR__ . '/src/AssetService.php';
