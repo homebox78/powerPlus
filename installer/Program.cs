@@ -96,7 +96,11 @@ public class MainForm : Form
         c.Settings.AreDevToolsEnabled = false;
         c.WebMessageReceived += OnMessage;
         c.NavigationCompleted += (_, __) =>
+        {
             Post(new { @event = "path", path = _installPath });
+            var (status, label) = DetectOffice();        // Office 버전 감지 → 미지원이면 안내
+            Post(new { @event = "office", status, label });
+        };
         c.NavigateToString(ReadResource("installer.html"));
     }
 
@@ -177,6 +181,68 @@ public class MainForm : Form
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("powerpnt.exe") { UseShellExecute = true });
         }
         catch { /* PowerPoint 미설치 등 — 무시 */ }
+    }
+
+    // 설치된 Office 버전을 감지한다. powerPlus(React18 작업창)는 WebView2 엔진이 필요한
+    //   Microsoft 365 / Office 2021·2019 이상에서만 동작 → 2016 등 구버전은 IE11 웹뷰라 미지원.
+    //   status: "ok" 정상 / "unsupported" 구버전 / "none" 미감지. (감지 실패는 막지 않고 ok 처리)
+    static (string status, string label) DetectOffice()
+    {
+        try
+        {
+            // 1) Click-to-Run (Microsoft 365 / 2019 / 2021 / 2024, 그리고 구형 C2R 2016)
+            foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
+            {
+                using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+                using var c2r = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Office\ClickToRun\Configuration");
+                if (c2r == null) continue;
+                string ver = (c2r.GetValue("VersionToReport") as string)
+                          ?? (c2r.GetValue("ClientVersionToReport") as string) ?? "";
+                string ids = (c2r.GetValue("ProductReleaseIds") as string) ?? "";
+                int build = ParseBuild(ver);                  // 16.0.<build>.x — 2016≈4266(<10000), 2019+≈10000+
+                string label = OfficeLabel(ids, ver);
+                bool modern = build >= 10000
+                    || Has(ids, "2019") || Has(ids, "2021") || Has(ids, "2024")
+                    || Has(ids, "365") || Has(ids, "O365") || Has(ids, "Microsoft365");
+                bool old2016 = Has(ids, "2016") || (build > 0 && build < 10000);
+                if (old2016 && !modern) return ("unsupported", label.Length > 0 ? label : "Office 2016");
+                return ("ok", label);
+            }
+            // 2) ClickToRun 없음 = MSI(볼륨) 또는 구버전 — 16.0 MSI는 Office 2016 볼륨
+            foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
+            {
+                using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+                if (HasInstallRoot(hklm, "16.0")) return ("unsupported", "Office 2016 (MSI 볼륨)");
+                if (HasInstallRoot(hklm, "15.0")) return ("unsupported", "Office 2013");
+                if (HasInstallRoot(hklm, "14.0")) return ("unsupported", "Office 2010");
+            }
+            return ("none", "Office 미감지");
+        }
+        catch { return ("ok", ""); }   // 감지 자체 실패 시 설치를 막지 않는다
+    }
+
+    static bool Has(string s, string sub) => s.IndexOf(sub, StringComparison.OrdinalIgnoreCase) >= 0;
+
+    static bool HasInstallRoot(RegistryKey hklm, string ver)
+    {
+        using var k = hklm.OpenSubKey($@"SOFTWARE\Microsoft\Office\{ver}\Common\InstallRoot");
+        return k?.GetValue("Path") is string p && p.Length > 0;
+    }
+
+    static int ParseBuild(string ver)
+    {
+        var parts = (ver ?? "").Split('.');
+        return parts.Length >= 3 && int.TryParse(parts[2], out var b) ? b : 0;
+    }
+
+    static string OfficeLabel(string ids, string ver)
+    {
+        if (Has(ids, "365") || Has(ids, "O365") || Has(ids, "Microsoft365")) return "Microsoft 365";
+        if (Has(ids, "2024")) return "Office 2024";
+        if (Has(ids, "2021")) return "Office 2021";
+        if (Has(ids, "2019")) return "Office 2019";
+        if (Has(ids, "2016")) return "Office 2016";
+        return string.IsNullOrEmpty(ver) ? "Office" : "Office (" + ver + ")";
     }
 
     void Post(object o) => _web.CoreWebView2?.PostWebMessageAsString(JsonSerializer.Serialize(o));
