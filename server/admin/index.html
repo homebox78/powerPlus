@@ -630,9 +630,19 @@
       catch (e) { alert(e.message); }
     }
 
-    /* ── 자산 목록 ── */
+    /* ── 자산 목록 ── (전체를 페이지 단위로 끝까지 로드 — 자산 수가 한도를 넘어도 누락 없게) */
     async function loadAssets() {
-      assets = (await api("/assets?limit=2000")).data || [];
+      const all = []; let page = 1;
+      for (;;) {
+        const r = await api("/assets?limit=2000&page=" + page);
+        const d = (r && r.data) || [];
+        all.push(...d);
+        const total = (r && r.total) || all.length;
+        if (d.length === 0 || all.length >= total) break;
+        page++;
+        if (page > 50) break; // 안전장치
+      }
+      assets = all;
       renderAssets();
     }
     let assetPage = 1;
