@@ -23,6 +23,8 @@ final class AssetService
                 return 'ORDER BY views DESC, a.id';
             case 'favorites': // 즐겨찾기순(많이 즐겨찾기된 순)
                 return 'ORDER BY fav_count DESC, a.id';
+            case 'name':      // 이름순(이름 가나다, 없으면 뒤로)
+                return 'ORDER BY (a.name IS NULL OR a.name = \'\'), a.name, a.id';
             default:          // 기본(등록 순)
                 return 'ORDER BY a.id';
         }

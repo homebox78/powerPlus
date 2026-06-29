@@ -18,6 +18,7 @@ const SORTS = [
   { key: "popular", label: "인기순" },
   { key: "latest", label: "최신순" },
   { key: "favorites", label: "즐겨찾기순" },
+  { key: "name", label: "이름순" },
 ];
 const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "인기순";
 
@@ -87,6 +88,7 @@ export default function App() {
   const [cat, setCat] = React.useState("all"); // 컴포저 카테고리 pill
   const [pptFilter, setPptFilter] = React.useState("all"); // 장표 서브필터(전체/패키지/표지/간지/콘텐츠…)
   const [foundFlash, setFoundFlash] = React.useState<number | null>(null); // "N개 찾았어요" 플래시
+  const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
   const [sort, setSort] = React.useState("popular");
@@ -192,18 +194,21 @@ export default function App() {
     return () => ctrl.abort();
   }, [view, cat, activeQuery, email, sort, pptFilter]);
 
-  // 검색 완료 → "N개 찾았어요" 플래시(잠깐 떴다 사라짐). 검색어가 있고 결과가 있을 때만.
+  // 검색 완료 → "N개 찾았어요" 플래시. **검색 버튼을 눌렀을 때(searchAnim)만** — 탭/카테고리 이동 제외.
   const prevLoadingRef = React.useRef(false);
   React.useEffect(() => {
-    if (prevLoadingRef.current && !loading && activeQuery && total > 0) {
-      setFoundFlash(total);
-      const t = window.setTimeout(() => setFoundFlash(null), 1700);
-      prevLoadingRef.current = loading;
-      return () => window.clearTimeout(t);
+    if (prevLoadingRef.current && !loading && searchAnim) {
+      setSearchAnim(false); // 한 번만 — 이후 탭 이동 시 재발동 방지
+      if (total > 0) {
+        setFoundFlash(total);
+        const t = window.setTimeout(() => setFoundFlash(null), 1700);
+        prevLoadingRef.current = loading;
+        return () => window.clearTimeout(t);
+      }
     }
     prevLoadingRef.current = loading;
     return undefined;
-  }, [loading, activeQuery, total]);
+  }, [loading, searchAnim, total]);
 
   async function loadMore() {
     setLoadingMore(true);
@@ -299,7 +304,9 @@ export default function App() {
   }
 
   function send() {
-    setActiveQuery(query.trim());
+    const q = query.trim();
+    setActiveQuery(q);
+    setSearchAnim(!!q); // 검색 버튼 눌렀을 때만 캐릭터 애니메이션
     setView("all");
     closeMenus();
   }
@@ -414,7 +421,15 @@ export default function App() {
                   <div key={a.id} className={"notif__item" + (open ? " notif__item--open" : "")}>
                     <button
                       className="notif__row"
-                      onClick={() => setAnnExpanded(open ? null : a.id)}
+                      onClick={() => {
+                        const willOpen = !open;
+                        setAnnExpanded(willOpen ? a.id : null);
+                        // 펼쳐서 읽으면 읽음 처리 → 벨 배지/점 상태 갱신
+                        if (willOpen && a.id > annSeen) {
+                          setAnnSeen(a.id);
+                          setAnnSeenState(a.id);
+                        }
+                      }}
                       aria-expanded={open}
                     >
                       <span className="notif__item-title">{a.title}</span>
@@ -598,7 +613,7 @@ export default function App() {
       </div>
 
       {/* 검색 중 — '자료 찾는 중' 캐릭터 레이어 */}
-      {loading && activeQuery && (
+      {loading && searchAnim && (
         <div style={{ position: "absolute", inset: 0, zIndex: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(240,243,246,0.94)", pointerEvents: "none" }}>
           <img src="assets/state-searching.png" alt="" style={{ width: 170, height: "auto" }} />
           <div style={{ marginTop: 6, fontWeight: 700, fontSize: 14, color: "#566070" }}>자료 찾는 중…</div>
