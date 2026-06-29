@@ -536,31 +536,38 @@ export default function App() {
         </div>
       </div>
 
-      {/* 장표 서브필터: 유형/페이지 그룹핑 */}
-      {isPpt && !similarOf && (
-        <div className="ppt-subfilter" style={{ display: "flex", gap: 6, overflowX: "auto", padding: "0 12px 8px", WebkitOverflowScrolling: "touch" }}>
-          {PPT_FILTERS.map((f) => {
-            const on = pptFilter === f.key;
-            return (
-              <button
-                key={f.key}
-                onClick={() => setPptFilter(f.key)}
-                style={{
-                  flex: "0 0 auto", padding: "5px 13px", borderRadius: 999, fontSize: 12, fontWeight: 600,
-                  border: "1px solid " + (on ? "#E0701F" : "#E8ECF1"),
-                  background: on ? "#E0701F" : "#fff", color: on ? "#fff" : "#566070",
-                  cursor: "pointer", whiteSpace: "nowrap",
-                }}
-              >
-                {f.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       {/* 그리드 */}
       <div className="app__body" ref={bodyRef}>
+        {/* 장표 서브필터: 유형/페이지 그룹핑 — 그리드 상단 고정(sticky) */}
+        {isPpt && !similarOf && (
+          <div
+            className="ppt-subfilter"
+            style={{
+              position: "sticky", top: 0, zIndex: 5,
+              display: "flex", gap: 6, overflowX: "auto",
+              padding: "8px 15px 10px", background: "var(--bg)",
+              borderBottom: "1px solid var(--line)", WebkitOverflowScrolling: "touch",
+            }}
+          >
+            {PPT_FILTERS.map((f) => {
+              const on = pptFilter === f.key;
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => setPptFilter(f.key)}
+                  style={{
+                    flex: "0 0 auto", padding: "5px 13px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+                    border: "1px solid " + (on ? "#E0701F" : "#E8ECF1"),
+                    background: on ? "#E0701F" : "#fff", color: on ? "#fff" : "#566070",
+                    cursor: "pointer", whiteSpace: "nowrap",
+                  }}
+                >
+                  {f.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
         <AssetGrid
           assets={similarOf ? similarList : displayed}
           insertingId={insertingId}
