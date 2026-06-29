@@ -64,4 +64,53 @@ final class UsageService
             'favorites' => (int) $pdo->query('SELECT COUNT(*) FROM user_favorites')->fetchColumn(),
         ];
     }
+
+    /** 자산 총수 + 카테고리별 수 — 대시보드가 전체 자산을 로드하지 않고도 KPI/분포를 그리게. */
+    public function assetCounts(): array
+    {
+        $by = [];
+        foreach (Database::pdo()->query("SELECT category, COUNT(*) c FROM assets GROUP BY category") as $r) {
+            $by[(string) $r['category']] = (int) $r['c'];
+        }
+        return ['total' => array_sum($by), 'byCategory' => $by];
+    }
+
+    /**
+     * 시계열 통계 — 기간 버킷별 방문자수 / 삽입수 / 제안서(장표) 삽입수.
+     * @param string $period 'day'|'month'|'year'
+     * @return array{period:string,points:array<int,array{bucket:string,visits:int,inserts:int,ppt:int}>}
+     */
+    public function series(string $period = 'day', int $limit = 30): array
+    {
+        // 포맷은 화이트리스트로 결정(주입 불가)
+        $fmt = $period === 'year' ? '%Y' : ($period === 'month' ? '%Y-%m' : '%Y-%m-%d');
+        $limit = max(1, min(120, $limit));
+        $pdo = Database::pdo();
+
+        $map = static function (string $sql) use ($pdo): array {
+            $out = [];
+            foreach ($pdo->query($sql) as $r) {
+                $out[(string) $r['b']] = (int) $r['c'];
+            }
+            return $out;
+        };
+        $visits  = $map("SELECT DATE_FORMAT(day, '$fmt') b, COUNT(DISTINCT email) c FROM visits GROUP BY b");
+        $inserts = $map("SELECT DATE_FORMAT(used_at, '$fmt') b, COUNT(*) c FROM usage_log GROUP BY b");
+        $ppt     = $map("SELECT DATE_FORMAT(u.used_at, '$fmt') b, COUNT(*) c FROM usage_log u JOIN assets a ON a.id = u.asset_id WHERE a.category='ppt' GROUP BY b");
+
+        $buckets = array_keys($visits + $inserts + $ppt);
+        sort($buckets);                       // 오래된→최신
+        $buckets = array_slice($buckets, -$limit); // 최근 N개만
+
+        $points = [];
+        foreach ($buckets as $b) {
+            $points[] = [
+                'bucket'  => $b,
+                'visits'  => $visits[$b]  ?? 0,
+                'inserts' => $inserts[$b] ?? 0,
+                'ppt'     => $ppt[$b]     ?? 0,
+            ];
+        }
+        return ['period' => $period, 'points' => $points];
+    }
 }

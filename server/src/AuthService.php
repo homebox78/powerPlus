@@ -143,6 +143,11 @@ final class AuthService
         }
         $pdo->prepare('UPDATE sessions SET last_used_at = NOW() WHERE token_hash = :h')
             ->execute([':h' => $hash]);
+        // 일별 방문 기록(사용자×날짜 1행) — 통계용. 같은 날 재요청은 UNIQUE로 무시.
+        try {
+            $pdo->prepare('INSERT IGNORE INTO visits (email, day, visited_at) VALUES (:e, CURDATE(), NOW())')
+                ->execute([':e' => (string) $email]);
+        } catch (\Throwable $e) { /* 통계 실패가 인증을 막지 않도록 무시 */ }
         return (string) $email;
     }
 

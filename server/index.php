@@ -141,6 +141,15 @@ try {
     }
 
     // ── 사용 통계 (관리자만) ──
+    if (preg_match('#/api/admin/stats/series$#', $path) && $method === 'GET') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        (new UsageController())->series();
+        exit;
+    }
     if (preg_match('#/api/admin/stats$#', $path) && $method === 'GET') {
         $email = (new AuthService())->validateToken(bearer_token() ?? '');
         if (!AdminController::isAdmin($email)) {

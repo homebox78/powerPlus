@@ -3,7 +3,7 @@ import AssetGrid from "./components/AssetGrid";
 import Login from "./components/Login";
 import { CATEGORIES } from "./data/mockAssets";
 import type { Asset, Category } from "./data/mockAssets";
-import { fetchAssets, fetchSimilar, AuthRequiredError } from "./api/assets";
+import { fetchAssets, fetchByIds, fetchSimilar, AuthRequiredError } from "./api/assets";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
 import { recordUsage } from "./api/usage";
 import { fetchCategories } from "./api/categories";
@@ -170,13 +170,27 @@ export default function App() {
     fetchAnnouncements().then(setAnnouncements).catch(() => undefined);
   }, [email]);
 
+  // 즐겨찾기/최근은 id 목록으로만 조회 → 전체(수천) 로드 회피. 정렬상 뒤쪽 자산도 누락 없음.
+  const specialKey = isSpecial
+    ? view === "favorites"
+      ? Array.from(favorites).sort().join(",")
+      : recent.join(",")
+    : "";
+
   // 목록 로드 (뷰/카테고리/검색/정렬 변경 시 1페이지부터)
   React.useEffect(() => {
     if (!email) return;
     const ctrl = new AbortController();
     pageRef.current = 1;
     setLoading(true);
-    fetchAssets(serverCategory, activeQuery, 1, isSpecial ? 500 : PAGE_SIZE, ctrl.signal, sort, pptKind, pptType)
+    const run = isSpecial
+      ? fetchByIds(view === "favorites" ? Array.from(favorites) : recent, ctrl.signal).then((assets) => ({
+          assets,
+          total: assets.length,
+          offline: false,
+        }))
+      : fetchAssets(serverCategory, activeQuery, 1, PAGE_SIZE, ctrl.signal, sort, pptKind, pptType);
+    run
       .then((r) => {
         setRawAssets(r.assets);
         setTotal(r.total);
@@ -192,7 +206,8 @@ export default function App() {
         if (!ctrl.signal.aborted) setLoading(false);
       });
     return () => ctrl.abort();
-  }, [view, cat, activeQuery, email, sort, pptFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, cat, activeQuery, email, sort, pptFilter, specialKey]);
 
   // 검색 완료 → "N개 찾았어요" 플래시. **검색 버튼을 눌렀을 때(searchAnim)만** — 탭/카테고리 이동 제외.
   const prevLoadingRef = React.useRef(false);

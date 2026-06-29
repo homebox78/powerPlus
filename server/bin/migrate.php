@@ -42,6 +42,16 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS usage_log (
   INDEX idx_used (used_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+// 일별 방문 기록 — 인증 시 사용자×날짜 1행(UNIQUE)으로 누적 → 일/월/년 방문자수 통계
+$pdo->exec("CREATE TABLE IF NOT EXISTS visits (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NULL,
+  day DATE NOT NULL,
+  visited_at DATETIME NOT NULL,
+  UNIQUE KEY uniq_day_email (day, email),
+  INDEX idx_day (day)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 // assets 테이블: 업로드 이미지 경로 컬럼 추가 + svg/name 을 선택값(NULL 허용)으로
 $hasCol = (int) $pdo->query(
     "SELECT COUNT(*) FROM information_schema.COLUMNS

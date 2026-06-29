@@ -195,6 +195,16 @@
     .bar-fill { height:100%; border-radius:5px; }
     .ann-link { color:var(--accent); cursor:pointer; text-decoration:none; }
     .ann-link:hover { text-decoration:underline; }
+    /* 방문·사용 추세 (작은 차트) */
+    .trend-block { margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
+    .trend-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .trend-tabs { display:inline-flex; gap:4px; background:#eef1f5; border-radius:8px; padding:3px; }
+    .trend-tab { border:0; background:transparent; font:600 11px Pretendard; color:var(--ink2); padding:3px 9px; border-radius:6px; cursor:pointer; }
+    .trend-tab--active { background:#fff; color:var(--accent); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+    .trend-chart { margin-top:6px; }
+    .trend-chart svg { display:block; }
+    .trend-legend { display:flex; gap:14px; margin-top:8px; font:600 11px Pretendard; color:var(--ink2); }
+    .trend-legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; vertical-align:middle; }
   </style>
 </head>
 <body>
@@ -258,6 +268,22 @@
         <div class="dash-card">
           <div class="dash-h">카테고리별 분포</div>
           <div id="dist-bars" class="dash-bars"></div>
+          <div class="trend-block">
+            <div class="trend-head">
+              <span class="dash-h" style="margin:0">방문·사용 추세</span>
+              <span class="trend-tabs">
+                <button class="trend-tab trend-tab--active" data-tp="day">일별</button>
+                <button class="trend-tab" data-tp="month">월별</button>
+                <button class="trend-tab" data-tp="year">년별</button>
+              </span>
+            </div>
+            <div id="trend-chart" class="trend-chart"></div>
+            <div class="trend-legend">
+              <span><i style="background:#e0701f"></i>방문자</span>
+              <span><i style="background:#3a6ea5"></i>삽입</span>
+              <span><i style="background:#1a9c5b"></i>제안서</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -399,6 +425,7 @@
     const TOKEN_KEY = "pp_admin_token";
     const $ = (id) => document.getElementById(id);
     let categories = [], assets = [], editingId = null, tagsKo = [], tagsEn = [], editingCatKey = null;
+    let catCountMap = {}, assetTotal = 0, assetsLoaded = false; // 대시보드/카테고리는 카운트만(빠름), 전체 자산은 자산탭에서 지연 로드
 
     const token = () => localStorage.getItem(TOKEN_KEY);
     async function api(path, opts = {}) {
@@ -434,7 +461,8 @@
       let me; try { me = await api("/auth/me"); } catch { localStorage.removeItem(TOKEN_KEY); showLogin(); return; }
       if (!me.isAdmin) { showLogin(); setMsg("login-msg","관리자 권한이 없는 계정입니다.","err"); localStorage.removeItem(TOKEN_KEY); return; }
       $("login").classList.add("hidden"); $("main").classList.remove("hidden"); $("who").textContent = me.email;
-      await loadCategories(); await loadAssets(); loadStats();
+      // 대시보드는 카운트만으로 빠르게. 무거운 전체 자산 로드는 자산탭 열 때만(지연).
+      await loadCategories(); loadStats();
     }
 
     /* ── 탭 ── */
@@ -445,6 +473,7 @@
       $("tab-stats").classList.toggle("hidden", t.dataset.tab !== "stats");
       $("tab-ann").classList.toggle("hidden", t.dataset.tab !== "ann");
       $("tab-req").classList.toggle("hidden", t.dataset.tab !== "req");
+      if (t.dataset.tab === "assets") ensureAssets();
       if (t.dataset.tab === "cats") renderCats();
       if (t.dataset.tab === "stats") loadStats();
       if (t.dataset.tab === "ann") loadAnns();
@@ -571,13 +600,16 @@
         `<div class="kpi__label">${label}</div><div class="kpi__value">${value}</div><div class="kpi__sub">${sub}</div></div>`;
       try {
         const r = await api("/admin/stats");
+        // 카운트는 서버 집계(전체 자산 미로드) — 자산탭/카테고리탭도 이 값 사용
+        catCountMap = (r.counts && r.counts.byCategory) || {};
+        assetTotal = (r.counts && r.counts.total) || 0;
         $("dash-kpi").innerHTML =
           kpi("총 삽입 횟수", r.summary.total, "이번 달 누적", "#e0701f") +
-          kpi("전체 자산 수", assets.length, categories.length + "개 카테고리", "#555555") +
-          kpi("사용된 자산", r.summary.unique + " / " + assets.length, "1회 이상 삽입", "#1a9c5b") +
+          kpi("전체 자산 수", assetTotal, categories.length + "개 카테고리", "#555555") +
+          kpi("사용된 자산", r.summary.unique + " / " + assetTotal, "1회 이상 삽입", "#1a9c5b") +
           kpi("총 즐겨찾기", r.summary.favorites ?? 0, "사용자 즐겨찾기 합계", "#f0566a");
         // 카테고리별 분포 (시안: 카테고리별 색상)
-        const counts = categories.map((c) => ({ key: c.key, label: c.label, n: assets.filter((a) => a.category === c.key).length }));
+        const counts = categories.map((c) => ({ key: c.key, label: c.label, n: catCountMap[c.key] || 0 }));
         const max = Math.max(1, ...counts.map((c) => c.n));
         $("dist-bars").innerHTML = counts.length ? counts.map((c) =>
           `<div class="bar-row"><div class="bar-top"><span class="bar-name">${esc(c.label)}</span><span class="bar-num">${c.n}</span></div>` +
@@ -585,7 +617,34 @@
         ).join("") : `<div style="color:var(--muted)">카테고리가 없습니다.</div>`;
         _rankData = { top: r.top || [], fav: r.topFavorites || [] };
         renderRank();
+        loadTrend(); // 방문/삽입 추세 차트
       } catch (e) { $("dash-kpi").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
+    }
+
+    /* ── 방문·사용 추세 차트 ── */
+    let _trendPeriod = "day";
+    document.querySelectorAll(".trend-tab").forEach((b) => b.onclick = () => loadTrend(b.dataset.tp));
+    function shortBucket(b, tp) { return tp === "year" ? b : tp === "month" ? b.slice(2) : b.slice(5); } // YYYY / YY-MM / MM-DD
+    async function loadTrend(period) {
+      const tp = period || _trendPeriod; _trendPeriod = tp;
+      document.querySelectorAll(".trend-tab").forEach((b) => b.classList.toggle("trend-tab--active", b.dataset.tp === tp));
+      try {
+        const r = await api("/admin/stats/series?period=" + tp);
+        const pts = r.points || [];
+        if (!pts.length) { $("trend-chart").innerHTML = '<div style="color:var(--muted);padding:24px 0;text-align:center;font-size:12px">아직 방문/사용 데이터가 없습니다.</div>'; return; }
+        const max = Math.max(1, ...pts.map((p) => Math.max(p.visits, p.inserts, p.ppt)));
+        const H = 150, base = H - 22, top = 8, bw = 7, gap = 2, slot = bw * 3 + gap * 2;
+        const W = Math.max(pts.length * (slot + 16) + 16, 280), step = (W - 16) / pts.length;
+        const barH = (v) => Math.max(v > 0 ? 2 : 0, Math.round(v / max * (base - top)));
+        const bar = (cx, off, v, color) => { const h = barH(v); return `<rect x="${(cx + off).toFixed(1)}" y="${base - h}" width="${bw}" height="${h}" rx="2" fill="${color}"><title>${v}</title></rect>`; };
+        const svg = pts.map((p, i) => {
+          const cx = 8 + i * step + step / 2 - slot / 2;
+          const lx = 8 + i * step + step / 2;
+          return bar(cx, 0, p.visits, "#e0701f") + bar(cx, bw + gap, p.inserts, "#3a6ea5") + bar(cx, (bw + gap) * 2, p.ppt, "#1a9c5b") +
+            `<text x="${lx.toFixed(1)}" y="${H - 6}" font-size="9" fill="#999" text-anchor="middle">${esc(shortBucket(p.bucket, tp))}</text>`;
+        }).join("");
+        $("trend-chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="xMidYMax meet"><line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="#e6eaef" stroke-width="1"/>${svg}</svg>`;
+      } catch (e) { $("trend-chart").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
     }
 
     /* ── 카테고리 ── */
@@ -596,7 +655,7 @@
       $("filter-cat").innerHTML = opts;
       $("f-category").innerHTML = categories.map((c) => `<option value="${esc(c.key)}">${esc(c.label)}</option>`).join("");
     }
-    function catCount(key) { return assets.filter((a) => a.category === key).length; }
+    function catCount(key) { return catCountMap[key] || 0; }
     function renderCats() {
       $("cat-rows").innerHTML = categories.map((c) => `<tr>
         <td class="tc" style="font-weight:700">${esc(c.label)}</td><td class="tc"><code>${esc(c.key)}</code></td><td class="tc" style="font-weight:600">${catCount(c.key)}</td>
@@ -643,8 +702,11 @@
         if (page > 50) break; // 안전장치
       }
       assets = all;
+      assetsLoaded = true;
       renderAssets();
     }
+    // 자산탭 진입 시 1회만 전체 로드(이후 재사용)
+    async function ensureAssets() { if (assetsLoaded) { renderAssets(); } else { await loadAssets(); } }
     let assetPage = 1;
     const PER_PAGE = 30;
     const resetAndRender = () => { assetPage = 1; renderAssets(); };
@@ -671,8 +733,8 @@
       $("asset-count").textContent = list.length
         ? ("전체 " + list.length + "개 · " + assetPage + "/" + totalPages + " 페이지 (페이지당 " + PER_PAGE + "개)") : "";
       $("asset-grid").innerHTML = pageList.length ? pageList.map((a) => {
-        const src = a.thumb_url || a.image_url;
-        const thumb = src ? `<img src="${esc(src)}" alt="">`
+        const src = a.thumb_url || a.image_url; // 항상 썸네일 우선(원본 대신) — 목록 속도
+        const thumb = src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async">`
           : a.svg ? a.svg
           : `<span style="font:600 11px 'JetBrains Mono',monospace;color:rgba(28,39,51,.4);text-transform:uppercase">${esc(a.category)}</span>`;
         // 국문 태그=파랑, 영문 태그=회색 (시안)

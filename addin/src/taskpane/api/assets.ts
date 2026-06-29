@@ -64,6 +64,27 @@ export async function fetchAssets(
   }
 }
 
+/** 즐겨찾기·최근: id 목록으로 해당 자산만 조회(전체 과다 로드 회피). 서버 미연결 시 mock 폴백. */
+export async function fetchByIds(ids: string[], signal?: AbortSignal): Promise<Asset[]> {
+  if (!ids.length) return [];
+  const token = getToken();
+  try {
+    const res = await fetch(`${API_BASE}/assets?ids=${encodeURIComponent(ids.join(","))}`, {
+      signal,
+      cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.status === 401) throw new AuthRequiredError("로그인이 필요합니다.");
+    if (!res.ok) throw new Error(`서버 응답 ${res.status}`);
+    const body = (await res.json()) as { data: Asset[] };
+    return body.data ?? [];
+  } catch (e) {
+    if (signal?.aborted || e instanceof AuthRequiredError) throw e;
+    const set = new Set(ids);
+    return filterAssets("all", "").filter((a) => set.has(a.id));
+  }
+}
+
 /** 특정 자산과 유사한 자산 추천 목록(태그 중첩 기반). 실패 시 빈 배열. */
 export async function fetchSimilar(
   id: string,

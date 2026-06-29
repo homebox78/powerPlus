@@ -25,14 +25,26 @@ final class UsageController
         $this->json(['ok' => true]);
     }
 
-    /** GET /api/admin/stats — 많이 쓴 자산 통계 */
+    /** GET /api/admin/stats — 요약/순위 + 자산 카운트(대시보드가 전체 자산 미로드로도 그리게) */
     public function stats(): void
     {
         $this->json([
             'summary'      => $this->service->summary(),
+            'counts'       => $this->service->assetCounts(),
             'top'          => $this->service->top(50),
             'topFavorites' => $this->service->topFavorites(50),
         ]);
+    }
+
+    /** GET /api/admin/stats/series?period=day|month|year — 기간별 방문/삽입 추세 */
+    public function series(): void
+    {
+        $period = (string) ($_GET['period'] ?? 'day');
+        if (!in_array($period, ['day', 'month', 'year'], true)) {
+            $period = 'day';
+        }
+        $limit = (int) ($_GET['limit'] ?? ($period === 'day' ? 30 : ($period === 'month' ? 24 : 8)));
+        $this->json($this->service->series($period, $limit));
     }
 
     private function json(mixed $payload, int $status = 200): void

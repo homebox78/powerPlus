@@ -134,6 +134,28 @@ final class AssetService
     }
 
     /**
+     * 특정 id 목록의 자산만 조회 — 즐겨찾기/최근이 전체(수천 개)를 받아오지 않게.
+     * 순서/정렬은 호출측(애드인)에서. @param array<int,string> $ids
+     */
+    public function byIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('strval', $ids), static fn($s) => $s !== '')));
+        $ids = array_slice($ids, 0, 1000);
+        if (!$ids) {
+            return ['data' => [], 'total' => 0];
+        }
+        $ph = [];
+        $params = [];
+        foreach ($ids as $k => $id) { $ph[] = ":id$k"; $params[":id$k"] = $id; }
+        $cols = preg_replace('/(^|,\s*)/', '$1a.', self::COLS);
+        $stmt = Database::pdo()->prepare(
+            "SELECT $cols, " . self::COUNT_COLS . " FROM assets a WHERE a.id IN (" . implode(',', $ph) . ')'
+        );
+        $stmt->execute($params);
+        return ['data' => array_map([$this, 'hydrate'], $stmt->fetchAll()), 'total' => count($ids)];
+    }
+
+    /**
      * 유사 자산 추천: 대상 자산의 태그를 공유하는 자산을 태그 중첩 수로 점수화.
      * 같은 카테고리 가점. 자기 자신 제외. (임베딩 도입 시 이 메서드를 벡터 검색으로 교체)
      */

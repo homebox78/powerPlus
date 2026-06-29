@@ -13,9 +13,15 @@ final class AssetController
         $this->service = new AssetService();
     }
 
-    /** GET /api/assets?category=&q=&page=&limit= */
+    /** GET /api/assets?category=&q=&page=&limit=  또는  ?ids=a,b,c (즐겨찾기/최근) */
     public function list(array $query): void
     {
+        // id 목록 조회 — 즐겨찾기/최근이 전체를 받지 않고 콕 집어서(빠름·정확)
+        $idsRaw = isset($query['ids']) ? trim((string) $query['ids']) : '';
+        if ($idsRaw !== '') {
+            $this->json($this->service->byIds(explode(',', $idsRaw)));
+            return;
+        }
         $category = isset($query['category']) ? (string) $query['category'] : 'all';
         $q        = isset($query['q']) ? (string) $query['q'] : '';
         $page     = max(1, (int) ($query['page'] ?? 1));
