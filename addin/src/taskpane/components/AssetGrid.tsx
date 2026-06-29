@@ -65,9 +65,7 @@ export default function AssetGrid({
   if (assets.length === 0) {
     return (
       <div className="empty">
-        <div className="empty__icon" aria-hidden>
-          ⭐
-        </div>
+        <img src="assets/state-empty.png" alt="" style={{ width: 150, height: "auto", marginBottom: 6 }} />
         <div className="empty__title">{emptyTitle}</div>
         <div className="empty__sub">{emptySub}</div>
       </div>

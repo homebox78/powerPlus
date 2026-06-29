@@ -86,6 +86,7 @@ export default function App() {
   const [view, setView] = React.useState<string>("all"); // 추천/즐겨찾기/최근
   const [cat, setCat] = React.useState("all"); // 컴포저 카테고리 pill
   const [pptFilter, setPptFilter] = React.useState("all"); // 장표 서브필터(전체/패키지/표지/간지/콘텐츠…)
+  const [foundFlash, setFoundFlash] = React.useState<number | null>(null); // "N개 찾았어요" 플래시
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
   const [sort, setSort] = React.useState("popular");
@@ -190,6 +191,19 @@ export default function App() {
       });
     return () => ctrl.abort();
   }, [view, cat, activeQuery, email, sort, pptFilter]);
+
+  // 검색 완료 → "N개 찾았어요" 플래시(잠깐 떴다 사라짐). 검색어가 있고 결과가 있을 때만.
+  const prevLoadingRef = React.useRef(false);
+  React.useEffect(() => {
+    if (prevLoadingRef.current && !loading && activeQuery && total > 0) {
+      setFoundFlash(total);
+      const t = window.setTimeout(() => setFoundFlash(null), 1700);
+      prevLoadingRef.current = loading;
+      return () => window.clearTimeout(t);
+    }
+    prevLoadingRef.current = loading;
+    return undefined;
+  }, [loading, activeQuery, total]);
 
   async function loadMore() {
     setLoadingMore(true);
@@ -582,6 +596,24 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {/* 검색 중 — '자료 찾는 중' 캐릭터 레이어 */}
+      {loading && activeQuery && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(240,243,246,0.94)", pointerEvents: "none" }}>
+          <img src="assets/state-searching.png" alt="" style={{ width: 170, height: "auto" }} />
+          <div style={{ marginTop: 6, fontWeight: 700, fontSize: 14, color: "#566070" }}>자료 찾는 중…</div>
+        </div>
+      )}
+
+      {/* 찾음 — 'N개 찾았어요' 플래시(잠깐 떴다 사라짐) */}
+      {foundFlash != null && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 61, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ background: "#fff", borderRadius: 18, padding: "18px 24px", boxShadow: "0 16px 44px rgba(28,39,51,0.2)", textAlign: "center", animation: "ppDrop 0.18s ease" }}>
+            <img src="assets/state-found.png" alt="" style={{ width: 130, height: "auto" }} />
+            <div style={{ marginTop: 4, fontWeight: 800, fontSize: 15, color: "#1C2733" }}>{foundFlash}개의 자료를 찾았어요!</div>
+          </div>
+        </div>
+      )}
 
       {/* 하단 컴포저 (검색) */}
       <div className="composer">
