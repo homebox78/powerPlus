@@ -656,7 +656,7 @@
           ? (a.slide_kind === "package" ? " · 패키지" : " · 단일·" + (PAGE_LABELS[a.slide_page] || "기타"))
           : "";
         return `<div class="card">
-          <div class="card__img" style="background:${TINT_BG[a.category] || '#f4f6f9'}">${thumb}</div>
+          <div class="card__img" style="background:#fff">${thumb}</div>
           <div class="card__body">
             <div class="card__cat">${esc(catLabel(a.category))}${esc(sub)}</div>
             <div class="card__tags">${ko}${en}</div>
@@ -673,21 +673,21 @@
     function renderPager(totalPages) {
       const el = $("asset-pager");
       if (totalPages <= 1) { el.innerHTML = ""; return; }
-      const p = assetPage, win = new Set([1, totalPages]);
-      for (let n = p - 2; n <= p + 2; n++) if (n >= 1 && n <= totalPages) win.add(n);
-      const nums = [...win].sort((a, b) => a - b);
-      let html = `<button data-pg="${p - 1}" ${p <= 1 ? "disabled" : ""}>‹</button>`;
-      let prev = 0;
-      for (const n of nums) {
-        if (prev && n - prev > 1) html += `<span class="pg-ell">…</span>`;
+      const p = assetPage, SIZE = 5;               // 5페이지씩 윈도우
+      const start = Math.floor((p - 1) / SIZE) * SIZE + 1;
+      const end = Math.min(start + SIZE - 1, totalPages);
+      const prevBlock = start - SIZE, nextBlock = start + SIZE;
+      let html = "";
+      html += `<button data-pg="${prevBlock}" ${start <= 1 ? "disabled" : ""} title="이전 5페이지">«</button>`;
+      html += `<button data-pg="${p - 1}" ${p <= 1 ? "disabled" : ""} title="이전">‹</button>`;
+      for (let n = start; n <= end; n++)
         html += `<button data-pg="${n}" class="${n === p ? "pg--on" : ""}">${n}</button>`;
-        prev = n;
-      }
-      html += `<button data-pg="${p + 1}" ${p >= totalPages ? "disabled" : ""}>›</button>`;
+      html += `<button data-pg="${p + 1}" ${p >= totalPages ? "disabled" : ""} title="다음">›</button>`;
+      html += `<button data-pg="${nextBlock}" ${nextBlock > totalPages ? "disabled" : ""} title="다음 5페이지">»</button>`;
       el.innerHTML = html;
       el.querySelectorAll("[data-pg]").forEach((b) => b.onclick = () => {
-        const n = +b.dataset.pg;
-        if (n < 1 || n > totalPages || n === assetPage) return;
+        let n = Math.max(1, Math.min(totalPages, +b.dataset.pg));
+        if (n === assetPage) return;
         assetPage = n; renderAssets();
         $("asset-grid").scrollIntoView({ behavior: "smooth", block: "start" });
       });
