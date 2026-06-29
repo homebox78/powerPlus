@@ -270,6 +270,13 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
           <input id="search" placeholder="태그로 검색…" />
         </div>
+        <select id="filter-sort" class="sel" title="정렬">
+          <option value="default">등록순</option>
+          <option value="latest">최신순</option>
+          <option value="name">이름순</option>
+          <option value="fav">즐겨찾기순</option>
+          <option value="popular">인기순</option>
+        </select>
         <div class="spacer"></div>
         <button id="btn-new" class="btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 자산</button>
       </div>
@@ -634,10 +641,20 @@
     const resetAndRender = () => { assetPage = 1; renderAssets(); };
     $("filter-cat").onchange = resetAndRender;
     $("search").oninput = resetAndRender;
+    $("filter-sort").onchange = resetAndRender;
     function renderAssets() {
       const cat = $("filter-cat").value, q = $("search").value.trim().toLowerCase();
       const list = assets.filter((a) => (cat === "all" || a.category === cat) &&
         (!q || (a.tags || []).some((t) => t.toLowerCase().includes(q))));
+      const sk = $("filter-sort").value;
+      const byId = (x, y) => String(x.id).localeCompare(String(y.id), undefined, { numeric: true });
+      list.sort((x, y) =>
+        sk === "latest" ? byId(y, x) :
+        sk === "name" ? (x.name || "힙").localeCompare(y.name || "힙", "ko") :
+        sk === "fav" ? ((y.fav_count || 0) - (x.fav_count || 0) || byId(x, y)) :
+        sk === "popular" ? ((y.views || 0) - (x.views || 0) || byId(x, y)) :
+        byId(x, y)
+      );
       const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
       const totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
       if (assetPage > totalPages) assetPage = totalPages;

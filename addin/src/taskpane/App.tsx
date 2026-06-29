@@ -15,15 +15,16 @@ import type { Announcement } from "./api/announcements";
 import { submitRequest } from "./api/requests";
 
 const SORTS = [
+  { key: "default", label: "등록순" },
   { key: "popular", label: "인기순" },
   { key: "latest", label: "최신순" },
   { key: "favorites", label: "즐겨찾기순" },
   { key: "name", label: "이름순" },
 ];
-const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "인기순";
+const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "등록순";
 
 const VIEWS = [
-  { key: "all", label: "추천" },
+  { key: "all", label: "전체" },
   { key: "favorites", label: "즐겨찾기" },
   { key: "recent", label: "최근" },
 ];
@@ -91,7 +92,7 @@ export default function App() {
   const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
-  const [sort, setSort] = React.useState("popular");
+  const [sort, setSort] = React.useState("default"); // 디폴트=등록순
   const [cats, setCats] = React.useState<Category[]>(CATEGORIES);
   const [grandTotal, setGrandTotal] = React.useState<number | null>(null);
 
@@ -486,6 +487,22 @@ export default function App() {
 
       {/* 홈 (인사말/검색바 + 세그먼트 + 카운트/정렬) */}
       <div className="home">
+        <div className="segmented">
+          {VIEWS.map((v) => (
+            <button
+              key={v.key}
+              className={"seg" + (view === v.key ? " seg--active" : "")}
+              onClick={() => {
+                setView(v.key);
+                closeMenus();
+              }}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 검색/유사 결과 바 — 탭 아래로 이동(사용자 요청) */}
         {similarOf ? (
           <div className="querybar">
             <span className="querybar__text">
@@ -505,21 +522,6 @@ export default function App() {
             </button>
           </div>
         ) : null}
-
-        <div className="segmented">
-          {VIEWS.map((v) => (
-            <button
-              key={v.key}
-              className={"seg" + (view === v.key ? " seg--active" : "")}
-              onClick={() => {
-                setView(v.key);
-                closeMenus();
-              }}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
 
         <div className="countrow">
           <span className="countrow__count">

@@ -25,7 +25,9 @@ final class AssetService
                 return 'ORDER BY fav_count DESC, a.id';
             case 'name':      // 이름순(이름 가나다, 없으면 뒤로)
                 return 'ORDER BY (a.name IS NULL OR a.name = \'\'), a.name, a.id';
-            default:          // 기본(등록 순)
+            case 'latest':    // 최신순(나중 등록=최신이 먼저)
+                return 'ORDER BY a.id DESC';
+            default:          // 기본(등록순 — 먼저 등록된 순)
                 return 'ORDER BY a.id';
         }
     }
