@@ -24,3 +24,7 @@ data*.zip
 
 # 해커톤 신청 자료(개인 문서 — git 제외)
 /해커톤_신청/
+
+# Windows 썸네일 캐시(추적 금지)
+Thumbs.db
+thumbs.db
