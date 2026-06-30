@@ -444,7 +444,7 @@ export default function App() {
   const emptySub = activeQuery
     ? `‘${activeQuery}’와 일치하는\n자료를 찾지 못했어요.\n다른 키워드로 검색해 보세요.`
     : view === "favorites"
-      ? "카드의 북마크를 눌러 자주 쓰는 자료를 모아보세요."
+      ? "카드의 북마크로 자주 쓰는 자료를 모아보세요."
       : view === "recent"
         ? "자료를 클릭해 슬라이드에 추가하면 여기에 쌓여요."
         : "다른 카테고리를 선택해 보세요.";
