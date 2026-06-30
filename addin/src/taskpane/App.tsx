@@ -631,7 +631,7 @@ export default function App() {
       {/* 검색 중 — '자료 찾는 중' 캐릭터 레이어 */}
       {loading && searchAnim && (
         <div style={{ position: "absolute", inset: 0, zIndex: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(240,243,246,0.94)", pointerEvents: "none" }}>
-          <img src="assets/state-searching.svg" alt="" className="state-anim state-anim--search" style={{ width: 170, height: "auto" }} />
+          <img src="assets/state-searching.svg" alt="" className="state-anim state-anim--search" style={{ width: 204, height: "auto" }} />
           <div style={{ marginTop: 6, fontWeight: 700, fontSize: 14, color: "#566070" }}>자료 찾는 중…</div>
         </div>
       )}
@@ -640,7 +640,7 @@ export default function App() {
       {foundFlash != null && (
         <div style={{ position: "absolute", inset: 0, zIndex: 61, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
           <div style={{ background: "#fff", borderRadius: 18, padding: "18px 24px", boxShadow: "0 16px 44px rgba(28,39,51,0.2)", textAlign: "center", animation: "ppDrop 0.18s ease" }}>
-            <img src="assets/state-found.svg" alt="" className="state-anim state-anim--found" style={{ width: 130, height: "auto" }} />
+            <img src="assets/state-found.svg" alt="" className="state-anim state-anim--found" style={{ width: 156, height: "auto" }} />
             <div style={{ marginTop: 4, fontWeight: 800, fontSize: 15, color: "#1C2733" }}>{foundFlash}개의 자료를 찾았어요!</div>
           </div>
         </div>
