@@ -27,7 +27,7 @@ const VIEWS = [
   { key: "all", label: "전체" },
   { key: "favorites", label: "즐겨찾기" },
   { key: "recent", label: "최근" },
-  { key: "browser", label: "브라우저" },
+  { key: "browser", label: "이미지검색" },
 ];
 
 /** Google 프로그래머블 검색엔진(CSE) ID.
@@ -35,15 +35,6 @@ const VIEWS = [
  *  '브라우저' 탭에서 **작업창 안에 바로** 구글 검색/결과가 인라인으로 표시됨.
  *  비워두면 새 창으로 여는 검색 런처가 표시됨. */
 const GOOGLE_CSE_CX = ""; // 무료 CSE는 전체웹 검색이 중단돼 일반 구글검색 불가 → 새 창 런처 사용
-
-/** 구글 검색을 사용자 기본 브라우저 새 창에서 연다(구글은 작업창 iframe 임베드를 막음). */
-function openExternal(url: string) {
-  try {
-    window.open(url, "_blank", "noopener,noreferrer");
-  } catch {
-    /* 일부 환경에서 차단될 수 있음 */
-  }
-}
 
 const REQ_TYPES = ["아이콘", "사진", "일러스트", "다이어그램", "장표"];
 
@@ -713,7 +704,6 @@ export default function App() {
             ) : (
               <div className="imgsearch__hint">검색어를 입력하면 무료 이미지가 여기에 표시됩니다.<br />클릭 한 번으로 슬라이드에 삽입돼요.</div>
             )}
-            <div className="browser__note">Openverse 무료 이미지 · 일반 구글 이미지는 <button className="browser__inlinelink" onClick={() => openExternal("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(browserQuery.trim() || "image"))}>새 창에서 열기</button></div>
           </div>
         ) : (
         <>
