@@ -329,6 +329,17 @@
     <section id="tab-assets" class="hidden">
       <div class="toolbar">
         <select id="filter-cat" class="sel"><option value="all">전체 카테고리</option></select>
+        <select id="filter-slide" class="sel hidden" title="장표 그룹">
+          <option value="all">전체 장표</option>
+          <option value="package">패키지</option>
+          <option value="cover">표지</option>
+          <option value="toc">목차</option>
+          <option value="divider">간지</option>
+          <option value="content">콘텐츠</option>
+          <option value="greeting">인사말</option>
+          <option value="qa">Q&amp;A</option>
+          <option value="etc">기타</option>
+        </select>
         <div class="search-box">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
           <input id="search" placeholder="태그로 검색…" />
@@ -834,12 +845,21 @@
     let assetPage = 1;
     const PER_PAGE = 30;
     const resetAndRender = () => { assetPage = 1; renderAssets(); };
-    $("filter-cat").onchange = resetAndRender;
+    $("filter-cat").onchange = () => {
+      $("filter-slide").classList.toggle("hidden", $("filter-cat").value !== "ppt");
+      resetAndRender();
+    };
+    $("filter-slide").onchange = resetAndRender;
     $("search").oninput = resetAndRender;
     $("filter-sort").onchange = resetAndRender;
     function renderAssets() {
       const cat = $("filter-cat").value, q = $("search").value.trim().toLowerCase();
+      const sg = cat === "ppt" ? $("filter-slide").value : "all"; // 장표 그룹(전체/패키지/표지/…)
+      const slideOk = (a) => sg === "all" ? true
+        : sg === "package" ? a.slide_kind === "package"
+        : (a.slide_kind === "single" && a.slide_page === sg);
       const list = assets.filter((a) => (cat === "all" || a.category === cat) &&
+        (cat !== "ppt" || slideOk(a)) &&
         (!q || (a.tags || []).some((t) => t.toLowerCase().includes(q))));
       const sk = $("filter-sort").value;
       const byId = (x, y) => String(x.id).localeCompare(String(y.id), undefined, { numeric: true });
