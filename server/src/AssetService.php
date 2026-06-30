@@ -25,8 +25,8 @@ final class AssetService
                 return 'ORDER BY fav_count DESC, a.id';
             case 'name':      // 이름순(이름 가나다, 없으면 뒤로)
                 return 'ORDER BY (a.name IS NULL OR a.name = \'\'), a.name, a.id';
-            case 'latest':    // 최신순(나중 등록=최신이 먼저)
-                return 'ORDER BY a.id DESC';
+            case 'latest':    // 최신순(등록 시각 기준 — 카테고리 무관 최근 등록이 먼저, 없으면 id)
+                return 'ORDER BY (a.created_at IS NULL), a.created_at DESC, a.id DESC';
             default:          // 기본(등록순 — 먼저 등록된 순)
                 return 'ORDER BY a.id';
         }
@@ -241,8 +241,8 @@ final class AssetService
         $ko = $d['tags_ko'] ?? [];
         $en = $d['tags_en'] ?? [];
         Database::pdo()->prepare(
-            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path, slide_kind, slide_page)
-             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :thumb_path, :slide_path, :slide_kind, :slide_page)'
+            'INSERT INTO assets (id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path, slide_kind, slide_page, created_at)
+             VALUES (:id, :name, :category, :tags, :tags_ko, :tags_en, :svg, :image_path, :thumb_path, :slide_path, :slide_kind, :slide_page, NOW())'
         )->execute([
             ':id'         => $d['id'],
             ':name'       => $d['name'] ?? null,

@@ -94,6 +94,16 @@ foreach (['slide_kind' => 'VARCHAR(16)', 'slide_page' => 'VARCHAR(32)'] as $col 
     }
 }
 
+// 등록 시각 — '최신순'을 카테고리 무관 실제 등록순으로 정렬하기 위함(없으면 id로 폴백)
+$hasCreated = (int) $pdo->query(
+    "SELECT COUNT(*) FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='assets' AND COLUMN_NAME='created_at'"
+)->fetchColumn();
+if ($hasCreated === 0) {
+    $pdo->exec("ALTER TABLE assets ADD COLUMN created_at DATETIME NULL");
+    $pdo->exec("ALTER TABLE assets ADD INDEX idx_created (created_at)");
+}
+
 // 공지(알람) 테이블 — 관리자가 등록, 사용자 애드인 우측상단 알람에 표시
 $pdo->exec("CREATE TABLE IF NOT EXISTS announcements (
   id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
