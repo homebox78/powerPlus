@@ -18,8 +18,8 @@ import { submitRequest } from "./api/requests";
 const SORTS = [
   { key: "latest", label: "최신순" },
   { key: "popular", label: "인기순" },
-  { key: "favorites", label: "즐겨찾기순" },
   { key: "name", label: "이름순" },
+  { key: "favorites", label: "즐겨찾기순" },
 ];
 const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "최신순";
 
