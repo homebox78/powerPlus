@@ -33,7 +33,7 @@ const VIEWS = [
  *  programmablesearchengine.google.com 에서 무료 생성 후 발급되는 cx 값을 여기에 붙이면
  *  '브라우저' 탭에서 **작업창 안에 바로** 구글 검색/결과가 인라인으로 표시됨.
  *  비워두면 새 창으로 여는 검색 런처가 표시됨. */
-const GOOGLE_CSE_CX = "";
+const GOOGLE_CSE_CX = ""; // 무료 CSE는 전체웹 검색이 중단돼 일반 구글검색 불가 → 새 창 런처 사용
 
 /** 구글 검색을 사용자 기본 브라우저 새 창에서 연다(구글은 작업창 iframe 임베드를 막음). */
 function openExternal(url: string) {
@@ -156,21 +156,36 @@ export default function App() {
   const PAGE_SIZE = 60;
   const isSpecial = view === "favorites" || view === "recent";
   const isBrowser = view === "browser";
-  const runBrowserSearch = (q: string) => {
+  // 기본은 구글 '이미지' 검색(mode="image"). URL처럼 보이면 그 사이트로. 결과는 브라우저 새 창.
+  const runBrowserSearch = (q: string, mode: "image" | "web" = "image") => {
     const s = q.trim();
     if (!s) return;
-    // URL처럼 보이면 그 사이트로, 아니면 구글 검색
     const looksUrl = /^(https?:\/\/|www\.)/i.test(s) || /^[\w-]+\.[a-z]{2,}(\/|$)/i.test(s);
-    openExternal(looksUrl ? (s.startsWith("http") ? s : "https://" + s) : "https://www.google.com/search?q=" + encodeURIComponent(s));
-  };
-  // 브라우저 탭 진입 시 CSE(작업창 내 인라인 구글 검색) 스크립트 로드 — cx 설정 시에만
-  React.useEffect(() => {
-    if (!isBrowser || !GOOGLE_CSE_CX) return;
-    const w = window as unknown as { google?: { search?: { cse?: { element?: { go?: () => void } } } } };
-    if (document.getElementById("pp-gcse")) {
-      try { w.google?.search?.cse?.element?.go?.(); } catch { /* noop */ }
+    if (looksUrl) {
+      openExternal(s.startsWith("http") ? s : "https://" + s);
       return;
     }
+    const base = "https://www.google.com/search?q=" + encodeURIComponent(s);
+    openExternal(mode === "image" ? base + "&tbm=isch" : base);
+  };
+  // 브라우저 탭 진입 시 CSE(작업창 내 인라인 구글 검색) 로드 — cx 설정 시에만. 이미지 검색을 기본으로.
+  React.useEffect(() => {
+    if (!isBrowser || !GOOGLE_CSE_CX) return;
+    const w = window as unknown as {
+      __gcse?: unknown;
+      google?: { search?: { cse?: { element?: { render?: (o: unknown) => void } } } };
+    };
+    const render = () => {
+      try {
+        w.google?.search?.cse?.element?.render?.({
+          div: "pp-cse-div",
+          tag: "search",
+          attributes: { enableImageSearch: true, defaultToImageSearch: true },
+        });
+      } catch { /* noop */ }
+    };
+    if (document.getElementById("pp-gcse")) { render(); return; }
+    w.__gcse = { parsetags: "explicit", callback: render };
     const sc = document.createElement("script");
     sc.id = "pp-gcse";
     sc.async = true;
@@ -624,10 +639,10 @@ export default function App() {
           <div className="browser">
             <div className="browser__head">
               <div className="browser__title">웹 브라우저</div>
-              <div className="browser__sub">{GOOGLE_CSE_CX ? "작업창 안에서 바로 구글 검색이 됩니다." : "구글에서 검색하면 브라우저 새 창에서 열립니다."}</div>
+              <div className="browser__sub">{GOOGLE_CSE_CX ? "작업창 안에서 바로 구글 검색이 됩니다." : "구글 이미지 검색이 기본 — 검색하면 결과가 브라우저 새 창에서 열립니다."}</div>
             </div>
             {GOOGLE_CSE_CX ? (
-              <div className="gcse-search" />
+              <div id="pp-cse-div" />
             ) : (
             <>
             <div className="browser__bar">
@@ -636,20 +651,20 @@ export default function App() {
                 className="browser__input"
                 type="search"
                 value={browserQuery}
-                placeholder="구글 검색 또는 사이트 주소…"
+                placeholder="구글 이미지 검색 (또는 사이트 주소)…"
                 onChange={(e) => setBrowserQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runBrowserSearch(browserQuery); } }}
-                aria-label="웹 검색"
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runBrowserSearch(browserQuery, "image"); } }}
+                aria-label="구글 이미지 검색"
               />
-              <button className="browser__go" onClick={() => runBrowserSearch(browserQuery)}>검색</button>
+              <button className="browser__go" onClick={() => runBrowserSearch(browserQuery, "image")}>이미지 검색</button>
             </div>
             <div className="browser__links">
-              <button className="browser__link" onClick={() => openExternal("https://www.google.com")}>Google</button>
-              <button className="browser__link" onClick={() => browserQuery.trim() ? openExternal("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(browserQuery.trim())) : openExternal("https://images.google.com")}>이미지검색</button>
+              <button className="browser__link" onClick={() => runBrowserSearch(browserQuery, "web")}>웹 검색</button>
+              <button className="browser__link" onClick={() => openExternal("https://images.google.com")}>구글 이미지</button>
               <button className="browser__link" onClick={() => openExternal("https://translate.google.com")}>번역</button>
               <button className="browser__link" onClick={() => openExternal("https://www.youtube.com")}>YouTube</button>
             </div>
-            <div className="browser__note">ⓘ 구글은 보안 정책상 작업창에 직접 임베드가 안 돼 결과는 새 창에서 열립니다. <b>작업창 안에서 바로 검색</b>하려면 Google 검색ID(cx)가 필요해요 — 발급해 전달해 주시면 인앱 검색을 켜 드립니다.</div>
+            <div className="browser__note">ⓘ 구글은 보안 정책상 작업창 안에 직접 표시할 수 없어, 검색하면 <b>구글 이미지 결과가 새 창</b>에서 열립니다. (작업창 안에 결과까지 띄우려면 별도 이미지 API 연동이 필요 — 원하시면 안내드릴게요.)</div>
             </>
             )}
           </div>
