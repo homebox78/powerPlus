@@ -36,7 +36,6 @@ const VIEWS = [
  *  비워두면 새 창으로 여는 검색 런처가 표시됨. */
 const GOOGLE_CSE_CX = ""; // 무료 CSE는 전체웹 검색이 중단돼 일반 구글검색 불가 → 새 창 런처 사용
 
-const REQ_TYPES = ["아이콘", "사진", "일러스트", "다이어그램", "장표"];
 
 // ---- 인라인 아이콘 ----
 const Ic = {
@@ -104,6 +103,7 @@ export default function App() {
   const [imgError, setImgError] = React.useState<string | null>(null);
   const [imgPage, setImgPage] = React.useState(1);
   const [imgTotal, setImgTotal] = React.useState(0);
+  const [imgQuery, setImgQuery] = React.useState(""); // 실제 검색된 쿼리(페이지네이션 고정용)
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
   const [sort, setSort] = React.useState("latest"); // 디폴트=최신순(새 자료 먼저)
   const [cats, setCats] = React.useState<Category[]>(CATEGORIES);
@@ -155,11 +155,14 @@ export default function App() {
   const isBrowser = view === "browser";
   // 무료 이미지(Openverse) 검색 — 작업창 안에서 결과 격자 표시
   const doImageSearch = async (page = 1) => {
-    const q = browserQuery.trim();
+    const q = page === 1 ? browserQuery.trim() : imgQuery;
     if (!q) return;
     setImgLoading(true);
     setImgError(null);
-    if (page === 1) setImgHits([]);
+    if (page === 1) {
+      setImgHits([]);
+      setImgQuery(q);
+    }
     try {
       const r = await searchImages(q, page);
       setImgHits((prev) => (page === 1 ? r.data : [...prev, ...r.data]));
@@ -171,6 +174,21 @@ export default function App() {
       setImgLoading(false);
     }
   };
+  // 웹 이미지 무한스크롤
+  const imgSentinelRef = React.useRef<HTMLDivElement>(null);
+  const imgHasMore = imgHits.length > 0 && imgHits.length < imgTotal;
+  React.useEffect(() => {
+    const sentinel = imgSentinelRef.current;
+    const root = bodyRef.current;
+    if (!sentinel || !root || !imgHasMore || imgLoading) return;
+    const io = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting && !imgLoading) doImageSearch(imgPage + 1); },
+      { root, rootMargin: "300px" }
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imgHasMore, imgLoading, imgPage, isBrowser]);
   // 검색된 이미지를 슬라이드에 삽입(프록시 URL → base64 → Office)
   const insertImage = (h: ImageHit) => {
     handleInsert({
@@ -694,10 +712,11 @@ export default function App() {
                     );
                   })}
                 </div>
-                {imgHits.length < imgTotal && (
-                  <button className="imgsearch__more" disabled={imgLoading} onClick={() => doImageSearch(imgPage + 1)}>
-                    {imgLoading ? "불러오는 중…" : "더 보기"}
-                  </button>
+                {imgHasMore && <div ref={imgSentinelRef} className="scroll-sentinel" aria-hidden />}
+                {imgLoading && imgHits.length > 0 && (
+                  <div className="loadmore-spin" aria-label="더 불러오는 중">
+                    <span className="spinner" />
+                  </div>
                 )}
               </>
             ) : (
@@ -867,13 +886,14 @@ export default function App() {
                 <div className="sheet__body">
                   <div className="sheet__flabel">유형</div>
                   <div className="sheet__types">
-                    {REQ_TYPES.map((t) => (
+                    {/* 유형 = 관리자 카테고리 연동(전체 제외). 카테고리 추가 시 자동 노출 */}
+                    {cats.filter((c) => c.key !== "all").map((c) => (
                       <button
-                        key={t}
-                        className={"chip-btn" + (reqType === t ? " chip-btn--active" : "")}
-                        onClick={() => setReqType(t)}
+                        key={c.key}
+                        className={"chip-btn" + (reqType === c.label ? " chip-btn--active" : "")}
+                        onClick={() => setReqType(c.label)}
                       >
-                        {t}
+                        {c.label}
                       </button>
                     ))}
                   </div>
