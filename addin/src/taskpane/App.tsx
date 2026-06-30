@@ -233,7 +233,6 @@ export default function App() {
     { key: "toc", label: "목차", ptype: "toc" },
     { key: "divider", label: "간지", ptype: "divider" },
     { key: "content", label: "콘텐츠", ptype: "content" },
-    { key: "greeting", label: "인사말", ptype: "greeting" },
     { key: "qa", label: "Q&A", ptype: "qa" },
     { key: "etc", label: "기타", ptype: "etc" },
   ];
