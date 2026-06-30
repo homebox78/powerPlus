@@ -31,7 +31,7 @@ function pptBadge(a: Asset): string | null {
 }
 
 // 즐겨찾기 = 북마크(스크랩) 아이콘
-const StarIcon = ({ on }: { on: boolean }) => (
+const BookmarkIcon = ({ on }: { on: boolean }) => (
   <svg width="14" height="15" viewBox="0 0 24 24" fill={on ? "#f0566a" : "none"} stroke={on ? "#f0566a" : "#aeb7c4"} strokeWidth={on ? 1.2 : 1.6}>
     <path
       d="M18 21l-6-4.2L6 21V5.2A2.2 2.2 0 0 1 8.2 3h7.6A2.2 2.2 0 0 1 18 5.2z"
@@ -121,7 +121,7 @@ export default function AssetGrid({
               aria-label={fav ? "즐겨찾기 해제" : "즐겨찾기 추가"}
               onClick={() => onToggleFavorite(a.id)}
             >
-              <StarIcon on={fav} />
+              <BookmarkIcon on={fav} />
             </button>
             {(() => {
               const badge = pptBadge(a);

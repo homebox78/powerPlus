@@ -607,7 +607,7 @@ body {
   cursor: default;
 }
 
-/* 즐겨찾기 별 — 카드 우상단 */
+/* 즐겨찾기 북마크 — 카드 우상단 */
 .card__fav {
   position: absolute;
   top: 8px;
