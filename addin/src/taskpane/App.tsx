@@ -29,6 +29,12 @@ const VIEWS = [
   { key: "browser", label: "브라우저" },
 ];
 
+/** Google 프로그래머블 검색엔진(CSE) ID.
+ *  programmablesearchengine.google.com 에서 무료 생성 후 발급되는 cx 값을 여기에 붙이면
+ *  '브라우저' 탭에서 **작업창 안에 바로** 구글 검색/결과가 인라인으로 표시됨.
+ *  비워두면 새 창으로 여는 검색 런처가 표시됨. */
+const GOOGLE_CSE_CX = "";
+
 /** 구글 검색을 사용자 기본 브라우저 새 창에서 연다(구글은 작업창 iframe 임베드를 막음). */
 function openExternal(url: string) {
   try {
@@ -157,6 +163,20 @@ export default function App() {
     const looksUrl = /^(https?:\/\/|www\.)/i.test(s) || /^[\w-]+\.[a-z]{2,}(\/|$)/i.test(s);
     openExternal(looksUrl ? (s.startsWith("http") ? s : "https://" + s) : "https://www.google.com/search?q=" + encodeURIComponent(s));
   };
+  // 브라우저 탭 진입 시 CSE(작업창 내 인라인 구글 검색) 스크립트 로드 — cx 설정 시에만
+  React.useEffect(() => {
+    if (!isBrowser || !GOOGLE_CSE_CX) return;
+    const w = window as unknown as { google?: { search?: { cse?: { element?: { go?: () => void } } } } };
+    if (document.getElementById("pp-gcse")) {
+      try { w.google?.search?.cse?.element?.go?.(); } catch { /* noop */ }
+      return;
+    }
+    const sc = document.createElement("script");
+    sc.id = "pp-gcse";
+    sc.async = true;
+    sc.src = "https://cse.google.com/cse.js?cx=" + GOOGLE_CSE_CX;
+    document.head.appendChild(sc);
+  }, [isBrowser]);
   const serverCategory = isSpecial ? "all" : cat;
   // 장표(ppt) 서브필터: 유형/페이지 그룹핑
   const PPT_FILTERS: { key: string; label: string; kind?: string; ptype?: string }[] = [
@@ -604,8 +624,12 @@ export default function App() {
           <div className="browser">
             <div className="browser__head">
               <div className="browser__title">웹 브라우저</div>
-              <div className="browser__sub">구글에서 검색하면 브라우저 새 창에서 열립니다.</div>
+              <div className="browser__sub">{GOOGLE_CSE_CX ? "작업창 안에서 바로 구글 검색이 됩니다." : "구글에서 검색하면 브라우저 새 창에서 열립니다."}</div>
             </div>
+            {GOOGLE_CSE_CX ? (
+              <div className="gcse-search" />
+            ) : (
+            <>
             <div className="browser__bar">
               <svg className="browser__mag" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a93a0" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6" strokeLinecap="round" /></svg>
               <input
@@ -625,7 +649,9 @@ export default function App() {
               <button className="browser__link" onClick={() => openExternal("https://translate.google.com")}>번역</button>
               <button className="browser__link" onClick={() => openExternal("https://www.youtube.com")}>YouTube</button>
             </div>
-            <div className="browser__note">ⓘ 구글은 보안 정책상 작업창 안에 직접 표시할 수 없어, 검색 결과는 브라우저 새 창에서 열립니다.</div>
+            <div className="browser__note">ⓘ 구글은 보안 정책상 작업창에 직접 임베드가 안 돼 결과는 새 창에서 열립니다. <b>작업창 안에서 바로 검색</b>하려면 Google 검색ID(cx)가 필요해요 — 발급해 전달해 주시면 인앱 검색을 켜 드립니다.</div>
+            </>
+            )}
           </div>
         ) : (
         <>
