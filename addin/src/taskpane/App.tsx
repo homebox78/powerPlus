@@ -26,7 +26,17 @@ const VIEWS = [
   { key: "all", label: "전체" },
   { key: "favorites", label: "즐겨찾기" },
   { key: "recent", label: "최근" },
+  { key: "browser", label: "브라우저" },
 ];
+
+/** 구글 검색을 사용자 기본 브라우저 새 창에서 연다(구글은 작업창 iframe 임베드를 막음). */
+function openExternal(url: string) {
+  try {
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch {
+    /* 일부 환경에서 차단될 수 있음 */
+  }
+}
 
 const REQ_TYPES = ["아이콘", "사진", "일러스트", "다이어그램", "장표"];
 
@@ -90,6 +100,7 @@ export default function App() {
   const [foundFlash, setFoundFlash] = React.useState<number | null>(null); // "N개 찾았어요" 플래시
   const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
+  const [browserQuery, setBrowserQuery] = React.useState(""); // 브라우저 탭 검색어
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
   const [sort, setSort] = React.useState("latest"); // 디폴트=최신순(새 자료 먼저)
   const [cats, setCats] = React.useState<Category[]>(CATEGORIES);
@@ -138,6 +149,14 @@ export default function App() {
 
   const PAGE_SIZE = 60;
   const isSpecial = view === "favorites" || view === "recent";
+  const isBrowser = view === "browser";
+  const runBrowserSearch = (q: string) => {
+    const s = q.trim();
+    if (!s) return;
+    // URL처럼 보이면 그 사이트로, 아니면 구글 검색
+    const looksUrl = /^(https?:\/\/|www\.)/i.test(s) || /^[\w-]+\.[a-z]{2,}(\/|$)/i.test(s);
+    openExternal(looksUrl ? (s.startsWith("http") ? s : "https://" + s) : "https://www.google.com/search?q=" + encodeURIComponent(s));
+  };
   const serverCategory = isSpecial ? "all" : cat;
   // 장표(ppt) 서브필터: 유형/페이지 그룹핑
   const PPT_FILTERS: { key: string; label: string; kind?: string; ptype?: string }[] = [
@@ -180,6 +199,7 @@ export default function App() {
   // 목록 로드 (뷰/카테고리/검색/정렬 변경 시 1페이지부터)
   React.useEffect(() => {
     if (!email) return;
+    if (isBrowser) { setLoading(false); return; } // 브라우저 탭은 자산 조회 안 함
     const ctrl = new AbortController();
     pageRef.current = 1;
     setLoading(true);
@@ -516,7 +536,7 @@ export default function App() {
         </div>
 
         {/* 검색/유사 결과 바 — 탭 아래로 이동(사용자 요청) */}
-        {similarOf ? (
+        {!isBrowser && (similarOf ? (
           <div className="querybar">
             <span className="querybar__text">
               ‘<b>{similarOf.name || similarOf.tags?.[0] || similarOf.id}</b>’와 비슷한 자산 {similarList.length}개
@@ -534,8 +554,9 @@ export default function App() {
               전체 보기
             </button>
           </div>
-        ) : null}
+        ) : null)}
 
+        {!isBrowser && (
         <div className="countrow">
           <span className="countrow__count">
             {loading ? "불러오는 중…" : count}개 <span>· 전체 {gt}</span>
@@ -574,10 +595,40 @@ export default function App() {
             </>
           )}
         </div>
+        )}
       </div>
 
-      {/* 그리드 */}
+      {/* 그리드 (브라우저 탭이면 웹 검색 패널) */}
       <div className="app__body" ref={bodyRef}>
+        {isBrowser ? (
+          <div className="browser">
+            <div className="browser__head">
+              <div className="browser__title">웹 브라우저</div>
+              <div className="browser__sub">구글에서 검색하면 브라우저 새 창에서 열립니다.</div>
+            </div>
+            <div className="browser__bar">
+              <svg className="browser__mag" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a93a0" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6" strokeLinecap="round" /></svg>
+              <input
+                className="browser__input"
+                type="search"
+                value={browserQuery}
+                placeholder="구글 검색 또는 사이트 주소…"
+                onChange={(e) => setBrowserQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runBrowserSearch(browserQuery); } }}
+                aria-label="웹 검색"
+              />
+              <button className="browser__go" onClick={() => runBrowserSearch(browserQuery)}>검색</button>
+            </div>
+            <div className="browser__links">
+              <button className="browser__link" onClick={() => openExternal("https://www.google.com")}>Google</button>
+              <button className="browser__link" onClick={() => browserQuery.trim() ? openExternal("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(browserQuery.trim())) : openExternal("https://images.google.com")}>이미지검색</button>
+              <button className="browser__link" onClick={() => openExternal("https://translate.google.com")}>번역</button>
+              <button className="browser__link" onClick={() => openExternal("https://www.youtube.com")}>YouTube</button>
+            </div>
+            <div className="browser__note">ⓘ 구글은 보안 정책상 작업창 안에 직접 표시할 수 없어, 검색 결과는 브라우저 새 창에서 열립니다.</div>
+          </div>
+        ) : (
+        <>
         {/* 장표 서브필터: 유형/페이지 그룹핑 — 그리드 상단 고정(sticky) */}
         {isPpt && !similarOf && (
           <div
@@ -626,6 +677,8 @@ export default function App() {
             <span className="spinner" />
           </div>
         )}
+        </>
+        )}
       </div>
 
       {/* 검색 중 — '자료 찾는 중' 캐릭터 레이어 */}
@@ -646,7 +699,8 @@ export default function App() {
         </div>
       )}
 
-      {/* 하단 컴포저 (검색) */}
+      {/* 하단 컴포저 (검색) — 브라우저 탭에선 숨김 */}
+      {!isBrowser && (
       <div className="composer">
         {catOpen && (
           <>
@@ -701,6 +755,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      )}
 
       {/* 토스트 */}
       {message && (
