@@ -27,7 +27,7 @@ const VIEWS = [
   { key: "all", label: "전체" },
   { key: "favorites", label: "즐겨찾기" },
   { key: "recent", label: "최근" },
-  { key: "browser", label: "웹이미지" },
+  { key: "browser", label: "웹 이미지" },
 ];
 
 /** Google 프로그래머블 검색엔진(CSE) ID.
@@ -660,7 +660,7 @@ export default function App() {
                 className="browser__input"
                 type="search"
                 value={browserQuery}
-                placeholder="이미지 검색 (예: 회의, 도시, 자연)…"
+                placeholder="키워드를 입력하세요."
                 onChange={(e) => setBrowserQuery(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); doImageSearch(1); } }}
                 aria-label="이미지 검색"
