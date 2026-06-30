@@ -11,8 +11,18 @@
         stroke: #000;
         stroke-miterlimit: 10;
       }
+      /* 어깨 으쓱: 올렸다 유지 → 갸웃(멋쩍게) → 내림 */
+      .shrug { transform-box: fill-box; transform-origin: 50% 100%; animation: ppShrug 2.7s ease-in-out infinite; }
+      @keyframes ppShrug {
+        0%,12%{ transform: translateY(0) rotate(0deg) }
+        32%,54%{ transform: translateY(-10px) rotate(-1.6deg) }
+        72%{ transform: translateY(-9px) rotate(1.6deg) }
+        88%,100%{ transform: translateY(0) rotate(0deg) }
+      }
+      @media (prefers-reduced-motion: reduce){ .shrug{animation:none} }
     </style>
   </defs>
+  <g class="shrug">
   <path class="st1" d="M294.66,197.3c.28,2.95-.59,5.87-1.45,8.71-.63,2.06-1.28,4.17-2.63,5.85"/>
   <path class="st2" d="M287.84,214.77c-.58,1.78-.89,3.65-.94,5.52-.02.78.01,1.58.32,2.3s.93,1.35,1.7,1.46"/>
   <path class="st0" d="M294.44,197.45c-.79,4.77-2.21,9.44-4.2,13.85"/>
@@ -62,5 +72,6 @@
     <path d="M143.71,459.12l7.61-24.36c.34,8.59-3.02,16.99-7.61,24.36Z"/>
     <path d="M321.2,340.68c4.56-5.19,10.31-6.92,15.32-10.39-.91-2.16-1.53-3.97-.73-6.41,1.56,2.42,2.22,4.8,1.44,7.87l-16.03,8.93Z"/>
     <path d="M105.05,331.15c-9.73-1.57-16.87,1.61-26.06,5.94,4.81-5.52,20.39-10.72,26.06-5.94Z"/>
+  </g>
   </g>
 </svg>
