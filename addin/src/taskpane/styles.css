@@ -776,6 +776,7 @@ body {
   margin-top: 6px;
   line-height: 1.5;
   max-width: 240px;
+  white-space: pre-line;
 }
 
 .scroll-sentinel {
