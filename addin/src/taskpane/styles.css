@@ -1231,3 +1231,51 @@ body {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+/* ===== 상태 일러스트(병맛) 위트 모션 ===== */
+.state-anim {
+  will-change: transform;
+  transform-origin: 50% 85%; /* 발끝 기준으로 까딱여 캐릭터감 */
+}
+@media (prefers-reduced-motion: reduce) {
+  .state-anim {
+    animation: none !important;
+  }
+}
+
+/* 검색 중 — 두리번두리번 살짝 갸웃(약간 어긋난 타이밍으로 병맛) */
+.state-anim--search {
+  animation: ppWobbleSearch 1.7s ease-in-out infinite;
+}
+@keyframes ppWobbleSearch {
+  0% { transform: rotate(-4deg) translateY(0); }
+  22% { transform: rotate(3.5deg) translateY(-4px); }
+  44% { transform: rotate(-2deg) translateY(0); }
+  60% { transform: rotate(5deg) translateY(-3px) scaleY(0.98); }
+  80% { transform: rotate(-3deg) translateY(0); }
+  100% { transform: rotate(-4deg) translateY(0); }
+}
+
+/* 찾았다! — 신난 통통 팝(오버슈트 + 살짝 까딱) 1회 */
+.state-anim--found {
+  animation: ppPopFound 0.72s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-origin: 50% 70%;
+}
+@keyframes ppPopFound {
+  0% { transform: scale(0.5) rotate(-9deg); opacity: 0; }
+  45% { transform: scale(1.18) rotate(7deg); opacity: 1; }
+  64% { transform: scale(0.93) rotate(-4deg); }
+  82% { transform: scale(1.06) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* 결과 없음 — 풀죽어 느릿느릿 갸우뚱(쓸쓸+살짝 멍한 병맛) */
+.state-anim--empty {
+  animation: ppSwayEmpty 3.4s ease-in-out infinite;
+  transform-origin: 50% 92%;
+}
+@keyframes ppSwayEmpty {
+  0% { transform: rotate(-2.6deg) translateY(0); }
+  50% { transform: rotate(2.6deg) translateY(1.5px) scaleY(0.99); }
+  100% { transform: rotate(-2.6deg) translateY(0); }
+}
