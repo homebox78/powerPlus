@@ -653,7 +653,6 @@ export default function App() {
           <div className="browser">
             <div className="browser__head">
               <div className="browser__title">웹 이미지 검색</div>
-              <div className="browser__sub">무료 이미지를 찾아 클릭하면 슬라이드에 바로 삽입됩니다.</div>
             </div>
             <div className="browser__bar">
               <svg className="browser__mag" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a93a0" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6" strokeLinecap="round" /></svg>
