@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import { CATEGORIES } from "./data/mockAssets";
 import type { Asset, Category } from "./data/mockAssets";
 import { fetchAssets, fetchByIds, fetchSimilar, AuthRequiredError } from "./api/assets";
+import { searchImages, imageProxyUrl, type ImageHit } from "./api/imagesearch";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
 import { recordUsage } from "./api/usage";
 import { fetchCategories } from "./api/categories";
@@ -107,6 +108,11 @@ export default function App() {
   const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
   const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [browserQuery, setBrowserQuery] = React.useState(""); // 브라우저 탭 검색어
+  const [imgHits, setImgHits] = React.useState<ImageHit[]>([]);
+  const [imgLoading, setImgLoading] = React.useState(false);
+  const [imgError, setImgError] = React.useState<string | null>(null);
+  const [imgPage, setImgPage] = React.useState(1);
+  const [imgTotal, setImgTotal] = React.useState(0);
   const [activeQuery, setActiveQuery] = React.useState(""); // 전송된 검색어
   const [sort, setSort] = React.useState("latest"); // 디폴트=최신순(새 자료 먼저)
   const [cats, setCats] = React.useState<Category[]>(CATEGORIES);
@@ -156,18 +162,35 @@ export default function App() {
   const PAGE_SIZE = 60;
   const isSpecial = view === "favorites" || view === "recent";
   const isBrowser = view === "browser";
-  // 기본은 구글 '이미지' 검색(mode="image"). URL처럼 보이면 그 사이트로. 결과는 브라우저 새 창.
-  const runBrowserSearch = (q: string, mode: "image" | "web" = "image") => {
-    const s = q.trim();
-    if (!s) return;
-    const looksUrl = /^(https?:\/\/|www\.)/i.test(s) || /^[\w-]+\.[a-z]{2,}(\/|$)/i.test(s);
-    if (looksUrl) {
-      openExternal(s.startsWith("http") ? s : "https://" + s);
-      return;
+  // 무료 이미지(Openverse) 검색 — 작업창 안에서 결과 격자 표시
+  const doImageSearch = async (page = 1) => {
+    const q = browserQuery.trim();
+    if (!q) return;
+    setImgLoading(true);
+    setImgError(null);
+    if (page === 1) setImgHits([]);
+    try {
+      const r = await searchImages(q, page);
+      setImgHits((prev) => (page === 1 ? r.data : [...prev, ...r.data]));
+      setImgTotal(r.total);
+      setImgPage(page);
+    } catch (e) {
+      setImgError(e instanceof Error ? e.message : "이미지 검색에 실패했어요.");
+    } finally {
+      setImgLoading(false);
     }
-    const base = "https://www.google.com/search?q=" + encodeURIComponent(s);
-    openExternal(mode === "image" ? base + "&tbm=isch" : base);
   };
+  // 검색된 이미지를 슬라이드에 삽입(프록시 URL → base64 → Office)
+  const insertImage = (h: ImageHit) => {
+    handleInsert({
+      id: "img-" + h.id,
+      name: h.title || "이미지",
+      category: "image",
+      tags: h.creator ? [h.creator] : [],
+      image_url: imageProxyUrl(h.url),
+    } as Asset);
+  };
+
   // 브라우저 탭 진입 시 CSE(작업창 내 인라인 구글 검색) 로드 — cx 설정 시에만. 이미지 검색을 기본으로.
   React.useEffect(() => {
     if (!isBrowser || !GOOGLE_CSE_CX) return;
@@ -638,35 +661,59 @@ export default function App() {
         {isBrowser ? (
           <div className="browser">
             <div className="browser__head">
-              <div className="browser__title">웹 브라우저</div>
-              <div className="browser__sub">{GOOGLE_CSE_CX ? "작업창 안에서 바로 구글 검색이 됩니다." : "구글 이미지 검색이 기본 — 검색하면 결과가 브라우저 새 창에서 열립니다."}</div>
+              <div className="browser__title">이미지 검색</div>
+              <div className="browser__sub">무료 이미지(Openverse)를 찾아 클릭하면 슬라이드에 바로 삽입돼요.</div>
             </div>
-            {GOOGLE_CSE_CX ? (
-              <div id="pp-cse-div" />
-            ) : (
-            <>
             <div className="browser__bar">
               <svg className="browser__mag" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a93a0" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.6-3.6" strokeLinecap="round" /></svg>
               <input
                 className="browser__input"
                 type="search"
                 value={browserQuery}
-                placeholder="구글 이미지 검색 (또는 사이트 주소)…"
+                placeholder="이미지 검색 (예: 회의, 도시, 자연)…"
                 onChange={(e) => setBrowserQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); runBrowserSearch(browserQuery, "image"); } }}
-                aria-label="구글 이미지 검색"
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); doImageSearch(1); } }}
+                aria-label="이미지 검색"
               />
-              <button className="browser__go" onClick={() => runBrowserSearch(browserQuery, "image")}>이미지 검색</button>
+              <button className="browser__go" onClick={() => doImageSearch(1)}>검색</button>
             </div>
-            <div className="browser__links">
-              <button className="browser__link" onClick={() => runBrowserSearch(browserQuery, "web")}>웹 검색</button>
-              <button className="browser__link" onClick={() => openExternal("https://images.google.com")}>구글 이미지</button>
-              <button className="browser__link" onClick={() => openExternal("https://translate.google.com")}>번역</button>
-              <button className="browser__link" onClick={() => openExternal("https://www.youtube.com")}>YouTube</button>
-            </div>
-            <div className="browser__note">ⓘ 구글은 보안 정책상 작업창 안에 직접 표시할 수 없어, 검색하면 <b>구글 이미지 결과가 새 창</b>에서 열립니다. (작업창 안에 결과까지 띄우려면 별도 이미지 API 연동이 필요 — 원하시면 안내드릴게요.)</div>
-            </>
+            {imgError ? (
+              <div className="imgsearch__msg">{imgError}</div>
+            ) : imgLoading && imgHits.length === 0 ? (
+              <div className="imgsearch__msg"><span className="spinner" /> 검색 중…</div>
+            ) : imgHits.length ? (
+              <>
+                <div className="imgsearch__grid">
+                  {imgHits.map((h) => {
+                    const id = "img-" + h.id;
+                    return (
+                      <button
+                        key={id}
+                        className="imgsearch__cell"
+                        title={(h.title || "이미지") + (h.creator ? " · " + h.creator : "")}
+                        disabled={insertingId === id}
+                        onClick={() => insertImage(h)}
+                      >
+                        <img src={h.thumb} alt={h.title} loading="lazy" decoding="async" />
+                        {insertingId === id && (
+                          <span className="imgsearch__ins" aria-hidden>
+                            <span className="spinner" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {imgHits.length < imgTotal && (
+                  <button className="imgsearch__more" disabled={imgLoading} onClick={() => doImageSearch(imgPage + 1)}>
+                    {imgLoading ? "불러오는 중…" : "더 보기"}
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="imgsearch__hint">검색어를 입력하면 무료 이미지가 여기에 표시됩니다.<br />클릭 한 번으로 슬라이드에 삽입돼요.</div>
             )}
+            <div className="browser__note">Openverse 무료 이미지 · 일반 구글 이미지는 <button className="browser__inlinelink" onClick={() => openExternal("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(browserQuery.trim() || "image"))}>새 창에서 열기</button></div>
           </div>
         ) : (
         <>

@@ -17,6 +17,7 @@ require_once __DIR__ . '/src/UsageController.php';
 require_once __DIR__ . '/src/PrefsController.php';
 require_once __DIR__ . '/src/AnnouncementController.php';
 require_once __DIR__ . '/src/RequestController.php';
+require_once __DIR__ . '/src/ImageSearchController.php';
 
 // ── CORS: 알려진 출처만 허용 (운영 도메인 + 로컬 dev). 그 외엔 운영 도메인으로 고정 ──
 $allowedOrigins = array_filter([
@@ -137,6 +138,20 @@ try {
             exit;
         }
         (new UsageController())->record(read_json_body(), $email);
+        exit;
+    }
+
+    // ── 무료 이미지 검색(Openverse) + 이미지 중계 (로그인 사용자) ──
+    if (preg_match('#/api/imagesearch$#', $path) && $method === 'GET') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) { json_out(['error' => '인증이 필요합니다.', 'code' => 401], 401); exit; }
+        (new ImageSearchController())->search($_GET);
+        exit;
+    }
+    if (preg_match('#/api/imageproxy$#', $path) && $method === 'GET') {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if ($email === null) { http_response_code(401); echo '인증이 필요합니다.'; exit; }
+        (new ImageSearchController())->proxy($_GET);
         exit;
     }
 

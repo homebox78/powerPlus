@@ -1,6 +1,7 @@
 /* global PowerPoint, Office, Image, document, window */
 import { useCallback, useState } from "react";
 import type { Asset } from "../data/mockAssets";
+import { getToken } from "../api/auth";
 
 /** SVG 문자열을 PNG base64(헤더 제외)로 변환.
  *  PowerPoint addImage()는 base64 인코딩된 PNG/JPEG를 받으므로
@@ -36,7 +37,9 @@ function svgToPngBase64(svg: string, size = 512): Promise<string> {
 
 /** 서버 업로드 이미지(PNG/JPG) URL → base64(헤더 제외). Office addImage 는 PNG/JPEG base64 를 받는다. */
 async function imageUrlToBase64(url: string): Promise<string> {
-  const res = await fetch(url);
+  // 동일 출처 정적 자산은 헤더 무관, 이미지 프록시(/api/imageproxy)는 로그인 필요 → 토큰 동봉
+  const token = getToken();
+  const res = await fetch(url, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
   if (!res.ok) throw new Error("이미지 로드 실패");
   const blob = await res.blob();
   return await new Promise((resolve, reject) => {
