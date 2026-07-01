@@ -280,7 +280,7 @@ final class UsageService
             'topUsers'      => $topUsers,
             'topAssets'     => $this->top(8),
             'topFavorites'  => $this->topFavorites(8),
-            'recentInserts' => $this->recentInserts(20),
+            'recentInserts' => $this->recentInserts(60),
             'requests'      => $requests,
             'kpi'           => $kpi,
             'totals'        => $totals,
