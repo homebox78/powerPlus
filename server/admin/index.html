@@ -243,6 +243,10 @@
     .dash-grid2a { display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; }
     .dash-grid3 > .dash-card, .dash-grid2a > .dash-card { display:flex; flex-direction:column; min-width:0; }
     .an-canwrap { min-width:0; } .an-canwrap canvas { max-width:100% !important; }
+    .an-cover-total { text-align:center; margin:8px 0 4px; }
+    .an-cover-total .ct-v { font:800 32px Pretendard; color:var(--text); line-height:1.1; }
+    .an-cover-total .ct-v .ct-u { font:700 15px Pretendard; color:var(--muted); margin-left:3px; }
+    .an-cover-total .ct-s { font:600 12px Pretendard; color:var(--muted); margin-top:3px; }
     @media (max-width:1000px){ .dash-grid3 { grid-template-columns:1fr 1fr; } .dash-grid2a { grid-template-columns:1fr; } }
     @media (max-width:640px){ .dash-grid3 { grid-template-columns:1fr; } }
     #an-topassets, #an-topusers, #an-rank { min-height:0; }
@@ -335,17 +339,17 @@
       <div id="an-kpi" class="an-kpi"></div>
       <div class="dash-grid2a">
         <div class="dash-card">
-          <div class="dash-h" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <span>사용 현황 <span class="an-note">(삽입 이동평균 점선)</span></span>
-            <span class="trend-tabs" id="tv-tabs">
-              <button class="trend-tab trend-tab--active" data-tv="trend">추이</button>
-              <button class="trend-tab" data-tv="heat">요일×시간</button>
-            </span>
-          </div>
-          <div id="tv-trend"><div class="an-canwrap"><canvas id="ch-trend"></canvas></div></div>
-          <div id="tv-heat" class="hidden"><div id="an-heatmap"></div></div>
+          <div class="dash-h">방문자 · 사용 추이 <span class="an-note">(삽입 이동평균 점선)</span></div>
+          <div class="an-canwrap"><canvas id="ch-trend"></canvas></div>
+          <div class="dash-h" style="margin-top:16px">요일 × 시간대 히트맵 <span class="an-note">(삽입 밀도 — 언제 많이 쓰는지)</span></div>
+          <div id="an-heatmap"></div>
         </div>
-        <div class="dash-card"><div class="dash-h">콘텐츠 커버리지 <span class="an-note">(사용 / 전체)</span></div><div class="an-canwrap an-canwrap--sm"><canvas id="ch-cover"></canvas></div><div id="an-coverbars" style="margin-top:10px"></div></div>
+        <div class="dash-card">
+          <div class="dash-h">콘텐츠 커버리지 <span class="an-note">(사용 / 전체)</span></div>
+          <div id="an-cover-total" class="an-cover-total"></div>
+          <div class="an-canwrap an-canwrap--sm"><canvas id="ch-cover"></canvas></div>
+          <div id="an-coverbars" style="margin-top:10px"></div>
+        </div>
       </div>
       <div class="dash-grid3">
         <div class="dash-card"><div class="dash-h">누적 성장 <span class="an-note">(삽입·자산)</span></div><div class="an-canwrap an-canwrap--sm"><canvas id="ch-cum"></canvas></div></div>
@@ -883,8 +887,9 @@
           options: { responsive: true, maintainAspectRatio: false, cutout: "60%", plugins: { legend: { position: "right", labels: { boxWidth: 10, font: { size: 11 }, usePointStyle: true } } } } })
           : ($("ch-catuse").parentElement.innerHTML = '<div class="an-empty">아직 사용 기록이 없습니다.</div>');
 
-        // ── 콘텐츠 커버리지(도넛 + 카테고리 바) ──
+        // ── 콘텐츠 커버리지(전체자산 큰 노출 + 도넛 + 카테고리 바) ──
         const used = k.coverageUsed || 0, unused = Math.max(0, (k.coverageTotal || 0) - used);
+        $("an-cover-total").innerHTML = `<div class="ct-v">${nfmt(k.coverageTotal)}<span class="ct-u">개</span></div><div class="ct-s">전체 자산 · 사용 ${nfmt(used)} (${k.coveragePct || 0}%)</div>`;
         chart("ch-cover", { type: "doughnut", data: { labels: ["사용됨", "미사용"], datasets: [{ data: [used, unused], backgroundColor: ["#1a9c5b", "#e6e9ee"], borderColor: "#fff", borderWidth: 2 }] },
           options: { responsive: true, maintainAspectRatio: false, cutout: "66%", plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 }, usePointStyle: true } } } } });
         $("an-coverbars").innerHTML = (r.coverageByCat || []).map((c) => {
@@ -921,7 +926,7 @@
       $("ut-users").classList.toggle("hidden", v !== "users");
       $("ut-recent").classList.toggle("hidden", v !== "recent");
     });
-    let _anRecent = [], _anRecentPage = 1; const RECENT_PP = 15;
+    let _anRecent = [], _anRecentPage = 1; const RECENT_PP = 10;
     function renderRecentPage() {
       const list = _anRecent, tp = Math.max(1, Math.ceil(list.length / RECENT_PP));
       if (_anRecentPage > tp) _anRecentPage = tp;
@@ -934,12 +939,7 @@
       el.innerHTML = h;
       el.querySelectorAll("[data-rp]").forEach((b) => b.onclick = () => { const n = +b.dataset.rp; if (n < 1 || n > tp || n === _anRecentPage) return; _anRecentPage = n; renderRecentPage(); });
     }
-    document.querySelectorAll("#tv-tabs .trend-tab").forEach((b) => b.onclick = () => {
-      const v = b.dataset.tv;
-      document.querySelectorAll("#tv-tabs .trend-tab").forEach((x) => x.classList.toggle("trend-tab--active", x.dataset.tv === v));
-      $("tv-trend").classList.toggle("hidden", v !== "trend");
-      $("tv-heat").classList.toggle("hidden", v !== "heat");
-    });
+    // (추이·히트맵은 한 카드에 위아래 배치 — 탭 토글 제거)
 
     /* ── 카테고리 ── */
     async function loadCategories() {
