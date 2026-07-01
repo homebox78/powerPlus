@@ -199,16 +199,90 @@ final class UsageService
             'visitDays'      => (int) $pdo->query("SELECT COUNT(DISTINCT day) FROM visits")->fetchColumn(),
         ];
 
+        // ── KPI (모니터링 핵심지표) ──
+        $q = static fn(string $sql): int => (int) Database::pdo()->query($sql)->fetchColumn();
+        $dau = $q("SELECT COUNT(DISTINCT email) FROM visits WHERE day = CURDATE()");
+        $wau = $q("SELECT COUNT(DISTINCT email) FROM visits WHERE day >= CURDATE() - INTERVAL 6 DAY");
+        $mau = $q("SELECT COUNT(DISTINCT email) FROM visits WHERE day >= CURDATE() - INTERVAL 29 DAY");
+        $insToday = $q("SELECT COUNT(*) FROM usage_log WHERE DATE(used_at) = CURDATE()");
+        $insYday  = $q("SELECT COUNT(*) FROM usage_log WHERE DATE(used_at) = CURDATE() - INTERVAL 1 DAY");
+        $ins7     = $q("SELECT COUNT(*) FROM usage_log WHERE used_at >= CURDATE() - INTERVAL 6 DAY");
+        $ins7prev = $q("SELECT COUNT(*) FROM usage_log WHERE used_at >= CURDATE() - INTERVAL 13 DAY AND used_at < CURDATE() - INTERVAL 6 DAY");
+        $usedAssets  = $q("SELECT COUNT(DISTINCT u.asset_id) FROM usage_log u JOIN assets a ON a.id = u.asset_id");
+        $totalAssets = $q("SELECT COUNT(*) FROM assets");
+        $kpi = [
+            'dau' => $dau, 'wau' => $wau, 'mau' => $mau,
+            'insToday' => $insToday, 'insYesterday' => $insYday,
+            'ins7d' => $ins7, 'ins7dPrev' => $ins7prev,
+            'stickiness'    => $mau > 0 ? (int) round($dau / $mau * 100) : 0,
+            'coverageUsed'  => $usedAssets,
+            'coverageTotal' => $totalAssets,
+            'coveragePct'   => $totalAssets > 0 ? (int) round($usedAssets / $totalAssets * 100) : 0,
+        ];
+
+        // ── 누적 성장(누적 삽입 · 누적 자산) — 전 구간 러닝합 후 표시구간만 ──
+        $assetsPer = $map("SELECT DATE_FORMAT(created_at, '$fmt') b, COUNT(*) c FROM assets WHERE created_at IS NOT NULL GROUP BY b");
+        $allB = array_keys($inserts + $assetsPer);
+        sort($allB);
+        $runIns = 0; $runAsset = 0; $cumMap = [];
+        foreach ($allB as $b) {
+            $runIns   += $inserts[$b]   ?? 0;
+            $runAsset += $assetsPer[$b] ?? 0;
+            $cumMap[$b] = ['inserts' => $runIns, 'assets' => $runAsset];
+        }
+        $cumulative = array_map(static fn($b) => [
+            'bucket'  => $b,
+            'inserts' => $cumMap[$b]['inserts'] ?? 0,
+            'assets'  => $cumMap[$b]['assets']  ?? 0,
+        ], $buckets);
+
+        // ── 요일(0=일~6=토) × 시간(0~23) 히트맵: 삽입 밀도 ──
+        $dhRaw = [];
+        foreach ($pdo->query("SELECT DAYOFWEEK(used_at) d, HOUR(used_at) h, COUNT(*) c FROM usage_log GROUP BY d, h") as $r) {
+            $dhRaw[((int) $r['d'] - 1) . '_' . (int) $r['h']] = (int) $r['c'];
+        }
+        $dowHour = [];
+        for ($d = 0; $d < 7; $d++) {
+            $rowc = [];
+            for ($h = 0; $h < 24; $h++) { $rowc[] = $dhRaw[$d . '_' . $h] ?? 0; }
+            $dowHour[] = $rowc;
+        }
+
+        // ── 카테고리별 커버리지(사용된 자산 / 등록 수) ──
+        $cvTotal = [];
+        foreach ($pdo->query("SELECT category cat, COUNT(*) c FROM assets GROUP BY category") as $r) { $cvTotal[(string) $r['cat']] = (int) $r['c']; }
+        $cvUsed = [];
+        foreach ($pdo->query("SELECT a.category cat, COUNT(DISTINCT u.asset_id) c FROM usage_log u JOIN assets a ON a.id = u.asset_id GROUP BY a.category") as $r) { $cvUsed[(string) $r['cat']] = (int) $r['c']; }
+        $coverageByCat = [];
+        foreach ($cvTotal as $cat => $tot) {
+            $coverageByCat[] = ['category' => $cat, 'total' => $tot, 'used' => $cvUsed[$cat] ?? 0];
+        }
+
+        // ── 미충족 수요(콘텐츠 요청) — 테이블 없으면 무시 ──
+        $requests = ['new' => 0, 'done' => 0, 'rejected' => 0, 'total' => 0];
+        try {
+            foreach ($pdo->query("SELECT status, COUNT(*) c FROM content_requests GROUP BY status") as $r) {
+                $s = (string) $r['status'];
+                if (isset($requests[$s])) { $requests[$s] = (int) $r['c']; }
+                $requests['total'] += (int) $r['c'];
+            }
+        } catch (\Throwable $e) { /* content_requests 없음 */ }
+
         return [
             'period'        => $period,
             'series'        => $series,
+            'cumulative'    => $cumulative,
             'categoryUsage' => $categoryUsage,
+            'coverageByCat' => $coverageByCat,
             'dow'           => $dow,
             'hour'          => $hour,
+            'dowHour'       => $dowHour,
             'topUsers'      => $topUsers,
             'topAssets'     => $this->top(8),
             'topFavorites'  => $this->topFavorites(8),
             'recentInserts' => $this->recentInserts(20),
+            'requests'      => $requests,
+            'kpi'           => $kpi,
             'totals'        => $totals,
         ];
     }
