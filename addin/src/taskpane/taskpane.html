@@ -60,6 +60,10 @@
             if (n) n.style.display = "block";
             var r = document.getElementById("root");
             if (r) r.style.display = "none";
+            // 전용 업그레이드 권장 페이지로 연결(리다이렉트 실패 시 위 인라인 안내가 남음)
+            try {
+              window.location.replace("unsupported.html");
+            } catch (e) {}
           }
         } catch (e) {}
       })();

@@ -60,6 +60,7 @@ module.exports = async (env, options) => {
         patterns: [
           { from: "assets", to: "assets", noErrorOnMissing: true },
           { from: "manifest.xml", to: "manifest.xml" },
+          { from: "src/taskpane/unsupported.html", to: "unsupported.html" },
         ],
       }),
     ],
