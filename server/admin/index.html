@@ -244,6 +244,16 @@
     .hm-legend i { width:15px; height:12px; border-radius:2px; display:inline-block; }
     .req-pill { display:inline-flex; align-items:baseline; gap:6px; padding:8px 14px; border-radius:10px; background:#f4f6f9; }
     .req-pill b { font:800 18px Pretendard; } .req-pill span { font:600 12px Pretendard; color:var(--ink2); }
+    /* 자산 카드 사용지표 배지 + 검색 지우기 + 토스트/확인 (관리자 UX 개선) */
+    .card__stat { display:flex; gap:14px; margin-top:5px; font:700 11px 'JetBrains Mono',monospace; color:var(--muted); }
+    .card__stat span { display:inline-flex; align-items:center; gap:3px; } .card__stat b { color:var(--ink2); }
+    .card__stat .z { opacity:.5; }
+    .search-box { position:relative; } .search-box input { padding-right:26px; }
+    .search-clear { position:absolute; right:7px; top:50%; transform:translateY(-50%); border:0; background:#e6e9ee; color:#666; width:18px; height:18px; border-radius:50%; font-size:13px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .search-clear:hover { background:#d8dce2; }
+    .toast-wrap { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+    .toast { background:#333; color:#fff; font:600 13px Pretendard; padding:11px 18px; border-radius:10px; box-shadow:0 6px 22px rgba(0,0,0,.22); opacity:0; transform:translateY(8px); transition:.22s; max-width:82vw; }
+    .toast--show { opacity:1; transform:none; } .toast--err { background:#c43e1c; }
     /* 가로 꽉 채우는 flex 막대 차트 */
     .gb { display:flex; align-items:flex-end; justify-content:space-around; gap:4px; width:100%; padding-top:8px; }
     .gb-col { flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; }
@@ -794,7 +804,6 @@
       _charts[id] = new Chart(el.getContext("2d"), cfg);
     }
     function nfmt(n) { return Number(n || 0).toLocaleString("ko-KR"); }
-    function catLabel(k) { return (categories.find((x) => x.key === k) || {}).label || k || ""; }
     function pctDelta(cur, prev) {
       cur = +cur || 0; prev = +prev || 0;
       if (!prev) return cur > 0 ? { t: "▲ 신규", c: "up" } : { t: "—", c: "flat" };
