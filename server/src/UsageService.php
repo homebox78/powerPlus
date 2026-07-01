@@ -32,6 +32,31 @@ final class UsageService
         return $this->rank('user_favorites', 'created_at', $limit);
     }
 
+    /**
+     * 최근 삽입 내역 — 누가(email) · 무엇을(asset) · 언제(used_at). 최신순.
+     * @return array<int,array{email:string,used_at:string,asset:?array}>
+     */
+    public function recentInserts(int $limit = 20): array
+    {
+        $limit = max(1, min(100, $limit));
+        $stmt = Database::pdo()->prepare(
+            'SELECT email, asset_id, used_at FROM usage_log ORDER BY id DESC LIMIT :lim'
+        );
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $assets = new AssetService();
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $out[] = [
+                'email'   => (string) ($row['email'] ?? ''),
+                'used_at' => (string) $row['used_at'],
+                'asset'   => $assets->find((string) $row['asset_id']),
+            ];
+        }
+        return $out;
+    }
+
     /** 공통: 특정 테이블에서 asset_id 별 카운트 상위 N. */
     private function rank(string $table, string $dateCol, int $limit): array
     {
@@ -183,6 +208,7 @@ final class UsageService
             'topUsers'      => $topUsers,
             'topAssets'     => $this->top(8),
             'topFavorites'  => $this->topFavorites(8),
+            'recentInserts' => $this->recentInserts(20),
             'totals'        => $totals,
         ];
     }

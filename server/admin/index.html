@@ -411,8 +411,9 @@
       <div class="dash-card"><div class="dash-h">시간대별 사용 패턴 <span class="an-note">(0~23시)</span></div><div id="an-hour" class="an-chart"></div></div>
       <div class="dash-grid2">
         <div class="dash-card dash-card--pad0"><div class="an-card-h">인기 자산 TOP</div><div id="an-topassets"></div></div>
-        <div class="dash-card dash-card--pad0"><div class="an-card-h">활발한 사용자 TOP</div><div id="an-topusers"></div></div>
+        <div class="dash-card dash-card--pad0"><div class="an-card-h">활발한 사용자 TOP <span class="an-note">(아이디별 삽입 수)</span></div><div id="an-topusers"></div></div>
       </div>
+      <div class="dash-card dash-card--pad0"><div class="an-card-h">최근 삽입 내역 <span class="an-note">(어떤 아이디가 · 무엇을 · 언제)</span></div><div id="an-recent"></div></div>
     </section>
   </div>
 
@@ -746,6 +747,17 @@
       }).join("");
       el.innerHTML = `<div class="gb">${cols}</div>`;
     }
+    function fmtUsed(s) { return s ? String(s).slice(5, 16) : ""; } // "MM-DD HH:MM"
+    function renderRecentInserts(list) {
+      if (!list.length) return '<div class="an-empty">아직 삽입 기록이 없습니다.</div>';
+      return list.map((it) => {
+        const a = it.asset || {}; const src = a.thumb_url || a.image_url;
+        const thumb = src ? `<img class="an-thumb" src="${esc(src)}" loading="lazy" alt="">` : `<span class="an-thumb"></span>`;
+        const catLbl = (categories.find((x) => x.key === a.category) || {}).label || a.category || "";
+        const lbl = a.id ? esc(catLbl) + " · " + esc(a.id) : "삭제된 자산";
+        return `<div class="an-row">${thumb}<div class="an-row__main"><div class="an-row__t">${esc(it.email || "익명")}</div><div class="an-row__s">${lbl}</div></div><span class="an-row__s" style="flex:none">${esc(fmtUsed(it.used_at))}</span></div>`;
+      }).join("");
+    }
     function renderTopAssets(list) {
       if (!list.length) return '<div class="an-empty">아직 사용 기록이 없습니다.</div>';
       return list.map((it, i) => {
@@ -777,6 +789,7 @@
         $("an-topassets").innerHTML = renderTopAssets(r.topAssets || []);
         const tu = r.topUsers || [];
         $("an-topusers").innerHTML = tu.length ? tu.map((u, i) => `<div class="an-row"><span class="an-rank an-rank--${i + 1}">${i + 1}</span><div class="an-row__main"><div class="an-row__t">${esc(u.email)}</div></div><span class="an-row__n">${u.count}</span></div>`).join("") : '<div class="an-empty">아직 사용 기록이 없습니다.</div>';
+        $("an-recent").innerHTML = renderRecentInserts(r.recentInserts || []);
       } catch (e) { $("an-kpi").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
     }
 
