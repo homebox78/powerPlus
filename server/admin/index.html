@@ -169,7 +169,7 @@
     .dash-h { font:800 15px Pretendard; color:var(--text); }
     .dash-h--pad { padding:18px 22px 4px; }
     .dash-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
-    .dash-grid2 > .dash-card { display:flex; flex-direction:column; }
+    .dash-grid2 > .dash-card { display:flex; flex-direction:column; min-width:0; }
     @media (max-width:900px){ .dash-grid2 { grid-template-columns:1fr; } }
     /* 인기/즐겨찾기 순위 (탭) */
     .rank-tabs { display:inline-flex; gap:4px; background:#e7ebf0; border-radius:11px; padding:3px; margin:14px 16px 0; }
@@ -241,7 +241,8 @@
     /* 한눈에 보는 대시보드 그리드 */
     .dash-grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; align-items:stretch; }
     .dash-grid2a { display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; }
-    .dash-grid3 > .dash-card, .dash-grid2a > .dash-card { display:flex; flex-direction:column; }
+    .dash-grid3 > .dash-card, .dash-grid2a > .dash-card { display:flex; flex-direction:column; min-width:0; }
+    .an-canwrap { min-width:0; } .an-canwrap canvas { max-width:100% !important; }
     @media (max-width:1000px){ .dash-grid3 { grid-template-columns:1fr 1fr; } .dash-grid2a { grid-template-columns:1fr; } }
     @media (max-width:640px){ .dash-grid3 { grid-template-columns:1fr; } }
     #an-topassets, #an-topusers, #an-rank { min-height:0; }
@@ -773,6 +774,7 @@
       }).join("");
     }
     function renderTopAssets(list) {
+      list = (list || []).filter((it) => it && it.asset && it.asset.id); // 삭제된 자산(빈 항목) 제외
       if (!list.length) return '<div class="an-empty">아직 사용 기록이 없습니다.</div>';
       return list.map((it, i) => {
         const a = it.asset || {}; const src = a.thumb_url || a.image_url;

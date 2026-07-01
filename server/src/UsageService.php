@@ -61,9 +61,11 @@ final class UsageService
     private function rank(string $table, string $dateCol, int $limit): array
     {
         $limit = max(1, min(200, $limit));
+        // JOIN assets: 삭제된 자산(삽입/즐겨찾기 기록만 남고 실물 없는 것)은 순위에서 제외 → 빈 줄 방지
         $stmt = Database::pdo()->prepare(
-            "SELECT asset_id, COUNT(*) AS cnt FROM $table
-             GROUP BY asset_id ORDER BY cnt DESC, MAX($dateCol) DESC LIMIT :lim"
+            "SELECT t.asset_id, COUNT(*) AS cnt FROM $table t
+             JOIN assets a ON a.id = t.asset_id
+             GROUP BY t.asset_id ORDER BY cnt DESC, MAX(t.$dateCol) DESC LIMIT :lim"
         );
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
