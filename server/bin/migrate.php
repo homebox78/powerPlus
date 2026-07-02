@@ -128,6 +128,19 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS content_requests (
   INDEX idx_status (status, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+// 검색 로그 — 검색 품질(무결과율)·수요 파악용. 무결과 검색어가 자산 확충/임베딩 도입의 근거 데이터.
+$pdo->exec("CREATE TABLE IF NOT EXISTS search_logs (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NULL,
+  query VARCHAR(255) NOT NULL,
+  category VARCHAR(32) NULL,
+  results INT NOT NULL DEFAULT 0,
+  searched_at DATETIME NOT NULL,
+  INDEX idx_time (searched_at),
+  INDEX idx_query (query(64)),
+  INDEX idx_zero (results, searched_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
 echo "migrate OK\n";
 echo "categories:\n";
 foreach ($pdo->query("SELECT `key`,label,sort_order FROM categories ORDER BY sort_order") as $r) {

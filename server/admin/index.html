@@ -373,6 +373,16 @@
           <div id="ut-recent" class="hidden"><div id="an-recent"></div><div id="an-recent-pager" class="pager" style="padding:10px 16px 6px"></div></div>
         </div>
       </div>
+      <div class="dash-grid2">
+        <div class="dash-card">
+          <div class="dash-h">인기 검색어 <span class="an-note">(최근 30일)</span></div>
+          <div id="an-searchtop"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-h">무결과 검색어 <span class="an-note" id="an-zerorate">(최근 30일)</span></div>
+          <div id="an-searchzero"></div>
+        </div>
+      </div>
     </section>
 
     <!-- 자산 탭 -->
@@ -910,6 +920,18 @@
         const tu = r.topUsers || [];
         $("an-topusers").innerHTML = tu.length ? tu.map((u, i) => `<div class="an-row"><span class="an-rank an-rank--${i + 1}">${i + 1}</span><div class="an-row__main"><div class="an-row__t">${esc(u.email)}</div></div><span class="an-row__n">${nfmt(u.count)}</span></div>`).join("") : '<div class="an-empty">아직 사용 기록이 없습니다.</div>';
         _anRecent = r.recentInserts || []; _anRecentPage = 1; renderRecentPage();
+
+        // ── 검색 품질(인기 검색어 · 무결과 검색어 + 무결과율) ──
+        const sr = r.search || { total: 0, zero: 0, zeroRate: 0, top: [], topZero: [] };
+        $("an-zerorate").textContent = sr.total > 0
+          ? `(최근 30일 · 검색 ${nfmt(sr.total)}회 · 무결과율 ${sr.zeroRate}%)`
+          : "(최근 30일)";
+        $("an-searchtop").innerHTML = (sr.top || []).length
+          ? sr.top.map((s, i) => `<div class="an-row"><span class="an-rank an-rank--${i + 1}">${i + 1}</span><div class="an-row__main"><div class="an-row__t">${esc(s.q)}</div>${s.zero > 0 ? `<div class="an-row__s">무결과 ${nfmt(s.zero)}회</div>` : ""}</div><span class="an-row__n">${nfmt(s.n)}</span></div>`).join("")
+          : '<div class="an-empty">아직 검색 기록이 없습니다.</div>';
+        $("an-searchzero").innerHTML = (sr.topZero || []).length
+          ? sr.topZero.map((s, i) => `<div class="an-row"><span class="an-rank an-rank--${i + 1}">${i + 1}</span><div class="an-row__main"><div class="an-row__t">${esc(s.q)}</div></div><span class="an-row__n">${nfmt(s.n)}</span></div>`).join("")
+          : '<div class="an-empty">무결과 검색이 없습니다. 👍</div>';
       } catch (e) { $("an-kpi").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
     }
     /* 순위 탭 / 최근삽입 페이지네이션 / 추이·히트맵 탭 */

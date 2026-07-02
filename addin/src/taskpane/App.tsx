@@ -420,6 +420,17 @@ export default function App() {
     setReqSubmitted(false);
     closeMenus();
   }
+  /** 무결과 검색 → 그 키워드로 콘텐츠 요청 시트 열기(제목·유형 프리필) — 검색↔요청 루프 연결 */
+  function openRequestFromSearch() {
+    setReqTitle(activeQuery.trim());
+    if (cat !== "all") {
+      const c = cats.find((x) => x.key === cat);
+      if (c) setReqType(c.label);
+    }
+    setRequestOpen(true);
+    setReqSubmitted(false);
+    closeMenus();
+  }
   function closeRequest() {
     setRequestOpen(false);
     setReqSubmitted(false);
@@ -763,6 +774,8 @@ export default function App() {
           onShowSimilar={handleShowSimilar}
           emptyTitle={similarOf ? "비슷한 자산이 없어요" : emptyTitle}
           emptySub={similarOf ? "다른 자산에서 다시 시도해 보세요." : emptySub}
+          emptyActionLabel={!similarOf && activeQuery ? `‘${activeQuery}’ 자료 요청하기` : undefined}
+          onEmptyAction={!similarOf && activeQuery ? openRequestFromSearch : undefined}
           loading={similarOf ? similarLoading : loading}
           cols={!isSpecial && (cat === "icon" || cat === "illust") ? 3 : 2}
         />

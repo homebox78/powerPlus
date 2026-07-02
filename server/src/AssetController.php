@@ -14,7 +14,7 @@ final class AssetController
     }
 
     /** GET /api/assets?category=&q=&page=&limit=  또는  ?ids=a,b,c (즐겨찾기/최근) */
-    public function list(array $query): void
+    public function list(array $query, ?string $email = null): void
     {
         // id 목록 조회 — 즐겨찾기/최근이 전체를 받지 않고 콕 집어서(빠름·정확)
         $idsRaw = isset($query['ids']) ? trim((string) $query['ids']) : '';
@@ -31,7 +31,24 @@ final class AssetController
         $kind     = isset($query['kind']) ? (string) $query['kind'] : '';   // package|single
         $ptype    = isset($query['ptype']) ? (string) $query['ptype'] : ''; // cover|toc|divider|content|greeting|qa|etc
 
-        $this->json($this->service->list($category, $q, $page, $limit, $sort, $kind, $ptype));
+        $result = $this->service->list($category, $q, $page, $limit, $sort, $kind, $ptype);
+
+        // 검색 로그(무결과율·수요 파악) — 1페이지만 기록(무한스크롤 중복 방지), 실패해도 응답은 정상
+        if ($q !== '' && $page === 1) {
+            try {
+                Database::pdo()->prepare(
+                    'INSERT INTO search_logs (email, query, category, results, searched_at)
+                     VALUES (:e, :q, :c, :n, NOW())'
+                )->execute([
+                    ':e' => $email,
+                    ':q' => mb_substr(trim($q), 0, 255),
+                    ':c' => $category,
+                    ':n' => (int) ($result['total'] ?? 0),
+                ]);
+            } catch (Throwable $e) { /* 로깅 실패는 무시 */ }
+        }
+
+        $this->json($result);
     }
 
     /** GET /api/assets/{id}/similar — 유사 자산 추천 */

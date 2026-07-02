@@ -778,6 +778,24 @@ body {
   max-width: 240px;
   white-space: pre-line;
 }
+/* 무결과 → 콘텐츠 요청 연결 버튼 (채움 버튼 = 블랙, pill) */
+.empty__action {
+  margin-top: 14px;
+  border: 0;
+  background: #333;
+  color: #fff;
+  font: 700 12.5px Pretendard, sans-serif;
+  border-radius: 999px;
+  padding: 9px 18px;
+  cursor: pointer;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.empty__action:hover {
+  background: #1f1f1f;
+}
 
 .scroll-sentinel {
   height: 1px;

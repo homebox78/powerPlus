@@ -338,7 +338,7 @@ try {
             exit;
         }
         if (preg_match('#/api/assets$#', $path)) {
-            $controller->list($_GET);
+            $controller->list($_GET, $email);
             exit;
         }
     }

@@ -11,6 +11,9 @@ interface Props {
   onShowSimilar?: (asset: Asset) => void;
   emptyTitle?: string;
   emptySub?: string;
+  /** 빈 상태 하단 액션 버튼(예: 무결과 → "이 키워드로 요청하기") */
+  emptyActionLabel?: string;
+  onEmptyAction?: () => void;
   loading?: boolean;
   /** 한 줄에 몇 개(아이콘/일러스트=3, 그 외=2) */
   cols?: number;
@@ -49,6 +52,8 @@ export default function AssetGrid({
   onToggleFavorite,
   emptyTitle = "자료가 없어요",
   emptySub = "다른 카테고리를 선택해 보세요.",
+  emptyActionLabel,
+  onEmptyAction,
   loading = false,
   cols = 2,
 }: Props) {
@@ -72,6 +77,11 @@ export default function AssetGrid({
         <img src="assets/state-empty.svg" alt="" className="state-anim state-anim--empty" style={{ width: 180, height: "auto", marginBottom: 6 }} />
         <div className="empty__title">{emptyTitle}</div>
         <div className="empty__sub" style={{ whiteSpace: "pre-line" }}>{emptySub}</div>
+        {emptyActionLabel && onEmptyAction && (
+          <button type="button" className="empty__action" onClick={onEmptyAction}>
+            {emptyActionLabel}
+          </button>
+        )}
       </div>
     );
   }

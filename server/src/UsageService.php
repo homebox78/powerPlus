@@ -286,6 +286,46 @@ final class UsageService
             'requests'      => $requests,
             'kpi'           => $kpi,
             'totals'        => $totals,
+            'search'        => $this->searchStats(30),
         ];
+    }
+
+    /** 검색 품질 통계(최근 N일) — 검색 수·무결과율·인기/무결과 검색어 TOP. 테이블 없으면 0. */
+    private function searchStats(int $days = 30): array
+    {
+        $out = ['total' => 0, 'zero' => 0, 'zeroRate' => 0.0, 'top' => [], 'topZero' => []];
+        try {
+            $pdo = Database::pdo();
+            $stmt = $pdo->prepare(
+                "SELECT COUNT(*) t, SUM(results = 0) z FROM search_logs
+                 WHERE searched_at >= DATE_SUB(NOW(), INTERVAL :d DAY)"
+            );
+            $stmt->execute([':d' => $days]);
+            $row = $stmt->fetch();
+            $out['total'] = (int) ($row['t'] ?? 0);
+            $out['zero']  = (int) ($row['z'] ?? 0);
+            $out['zeroRate'] = $out['total'] > 0 ? round($out['zero'] * 100 / $out['total'], 1) : 0.0;
+
+            $q1 = $pdo->prepare(
+                "SELECT query q, COUNT(*) n, SUM(results = 0) z FROM search_logs
+                 WHERE searched_at >= DATE_SUB(NOW(), INTERVAL :d DAY)
+                 GROUP BY query ORDER BY n DESC LIMIT 10"
+            );
+            $q1->execute([':d' => $days]);
+            foreach ($q1 as $r) {
+                $out['top'][] = ['q' => (string) $r['q'], 'n' => (int) $r['n'], 'zero' => (int) $r['z']];
+            }
+
+            $q2 = $pdo->prepare(
+                "SELECT query q, COUNT(*) n FROM search_logs
+                 WHERE results = 0 AND searched_at >= DATE_SUB(NOW(), INTERVAL :d DAY)
+                 GROUP BY query ORDER BY n DESC LIMIT 10"
+            );
+            $q2->execute([':d' => $days]);
+            foreach ($q2 as $r) {
+                $out['topZero'][] = ['q' => (string) $r['q'], 'n' => (int) $r['n']];
+            }
+        } catch (\Throwable $e) { /* search_logs 미생성 등 — 0으로 */ }
+        return $out;
     }
 }
