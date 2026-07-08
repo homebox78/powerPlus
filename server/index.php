@@ -77,6 +77,21 @@ if (preg_match('#/health$#', $path)) {
 }
 
 try {
+    // ── 공개 자산 목록/카테고리 (인증 불필요, 읽기 전용) — DeckGen 등 내부 도구 연동용 ──
+    // 이미지(image_url/thumb_url)는 이미 공개 정적 파일이라 메타데이터 공개도 안전. 쓰기·삭제는 불가.
+    if (preg_match('#/api/public/assets$#', $path) && $method === 'GET') {
+        (new AssetController())->list($_GET, null);
+        exit;
+    }
+    if (preg_match('#/api/public/assets/([^/]+)/similar$#', $path, $m) && $method === 'GET') {
+        (new AssetController())->similar(urldecode($m[1]), $_GET);
+        exit;
+    }
+    if (preg_match('#/api/public/categories$#', $path) && $method === 'GET') {
+        (new CategoryController())->list();
+        exit;
+    }
+
     // ── 인증 라우트 (로그인 불필요) ──
     if (preg_match('#/api/auth/request$#', $path) && $method === 'POST') {
         (new AuthController())->request(read_json_body());
