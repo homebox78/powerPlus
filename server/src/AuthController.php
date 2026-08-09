@@ -47,17 +47,6 @@ final class AuthController
         ]);
     }
 
-    /** GET /api/auth/me  (Authorization: Bearer) */
-    public function me(?string $token): void
-    {
-        $email = $token !== null ? $this->service->validateToken($token) : null;
-        if ($email === null) {
-            $this->json(['error' => '인증이 필요합니다.', 'code' => 401], 401);
-            return;
-        }
-        $this->json(['email' => $email]);
-    }
-
     /** POST /api/auth/logout  (Authorization: Bearer) */
     public function logout(?string $token): void
     {

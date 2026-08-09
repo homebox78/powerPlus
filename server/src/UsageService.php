@@ -45,16 +45,27 @@ final class UsageService
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        $assets = new AssetService();
+        // 자산은 byIds 일괄 조회 후 매핑 — 행마다 find() 호출(N+1 쿼리) 방지
+        $rows = $stmt->fetchAll();
+        $map = self::assetMap(array_column($rows, 'asset_id'));
         $out = [];
-        foreach ($stmt->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $out[] = [
                 'email'   => (string) ($row['email'] ?? ''),
                 'used_at' => (string) $row['used_at'],
-                'asset'   => $assets->find((string) $row['asset_id']),
+                'asset'   => $map[(string) $row['asset_id']] ?? null,
             ];
         }
         return $out;
+    }
+
+    /** id 목록 → [id => 자산] 매핑 (일괄 조회, N+1 방지 공용) */
+    private static function assetMap(array $ids): array
+    {
+        $data = (new AssetService())->byIds(array_map('strval', $ids))['data'] ?? [];
+        $map = [];
+        foreach ($data as $a) $map[(string) $a['id']] = $a;
+        return $map;
     }
 
     /** 공통: 특정 테이블에서 asset_id 별 카운트 상위 N. */
@@ -70,12 +81,14 @@ final class UsageService
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        $assets = new AssetService();
+        // 자산은 byIds 일괄 조회 후 매핑(N+1 방지)
+        $rows = $stmt->fetchAll();
+        $map = self::assetMap(array_column($rows, 'asset_id'));
         $out = [];
-        foreach ($stmt->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $out[] = [
                 'count' => (int) $row['cnt'],
-                'asset' => $assets->find((string) $row['asset_id']),
+                'asset' => $map[(string) $row['asset_id']] ?? null,
             ];
         }
         return $out;

@@ -20,7 +20,10 @@ declare(strict_types=1);
  *       uploads/ppt/{id}.png 저장 후 900px 리사이즈 + 360px 썸네일 생성 → assets 행 생성.
  *       처리한 파일은 _imported/ppt/ 로 이동(중복 등록 방지).
  */
-if (($_GET['key'] ?? '') !== 'pp_import_ppt_124e662a2d19') { http_response_code(404); exit; }
+// 키는 git 제외 config/config.php 의 'import_key' — 공개 repo 소스에 시크릿을 두지 않는다. 미설정이면 항상 404.
+require __DIR__ . '/src/Config.php';
+$IMPORT_KEY = (string) Config::get('import_key', '');
+if ($IMPORT_KEY === '' || !hash_equals($IMPORT_KEY, (string) ($_GET['key'] ?? ''))) { http_response_code(404); exit; }
 @set_time_limit(0);          // 618개 처리 — 실행시간 제한 해제
 @ignore_user_abort(true);    // curl 끊겨도 끝까지 진행
 header('Content-Type: text/plain; charset=utf-8');

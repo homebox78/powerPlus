@@ -100,10 +100,13 @@ final class ImageSearchController
                 CURLOPT_HTTPHEADER     => $headers,
                 CURLOPT_SSL_VERIFYPEER => true,
             ]);
-            // open_basedir 환경에선 FOLLOWLOCATION 사용 불가 → 가능할 때만 켜서 리다이렉트 대응
+            // open_basedir 환경에선 FOLLOWLOCATION 사용 불가 → 가능할 때만 켜서 리다이렉트 대응.
+            // 리다이렉트 hop도 https만 허용(SSRF: https→302→http://사설IP 다운그레이드 우회 차단)
             if (!ini_get('open_basedir')) {
                 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+                curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
+                curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
             }
             $body = curl_exec($ch);
             $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);

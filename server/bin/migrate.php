@@ -1,7 +1,15 @@
 <?php
 declare(strict_types=1);
-// DB 마이그레이션 — 서버에서 `php bin/migrate.php` 로 실행. 멱등(여러 번 실행해도 안전).
-require_once __DIR__ . '/../src/Database.php';
+// DB 마이그레이션 — 멱등(여러 번 실행해도 안전).
+// 실행: CLI `php bin/migrate.php` 또는 웹루트 임시 사본 + ?key=(config의 import_key) — 웹 실행은 키 필수.
+$srcDir = is_dir(__DIR__ . '/src') ? __DIR__ . '/src' : __DIR__ . '/../src'; // 웹루트 사본/원위치 모두 지원
+require_once $srcDir . '/Config.php';
+require_once $srcDir . '/Database.php';
+if (PHP_SAPI !== 'cli') {
+    $IMPORT_KEY = (string) Config::get('import_key', '');
+    if ($IMPORT_KEY === '' || !hash_equals($IMPORT_KEY, (string) ($_GET['key'] ?? ''))) { http_response_code(404); exit; }
+    header('Content-Type: text/plain; charset=utf-8');
+}
 
 $pdo = Database::pdo();
 
@@ -140,6 +148,15 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS search_logs (
   INDEX idx_query (query(64)),
   INDEX idx_zero (results, searched_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+// user_favorites.asset_id 인덱스 — fav_count 서브쿼리·순위 JOIN이 PK(email 선두)로는 풀스캔이라 필수
+$hasFavIdx = (int) $pdo->query(
+    "SELECT COUNT(*) FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='user_favorites' AND INDEX_NAME='idx_asset'"
+)->fetchColumn();
+if ($hasFavIdx === 0) {
+    $pdo->exec("ALTER TABLE user_favorites ADD INDEX idx_asset (asset_id)");
+}
 
 echo "migrate OK\n";
 echo "categories:\n";

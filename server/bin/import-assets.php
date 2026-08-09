@@ -10,7 +10,10 @@ declare(strict_types=1);
  * 동작: 새 자산만(스테이징에 있는 파일 전부) → nextId 부여 → uploads/<cat>/ 복사 +
  *       썸네일 생성 + assets 생성(tags_ko/tags_en). 처리 후 _import/<cat> 파일은 _imported/<cat> 로 이동.
  */
-if (($_GET['key'] ?? '') !== 'pp_import_2f71c98d0b5f') { http_response_code(404); exit; }
+// 키는 git 제외 config/config.php 의 'import_key' — 공개 repo 소스에 시크릿을 두지 않는다. 미설정이면 항상 404.
+require __DIR__ . '/src/Config.php';
+$IMPORT_KEY = (string) Config::get('import_key', '');
+if ($IMPORT_KEY === '' || !hash_equals($IMPORT_KEY, (string) ($_GET['key'] ?? ''))) { http_response_code(404); exit; }
 header('Content-Type: text/plain; charset=utf-8');
 require __DIR__ . '/src/Database.php';
 require __DIR__ . '/src/AssetService.php';

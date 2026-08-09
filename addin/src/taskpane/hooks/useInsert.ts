@@ -37,8 +37,13 @@ function svgToPngBase64(svg: string, size = 512): Promise<string> {
 
 /** 서버 업로드 이미지(PNG/JPG) URL → base64(헤더 제외). Office addImage 는 PNG/JPEG base64 를 받는다. */
 async function imageUrlToBase64(url: string): Promise<string> {
-  // 동일 출처 정적 자산은 헤더 무관, 이미지 프록시(/api/imageproxy)는 로그인 필요 → 토큰 동봉
-  const token = getToken();
+  // 이미지 프록시(/api/imageproxy)는 로그인 필요 → 토큰 동봉.
+  // 단 **자사 출처일 때만** — image_url이 외부 호스트로 확장돼도 토큰이 새지 않게 가드.
+  let sameOrigin = true;
+  try {
+    sameOrigin = new URL(url, window.location.href).origin === window.location.origin;
+  } catch { sameOrigin = false; }
+  const token = sameOrigin ? getToken() : null;
   const res = await fetch(url, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
   if (!res.ok) throw new Error("이미지 로드 실패");
   const blob = await res.blob();

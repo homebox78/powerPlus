@@ -104,9 +104,15 @@ export default function AssetGrid({
                 {a.image_url || a.thumb_url ? (
                   // 목록은 썸네일(빠른 로딩), 삽입은 원본(useInsert가 image_url 사용)
                   <img src={a.thumb_url || a.image_url} alt={label} loading="lazy" decoding="async" />
-                ) : (
-                  <span className="card__svg" dangerouslySetInnerHTML={{ __html: a.svg || "" }} />
-                )}
+                ) : a.svg ? (
+                  // 구(mock) svg 자산은 <img data:URI>로 렌더 — raw HTML 주입(XSS) 없이 표시만 (img 내 SVG는 스크립트 실행 불가)
+                  <img
+                    className="card__svg"
+                    src={`data:image/svg+xml;utf8,${encodeURIComponent(a.svg)}`}
+                    alt={label}
+                    loading="lazy"
+                  />
+                ) : null}
                 {inserting && (
                   <span className="card__inserting" aria-hidden>
                     <span className="spinner" />

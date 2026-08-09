@@ -171,23 +171,11 @@
     .dash-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
     .dash-grid2 > .dash-card { display:flex; flex-direction:column; min-width:0; }
     @media (max-width:900px){ .dash-grid2 { grid-template-columns:1fr; } }
-    /* 인기/즐겨찾기 순위 (탭) */
+    /* 순위/최근 탭 버튼 (rk-tabs · ut-tabs 공용) */
     .rank-tabs { display:inline-flex; gap:4px; background:#e7ebf0; border-radius:11px; padding:3px; margin:14px 16px 0; }
     .rank-tab { border:none; background:none; border-radius:9px; padding:8px 16px; font:700 12.5px Pretendard;
       color:#7b8794; cursor:pointer; }
     .rank-tab--active { background:linear-gradient(140deg,#f0894c,#c43e1c); color:#fff; box-shadow:0 3px 8px rgba(196,62,28,.3); }
-    .rank-head { display:grid; grid-template-columns:40px 64px 1fr 70px; gap:12px; padding:12px 22px 10px;
-      font:700 11.5px Pretendard; color:var(--muted); }
-    .rank-row { display:grid; grid-template-columns:40px 64px 1fr 70px; gap:12px; align-items:center;
-      padding:11px 22px; border-top:1px solid #f2f5f8; }
-    .rank-badge { display:block; border-radius:8px; padding:4px 0; text-align:center; font:800 14px Pretendard; color:#fff; }
-    .rank-badge--gray { background:#f1f4f7; color:#7b8794; }
-    .rank-thumb { width:54px; height:38px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-    .rank-thumb img { max-height:100%; max-width:100%; object-fit:contain; }
-    .rank-cat { font:700 13px Pretendard; color:var(--text); }
-    .rank-tagline { font:500 11.5px Pretendard; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:1px; }
-    .rank-count { font:800 15px Pretendard; color:var(--accent); text-align:right; }
-    .rank-empty { padding:28px 22px; text-align:center; color:var(--muted); border-top:1px solid #f2f5f8; }
     /* 카테고리별 분포 */
     .dash-bars { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
     .bar-row > .bar-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
@@ -197,16 +185,10 @@
     .bar-fill { height:100%; border-radius:5px; }
     .ann-link { color:var(--accent); cursor:pointer; text-decoration:none; }
     .ann-link:hover { text-decoration:underline; }
-    /* 방문·사용 추세 (작은 차트) */
-    .trend-block { margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
-    .trend-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    /* 기간 토글 (일별/월별/년별 — an-period) */
     .trend-tabs { display:inline-flex; gap:4px; background:#eef1f5; border-radius:8px; padding:3px; }
     .trend-tab { border:0; background:transparent; font:600 11px Pretendard; color:var(--ink2); padding:3px 9px; border-radius:6px; cursor:pointer; }
     .trend-tab--active { background:#fff; color:var(--accent); box-shadow:0 1px 2px rgba(0,0,0,.08); }
-    .trend-chart { margin-top:6px; }
-    .trend-chart svg { display:block; }
-    .trend-legend { display:flex; gap:14px; margin-top:8px; flex-wrap:wrap; font:600 11px Pretendard; color:var(--ink2); }
-    .trend-legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px; vertical-align:middle; }
     /* 통계 탭 */
     .an-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
     .an-title { font:800 20px Pretendard; color:var(--text); margin:0; }
@@ -276,7 +258,6 @@
     .gb-lbl { margin-top:7px; font:600 12px Pretendard; color:var(--ink2); white-space:nowrap; }
     .an-chart { margin-top:6px; }
     /* 글자 키움 */
-    .trend-legend { font-size:12.5px; }
     .dash-h { font-size:15px; }
     .bar-name, .bar-num { font-size:13px !important; }
   </style>
@@ -572,7 +553,9 @@
       if (!res.ok) throw new Error(body.error || ("오류 " + res.status));
       return body;
     }
-    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    // 사용자 입력 URL은 http(s)만 링크로 — javascript: 등 스킴이 href로 들어가는 XSS 차단(esc는 HTML만 방어)
+    const safeHttpUrl = (s) => /^https?:\/\//i.test(String(s || "")) ? String(s) : null;
 
     /* ── 로그인 ── */
     $("btn-request").onclick = async () => {
@@ -629,7 +612,7 @@
           : `<span class="tag" style="background:#fbeee4;color:#e0701f">대기</span>`;
       $("req-rows").innerHTML = reqs.length ? reqs.map((r) => `<tr>
         <td class="tc"><span class="tag">${esc(r.type)}</span></td>
-        <td><div style="font-weight:700">${esc(r.title)}</div>${r.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px" class="t-nowrap">${esc(r.description)}</div>` : ""}${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px">${esc(r.link)}</a>` : ""}</td>
+        <td><div style="font-weight:700">${esc(r.title)}</div>${r.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px" class="t-nowrap">${esc(r.description)}</div>` : ""}${r.link ? (safeHttpUrl(r.link) ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px">${esc(r.link)}</a>` : `<span style="color:var(--muted);font-size:12px">${esc(r.link)}</span>`) : ""}</td>
         <td class="tc" style="color:var(--muted);font-size:12px">${esc(r.email || "-")}</td>
         <td class="tc">${badge(r.status)}</td>
         <td class="tc mono" style="color:var(--muted);font-size:12px">${esc((r.created_at||"").slice(0,10))}</td>
@@ -697,36 +680,9 @@
     }
 
     // 카테고리 틴트(썸네일 배경) / 분포 막대 색상 (시안)
-    const TINT_BG = { icon:"#fbeee4", photo:"#edf0f4", illust:"#fdebee", diagram:"#f0ebfb", ppt:"#fef4e2" };
     const DIST_COLORS = { icon:"#e0701f", photo:"#888888", illust:"#f0566a", diagram:"#555555", ppt:"#f5a623" };
     const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
-    let _rankData = { top: [], fav: [] }, _rankTab = "top";
-    function rankRows(list, emptyMsg) {
-      const rows = (list || []).filter((r) => r.asset).slice(0, 7);
-      if (!rows.length) return `<div class="rank-empty">${emptyMsg}</div>`;
-      const badgeColor = ["#f0566a", "#f5a623", "#e0701f"];
-      return rows.map((row, i) => {
-        const a = row.asset;
-        const tint = TINT_BG[a.category] || "#f4f6f9";
-        const thumb = a.thumb_url || a.image_url ? `<img src="${esc(a.thumb_url || a.image_url)}">` : (a.svg || "");
-        const badge = i < 3
-          ? `<span class="rank-badge" style="background:${badgeColor[i]}">${i + 1}</span>`
-          : `<span class="rank-badge rank-badge--gray">${i + 1}</span>`;
-        const tagline = (a.tags || []).slice(0, 5).join(" · ");
-        return `<div class="rank-row">${badge}
-          <div class="rank-thumb" style="background:${tint}">${thumb}</div>
-          <div style="min-width:0"><div class="rank-cat">${esc(catLabel(a.category))}</div><div class="rank-tagline">${esc(tagline)}</div></div>
-          <div class="rank-count">${row.count}</div></div>`;
-      }).join("");
-    }
-    function renderRank() {
-      const fav = _rankTab === "fav";
-      $("rank-metric").textContent = fav ? "즐겨찾기" : "삽입";
-      $("rank-rows").innerHTML = rankRows(fav ? _rankData.fav : _rankData.top,
-        fav ? "아직 즐겨찾기가 없습니다." : "아직 삽입 기록이 없습니다.");
-      document.querySelectorAll(".rank-tab").forEach((b) => b.classList.toggle("rank-tab--active", b.dataset.rt === _rankTab));
-    }
-    // (구 순위 탭 바인딩 제거 — 대시보드 통합 후 renderRankTab이 대체)
+    // (구 순위 탭 rankRows/renderRank 제거 — 대시보드 통합 후 renderRankTab+renderTopAssets가 대체)
     async function loadStats() {
       // 카테고리 카운트/총자산은 자산·카테고리 탭도 사용 → 먼저 확보(대시보드 렌더와 무관하게 유지)
       try {
@@ -737,31 +693,9 @@
       loadAnalytics(); // 모니터링 대시보드(통계 통합)
     }
 
-    /* ── 방문·사용 추세 차트 ── */
-    let _trendPeriod = "day";
-    // (구 추세 탭 바인딩 제거 — an-period는 loadAnalytics, tv-tabs는 추이/히트맵 토글이 대체)
+    /* ── 기간 버킷 라벨(추이·누적 차트 공용) ── */
     function shortBucket(b, tp) { return tp === "year" ? b : tp === "month" ? b.slice(2) : b.slice(5); } // YYYY / YY-MM / MM-DD
-    async function loadTrend(period) {
-      const tp = period || _trendPeriod; _trendPeriod = tp;
-      document.querySelectorAll(".trend-tab").forEach((b) => b.classList.toggle("trend-tab--active", b.dataset.tp === tp));
-      try {
-        const r = await api("/admin/stats/series?period=" + tp);
-        const pts = r.points || [];
-        if (!pts.length) { $("trend-chart").innerHTML = '<div style="color:var(--muted);padding:24px 0;text-align:center;font-size:12px">아직 방문/사용 데이터가 없습니다.</div>'; return; }
-        const max = Math.max(1, ...pts.map((p) => Math.max(p.visits, p.inserts, p.ppt)));
-        const H = 150, base = H - 22, top = 8, bw = 7, gap = 2, slot = bw * 3 + gap * 2;
-        const W = Math.max(pts.length * (slot + 16) + 16, 280), step = (W - 16) / pts.length;
-        const barH = (v) => Math.max(v > 0 ? 2 : 0, Math.round(v / max * (base - top)));
-        const bar = (cx, off, v, color) => { const h = barH(v); return `<rect x="${(cx + off).toFixed(1)}" y="${base - h}" width="${bw}" height="${h}" rx="2" fill="${color}"><title>${v}</title></rect>`; };
-        const svg = pts.map((p, i) => {
-          const cx = 8 + i * step + step / 2 - slot / 2;
-          const lx = 8 + i * step + step / 2;
-          return bar(cx, 0, p.visits, "#e0701f") + bar(cx, bw + gap, p.inserts, "#3a6ea5") + bar(cx, (bw + gap) * 2, p.ppt, "#1a9c5b") +
-            `<text x="${lx.toFixed(1)}" y="${H - 6}" font-size="9" fill="#999" text-anchor="middle">${esc(shortBucket(p.bucket, tp))}</text>`;
-        }).join("");
-        $("trend-chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="xMidYMax meet"><line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="#e6eaef" stroke-width="1"/>${svg}</svg>`;
-      } catch (e) { $("trend-chart").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
-    }
+    // (구 SVG 추세 차트 loadTrend 제거 — Chart.js 기반 loadAnalytics가 대체)
 
     /* ── 통계 탭(상세 분석) ── */
     let _anPeriod = "day";
@@ -1071,8 +1005,8 @@
         ? ("전체 " + list.length + "개 · " + assetPage + "/" + totalPages + " 페이지 (페이지당 " + PER_PAGE + "개)") : "";
       $("asset-grid").innerHTML = pageList.length ? pageList.map((a) => {
         const src = a.thumb_url || a.image_url; // 항상 썸네일 우선(원본 대신) — 목록 속도
+        // 서버가 svg 원문을 더 이상 내려보내지 않음(stored-XSS 증폭 방지) — 이미지 없으면 카테고리 텍스트만
         const thumb = src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async">`
-          : a.svg ? a.svg
           : `<span style="font:600 11px 'JetBrains Mono',monospace;color:rgba(28,39,51,.4);text-transform:uppercase">${esc(a.category)}</span>`;
         // 국문 태그=파랑, 영문 태그=회색 (시안)
         const ko = (a.tags_ko || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
@@ -1136,8 +1070,12 @@
     function setFile(f) {
       if (!f) return;
       pickedFile = f;
-      const pv = $("drop-preview");
-      pv.innerHTML = `<img src="${URL.createObjectURL(f)}">`; pv.style.display = "block";
+      setPreviewBlob($("drop-preview"), f);
+    }
+    // 미리보기 blob URL 관리 — 새로 만들기 전에 이전 것을 revoke(모달 반복 사용 시 메모리 누수 방지)
+    function setPreviewBlob(pv, f) {
+      if (pv._blobUrl) { URL.revokeObjectURL(pv._blobUrl); pv._blobUrl = null; }
+      if (f) { pv._blobUrl = URL.createObjectURL(f); pv.innerHTML = `<img src="${pv._blobUrl}">`; pv.style.display = "block"; }
     }
     // 장표 파일(.ppt/.pptx)
     $("slide-drop").onclick = () => $("f-slide").click();
@@ -1194,9 +1132,9 @@
       $("modal-title").textContent = a ? "자산 수정" : "새 자산";
       $("f-category").value = a ? a.category : (categories[0] && categories[0].key);
       const pv = $("drop-preview");
+      setPreviewBlob(pv, null); // 이전 blob 미리보기 정리
       if (a && a.image_url) { pv.innerHTML = `<img src="${esc(a.image_url)}">`; pv.style.display = "block"; }
-      else if (a && a.svg) { pv.innerHTML = a.svg; pv.style.display = "block"; }
-      else { pv.innerHTML = ""; pv.style.display = "none"; }
+      else { pv.innerHTML = ""; pv.style.display = "none"; } // svg 원문 렌더 분기 제거(XSS 방지 — 서버도 미제공)
       // 장표: 기존 파일명 + 유형/페이지 종류
       $("slide-name").textContent = (a && a.slide_path) ? "📎 " + a.slide_path.split("/").pop() : "";
       $("f-slide-kind").value = (a && a.slide_kind) ? a.slide_kind : "package";

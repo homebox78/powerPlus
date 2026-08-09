@@ -21,12 +21,17 @@ final class RequestController
             $this->json(['error' => '제목은 필수입니다.', 'code' => 400], 400);
             return;
         }
+        // 참고 링크는 http(s)만 허용 — javascript: 등 스킴이 관리자 화면의 <a href>로 렌더되는 stored-XSS 차단
+        $link = trim((string) ($body['link'] ?? ''));
+        if ($link !== '' && (!preg_match('#^https?://#i', $link) || filter_var($link, FILTER_VALIDATE_URL) === false)) {
+            $link = '';
+        }
         $row = $this->service->create(
             $email,
             (string) ($body['type'] ?? '기타'),
             $title,
             (string) ($body['description'] ?? ''),
-            (string) ($body['link'] ?? '')
+            $link
         );
         $this->json(['data' => $row], 201);
     }

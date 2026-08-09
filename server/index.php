@@ -79,12 +79,13 @@ if (preg_match('#/health$#', $path)) {
 try {
     // ── 공개 자산 목록/카테고리 (인증 불필요, 읽기 전용) — DeckGen 등 내부 도구 연동용 ──
     // 이미지(image_url/thumb_url)는 이미 공개 정적 파일이라 메타데이터 공개도 안전. 쓰기·삭제는 불가.
+    // $public=true → 장표 원본 직링크(slide_url) 제거 + limit 상한 축소 + 검색 로그 미기록 (AssetController 참고)
     if (preg_match('#/api/public/assets$#', $path) && $method === 'GET') {
-        (new AssetController())->list($_GET, null);
+        (new AssetController())->list($_GET, null, true);
         exit;
     }
     if (preg_match('#/api/public/assets/([^/]+)/similar$#', $path, $m) && $method === 'GET') {
-        (new AssetController())->similar(urldecode($m[1]), $_GET);
+        (new AssetController())->similar(urldecode($m[1]), $_GET, true);
         exit;
     }
     if (preg_match('#/api/public/categories$#', $path) && $method === 'GET') {
@@ -360,6 +361,7 @@ try {
 
     json_out(['error' => 'Not Found', 'code' => 404], 404);
 } catch (Throwable $e) {
-    // 운영에서는 상세 메시지 대신 logger로 기록할 것
+    // 응답은 일반화(내부정보 비노출), 원인은 서버 에러 로그에만 기록 — 장애 추적용
+    error_log('[powerPlus] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
     json_out(['error' => 'Internal Server Error', 'code' => 500], 500);
 }

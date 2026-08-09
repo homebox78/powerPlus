@@ -9,7 +9,10 @@ declare(strict_types=1);
  * 사용: bin/ 은 .htaccess 차단 → 웹루트로 임시 업로드 후
  *       curl "https://.../enrich-colors.php?key=pp_enrich_34c3caad1930"
  */
-if (($_GET['key'] ?? '') !== 'pp_enrich_34c3caad1930') { http_response_code(404); exit; }
+// 키는 git 제외 config/config.php 의 'import_key' — 공개 repo 소스에 시크릿을 두지 않는다. 미설정이면 항상 404.
+require __DIR__ . '/src/Config.php';
+$IMPORT_KEY = (string) Config::get('import_key', '');
+if ($IMPORT_KEY === '' || !hash_equals($IMPORT_KEY, (string) ($_GET['key'] ?? ''))) { http_response_code(404); exit; }
 @set_time_limit(0);
 @ignore_user_abort(true);
 header('Content-Type: text/plain; charset=utf-8');

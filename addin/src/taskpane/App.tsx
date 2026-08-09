@@ -30,13 +30,6 @@ const VIEWS = [
   { key: "browser", label: "웹 이미지" },
 ];
 
-/** Google 프로그래머블 검색엔진(CSE) ID.
- *  programmablesearchengine.google.com 에서 무료 생성 후 발급되는 cx 값을 여기에 붙이면
- *  '브라우저' 탭에서 **작업창 안에 바로** 구글 검색/결과가 인라인으로 표시됨.
- *  비워두면 새 창으로 여는 검색 런처가 표시됨. */
-const GOOGLE_CSE_CX = ""; // 무료 CSE는 전체웹 검색이 중단돼 일반 구글검색 불가 → 새 창 런처 사용
-
-
 // ---- 인라인 아이콘 ----
 const Ic = {
   bell: (
@@ -86,6 +79,48 @@ const Ic = {
   ),
 };
 
+/**
+ * 하단 컴포저 검색창. 입력 초안(draft)을 로컬 state로 격리해
+ * 타이핑마다 App 전체(무한스크롤 카드 수백 개)가 리렌더되지 않게 한다.
+ * activeQuery가 밖에서 바뀌면(검색 해제 등) 초안도 동기화.
+ */
+function ComposerInput({
+  activeQuery,
+  onSend,
+  catButton,
+}: {
+  activeQuery: string;
+  onSend: (q: string) => void;
+  catButton: React.ReactNode;
+}) {
+  const [draft, setDraft] = React.useState(activeQuery);
+  React.useEffect(() => { setDraft(activeQuery); }, [activeQuery]);
+  return (
+    <div className="composer__box">
+      <input
+        className="composer__input"
+        type="search"
+        value={draft}
+        placeholder="필요한 자료를 설명해 보세요…"
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            onSend(draft);
+          }
+        }}
+        aria-label="자산 검색"
+      />
+      <div className="composer__actions">
+        {catButton}
+        <button className="composer__send" onClick={() => onSend(draft)} aria-label="검색">
+          {Ic.send}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [email, setUserEmail] = React.useState<string | null>(() =>
     getToken() ? getEmail() : null
@@ -96,7 +131,6 @@ export default function App() {
   const [pptFilter, setPptFilter] = React.useState("all"); // 장표 서브필터(전체/패키지/표지/간지/콘텐츠…)
   const [foundFlash, setFoundFlash] = React.useState<number | null>(null); // "N개 찾았어요" 플래시
   const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
-  const [query, setQuery] = React.useState(""); // 컴포저 입력값
   const [browserQuery, setBrowserQuery] = React.useState(""); // 브라우저 탭 검색어
   const [imgHits, setImgHits] = React.useState<ImageHit[]>([]);
   const [imgLoading, setImgLoading] = React.useState(false);
@@ -200,30 +234,6 @@ export default function App() {
     } as Asset);
   };
 
-  // 브라우저 탭 진입 시 CSE(작업창 내 인라인 구글 검색) 로드 — cx 설정 시에만. 이미지 검색을 기본으로.
-  React.useEffect(() => {
-    if (!isBrowser || !GOOGLE_CSE_CX) return;
-    const w = window as unknown as {
-      __gcse?: unknown;
-      google?: { search?: { cse?: { element?: { render?: (o: unknown) => void } } } };
-    };
-    const render = () => {
-      try {
-        w.google?.search?.cse?.element?.render?.({
-          div: "pp-cse-div",
-          tag: "search",
-          attributes: { enableImageSearch: true, defaultToImageSearch: true },
-        });
-      } catch { /* noop */ }
-    };
-    if (document.getElementById("pp-gcse")) { render(); return; }
-    w.__gcse = { parsetags: "explicit", callback: render };
-    const sc = document.createElement("script");
-    sc.id = "pp-gcse";
-    sc.async = true;
-    sc.src = "https://cse.google.com/cse.js?cx=" + GOOGLE_CSE_CX;
-    document.head.appendChild(sc);
-  }, [isBrowser]);
   const serverCategory = isSpecial ? "all" : cat;
   // 장표(ppt) 서브필터: 유형/페이지 그룹핑
   const PPT_FILTERS: { key: string; label: string; kind?: string; ptype?: string }[] = [
@@ -240,9 +250,6 @@ export default function App() {
   const pf = PPT_FILTERS.find((f) => f.key === pptFilter);
   const pptKind = isPpt ? pf?.kind ?? "" : "";
   const pptType = isPpt ? pf?.ptype ?? "" : "";
-  // 카테고리 바뀌면 장표 서브필터 초기화
-  React.useEffect(() => { setPptFilter("all"); }, [cat]);
-
   // 카테고리 + 전체 수 + 공지 로드
   React.useEffect(() => {
     if (!email) return;
@@ -403,16 +410,16 @@ export default function App() {
     }
   }
 
-  function send() {
-    const q = query.trim();
+  /** 컴포저 검색어 확정. 입력 초안은 ComposerInput 로컬 state — 타이핑마다 App(수백 카드) 리렌더 방지 */
+  function sendQuery(raw: string) {
+    const q = raw.trim();
     setActiveQuery(q);
     setSearchAnim(!!q); // 검색 버튼 눌렀을 때만 캐릭터 애니메이션
     setView("all");
     closeMenus();
   }
   function clearQuery() {
-    setQuery("");
-    setActiveQuery("");
+    setActiveQuery(""); // ComposerInput 초안은 activeQuery 동기화 effect로 함께 비워짐
   }
 
   function openRequest() {
@@ -820,6 +827,7 @@ export default function App() {
                   className={"menu-item" + (cat === c.key ? " menu-item--active" : "")}
                   onClick={() => {
                     setCat(c.key);
+                    setPptFilter("all"); // 카테고리 전환 시 장표 서브필터 초기화(effect로 하면 fetch 2회)
                     setView("all");
                     closeMenus();
                   }}
@@ -831,22 +839,10 @@ export default function App() {
             </div>
           </>
         )}
-        <div className="composer__box">
-          <input
-            className="composer__input"
-            type="search"
-            value={query}
-            placeholder="필요한 자료를 설명해 보세요…"
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                send();
-              }
-            }}
-            aria-label="자산 검색"
-          />
-          <div className="composer__actions">
+        <ComposerInput
+          activeQuery={activeQuery}
+          onSend={sendQuery}
+          catButton={
             <button
               className="composer__cat"
               onClick={() => {
@@ -857,11 +853,8 @@ export default function App() {
               {catLabel}
               {Ic.chev}
             </button>
-            <button className="composer__send" onClick={send} aria-label="검색">
-              {Ic.send}
-            </button>
-          </div>
-        </div>
+          }
+        />
       </div>
       )}
 

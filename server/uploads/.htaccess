@@ -5,6 +5,8 @@ php_flag engine off
 </FilesMatch>
 
 # 애드인(다른 도메인)이 이미지를 fetch 해 슬라이드에 삽입할 수 있도록 CORS 허용
+# 이미지 URL은 ?v=filemtime 캐시버스트가 붙으므로 장기 캐시가 안전(파일이 바뀌면 URL도 바뀜)
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
+  Header set Cache-Control "public, max-age=31536000, immutable"
 </IfModule>

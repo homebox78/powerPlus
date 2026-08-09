@@ -10,7 +10,7 @@
    - 대량이면 멀티에이전트 워크플로(병렬 비전 태깅) 사용 — 사용자 옵트인/토큰 비용 안내.
 4. **업로드+등록**:
    - tar 로 `data/_stage/*` → 서버 `<webroot>/_import/<cat>/`, `tags.json` → `<webroot>/_import/tags.json` 업로드.
-   - `server/bin/import-assets.php` 를 **웹루트로 임시 업로드** → `curl ".../import-assets.php?key=pp_import_2f71c98d0b5f"` → 삭제.
+   - `server/bin/import-assets.php` 를 **웹루트로 임시 업로드** → `curl ".../import-assets.php?key=<config.php의 import_key>"` → 삭제.
      (import-assets.php: nextId 부여 → uploads 복사 → 썸네일(GD) → assets 생성(tags_ko/en) → _import 파일을 _imported 로 이동)
    - 서버 `_import` 잔여 정리.
 5. **로컬 정리**: `data/_incoming/<cat>/*` → `data/_imported/<cat>/` 이동(다음 회차 중복 방지).
@@ -22,5 +22,5 @@
 - 통합 tags 는 서버가 ko+en 합쳐 자동 생성(검색용). 부분일치 LIKE.
 
 ## 키 / 경로
-- import key: `pp_import_2f71c98d0b5f` (운영 전 교체 권장)
+- import key: 서버 `config/config.php`의 `import_key` 값(git 제외 — 소스에 키를 두지 않음)
 - 서버 배포·접속: `server/bin/deploy.sh`, `config/deploy.env`(gitignore)

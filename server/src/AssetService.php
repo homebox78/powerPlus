@@ -8,7 +8,8 @@ require_once __DIR__ . '/SearchLexicon.php';
 /** 자산 조회/검색/CRUD. SQL은 모두 prepared statement. */
 final class AssetService
 {
-    private const COLS = 'id, name, category, tags, tags_ko, tags_en, svg, image_path, thumb_path, slide_path, slide_kind, slide_page';
+    // svg(구 mock 잔재, 실자산 전부 NULL)는 응답에서 제외 — raw SVG를 클라이언트에 내려보내지 않는다(stored-XSS 증폭 방지)
+    private const COLS = 'id, name, category, tags, tags_ko, tags_en, image_path, thumb_path, slide_path, slide_kind, slide_page';
 
     /** 자산별 조회수(삽입 횟수) 및 즐겨찾기 수 서브쿼리 — 모든 응답에 노출(인기/즐겨찾기 순위용) */
     private const COUNT_COLS =
@@ -305,7 +306,7 @@ final class AssetService
         return $stmt->rowCount() > 0;
     }
 
-    /** tags(통합/ko/en) → 배열, image_path → 전체 URL(image_url). svg(구 mock)도 그대로 유지. */
+    /** tags(통합/ko/en) → 배열, image_path/thumb_path/slide_path → 전체 URL(image_url 등). */
     private function hydrate(array $row): array
     {
         unset($row['_score']); // 관련도 점수는 내부용 — 응답에서 제외

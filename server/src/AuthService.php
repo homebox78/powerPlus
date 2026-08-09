@@ -157,7 +157,15 @@ final class AuthService
         if ($token === '') {
             return;
         }
-        Database::pdo()->prepare('DELETE FROM sessions WHERE token_hash = :h')
+        $pdo = Database::pdo();
+        $pdo->prepare('DELETE FROM sessions WHERE token_hash = :h')
             ->execute([':h' => hash('sha256', $token)]);
+        // 만료 행 확률적 청소(1/20) — 별도 크론 없이 sessions/auth_codes 무한 누적 방지
+        if (random_int(1, 20) === 1) {
+            try {
+                $pdo->exec('DELETE FROM sessions WHERE expires_at < NOW()');
+                $pdo->exec('DELETE FROM auth_codes WHERE expires_at < NOW()');
+            } catch (\Throwable $e) { /* 청소 실패는 무시 */ }
+        }
     }
 }
