@@ -74,7 +74,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-1. 로그인 — 이메일 인증
 
-![애드인 로그인](docs/manual/addin-01-login.png)
+<img src="docs/manual/addin-01-login.png" alt="애드인 로그인" width="520">
 
 처음 실행하면 로그인 화면이 나옵니다. 별도 비밀번호가 없는 **이메일 인증코드(OTP) 방식**입니다.
 
@@ -88,7 +88,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-2. 기본 화면 구성
 
-![애드인 전체 탭](docs/manual/addin-02-all.png)
+<img src="docs/manual/addin-02-all.png" alt="애드인 전체 탭" width="520">
 
 | 영역 | 위치 | 설명 |
 |---|---|---|
@@ -113,7 +113,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 #### 장표 (382~682개 · PPT 슬라이드 자산)
 
-![장표 카테고리](docs/manual/addin-03-ppt.png)
+<img src="docs/manual/addin-03-ppt.png" alt="장표 카테고리" width="520">
 
 - 장표는 **그룹 칩**으로 한 번 더 필터링됩니다: **전체 / 패키지 / 표지 / 목차 / 간지 / 콘텐츠 / Q&A / 기타**
 - 카드 좌상단에 그룹 뱃지(`표지`, `콘텐츠` 등)가 표시됩니다.
@@ -124,25 +124,25 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 #### 아이콘 (921개+)
 
-![아이콘 카테고리](docs/manual/addin-04-icon.png)
+<img src="docs/manual/addin-04-icon.png" alt="아이콘 카테고리" width="520">
 
 3열 그리드로 표시됩니다. 업무·IT·바이오·전자정부·보안 등 제안서용 라인 아이콘과 기후·환경·에너지 테마 3D 아이콘을 제공합니다. 투명 배경(PNG)이라 어떤 슬라이드 배경에도 얹을 수 있습니다.
 
 #### 사진 (326개+)
 
-![사진 카테고리](docs/manual/addin-05-photo.png)
+<img src="docs/manual/addin-05-photo.png" alt="사진 카테고리" width="520">
 
 와이드 고해상 배경 사진 — IT·데이터센터·반도체·바이오·기후위기·신재생에너지·비즈니스 테마. 표지/간지 배경으로 쓰기 좋게 구성돼 있습니다.
 
 #### 일러스트 (361개+)
 
-![일러스트 카테고리](docs/manual/addin-06-illust.png)
+<img src="docs/manual/addin-06-illust.png" alt="일러스트 카테고리" width="520">
 
 비즈니스 캐릭터 일러스트(발표·회의·데이터분석·협업·콜센터·의료 등). 3열 그리드.
 
 ### 2-5. 검색
 
-![검색 결과](docs/manual/addin-07-search.png)
+<img src="docs/manual/addin-07-search.png" alt="검색 결과" width="520">
 
 하단 컴포저에 키워드를 입력하고 ↑(또는 Enter)를 누르면 검색됩니다.
 
@@ -154,7 +154,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-6. 즐겨찾기 · 최근
 
-![최근 탭](docs/manual/addin-08-recent.png)
+<img src="docs/manual/addin-08-recent.png" alt="최근 탭" width="520">
 
 - **즐겨찾기 탭**: 북마크한 자산만 모아 봅니다. 자주 쓰는 표지·아이콘을 등록해 두면 매번 검색할 필요가 없습니다.
 - **최근 탭**(캡처): **내가 최근에 삽입한 자산** 목록입니다. "지난번에 썼던 그 사진" 을 다시 찾을 때 가장 빠른 경로입니다.
@@ -162,7 +162,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-7. 웹 이미지 검색
 
-![웹 이미지 탭](docs/manual/addin-09-webimage.png)
+<img src="docs/manual/addin-09-webimage.png" alt="웹 이미지 탭" width="520">
 
 사내 라이브러리에 없는 이미지가 필요할 때, 작업창 안에서 **외부 무료 이미지를 검색해 바로 삽입**할 수 있습니다.
 
@@ -173,7 +173,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-8. 콘텐츠 요청
 
-![콘텐츠 요청 바텀시트](docs/manual/addin-10-request.png)
+<img src="docs/manual/addin-10-request.png" alt="콘텐츠 요청 바텀시트" width="520">
 
 필요한 자료가 라이브러리에 없으면 **관리자에게 직접 요청**할 수 있습니다. (검색 무결과 화면의 "자료 요청하기" 버튼 또는 프로필 메뉴에서 열림)
 
