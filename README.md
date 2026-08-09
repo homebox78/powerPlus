@@ -27,7 +27,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 1-1. 시작
 
-![설치 1단계 — 시작](docs/manual/installer-1-start.png)
+<img src="docs/manual/installer-1-start.png" alt="설치 1단계 — 시작" width="620">
 
 설치 전 요구사항을 안내합니다. 좌측 사이드바에 전체 5단계(시작→라이선스→옵션→설치→완료) 진행 상태가 표시됩니다.
 
@@ -39,13 +39,13 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 1-2. 라이선스 동의
 
-![설치 2단계 — 라이선스](docs/manual/installer-2-license.png)
+<img src="docs/manual/installer-2-license.png" alt="설치 2단계 — 라이선스" width="620">
 
 최종 사용자 사용권 계약(EULA)입니다. 핵심: 사내 사용 한정, 자산의 외부 무단 배포 금지, 삽입·즐겨찾기 통계는 서비스 개선 목적으로만 수집. **"위 라이선스 계약에 동의합니다"를 체크**해야 [동의 및 다음] 버튼이 활성화됩니다.
 
 ### 1-3. 설치 옵션
 
-![설치 3단계 — 옵션](docs/manual/installer-3-options.png)
+<img src="docs/manual/installer-3-options.png" alt="설치 3단계 — 옵션" width="620">
 
 설치 위치를 확인합니다. 기본값(`C:\Users\<사용자>\AppData\Local\powerPlus`) 그대로 두면 됩니다.
 
@@ -54,13 +54,13 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 1-4. 설치 진행
 
-![설치 4단계 — 설치 중](docs/manual/installer-4-progress.png)
+<img src="docs/manual/installer-4-progress.png" alt="설치 4단계 — 설치 중" width="620">
 
 파일 복사와 PowerPoint 애드인 레지스트리 등록(`WEF\Developer`)이 자동으로 진행됩니다. 수 초 내에 완료됩니다.
 
 ### 1-5. 완료 → 실행 위치
 
-![설치 5단계 — 완료](docs/manual/installer-5-done.png)
+<img src="docs/manual/installer-5-done.png" alt="설치 5단계 — 완료" width="620">
 
 "지금 PowerPoint 실행하기"를 체크한 채 [완료]를 누르면 PowerPoint가 바로 열립니다.
 
@@ -74,7 +74,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-1. 로그인 — 이메일 인증
 
-<img src="docs/manual/addin-01-login.png" alt="애드인 로그인" width="520">
+<img src="docs/manual/addin-01-login.png" alt="애드인 로그인" width="442">
 
 처음 실행하면 로그인 화면이 나옵니다. 별도 비밀번호가 없는 **이메일 인증코드(OTP) 방식**입니다.
 
@@ -88,7 +88,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-2. 기본 화면 구성
 
-<img src="docs/manual/addin-02-all.png" alt="애드인 전체 탭" width="520">
+<img src="docs/manual/addin-02-all.png" alt="애드인 전체 탭" width="442">
 
 | 영역 | 위치 | 설명 |
 |---|---|---|
@@ -113,7 +113,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 #### 장표 (382~682개 · PPT 슬라이드 자산)
 
-<img src="docs/manual/addin-03-ppt.png" alt="장표 카테고리" width="520">
+<img src="docs/manual/addin-03-ppt.png" alt="장표 카테고리" width="442">
 
 - 장표는 **그룹 칩**으로 한 번 더 필터링됩니다: **전체 / 패키지 / 표지 / 목차 / 간지 / 콘텐츠 / Q&A / 기타**
 - 카드 좌상단에 그룹 뱃지(`표지`, `콘텐츠` 등)가 표시됩니다.
@@ -124,25 +124,25 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 #### 아이콘 (921개+)
 
-<img src="docs/manual/addin-04-icon.png" alt="아이콘 카테고리" width="520">
+<img src="docs/manual/addin-04-icon.png" alt="아이콘 카테고리" width="442">
 
 3열 그리드로 표시됩니다. 업무·IT·바이오·전자정부·보안 등 제안서용 라인 아이콘과 기후·환경·에너지 테마 3D 아이콘을 제공합니다. 투명 배경(PNG)이라 어떤 슬라이드 배경에도 얹을 수 있습니다.
 
 #### 사진 (326개+)
 
-<img src="docs/manual/addin-05-photo.png" alt="사진 카테고리" width="520">
+<img src="docs/manual/addin-05-photo.png" alt="사진 카테고리" width="442">
 
 와이드 고해상 배경 사진 — IT·데이터센터·반도체·바이오·기후위기·신재생에너지·비즈니스 테마. 표지/간지 배경으로 쓰기 좋게 구성돼 있습니다.
 
 #### 일러스트 (361개+)
 
-<img src="docs/manual/addin-06-illust.png" alt="일러스트 카테고리" width="520">
+<img src="docs/manual/addin-06-illust.png" alt="일러스트 카테고리" width="442">
 
 비즈니스 캐릭터 일러스트(발표·회의·데이터분석·협업·콜센터·의료 등). 3열 그리드.
 
 ### 2-5. 검색
 
-<img src="docs/manual/addin-07-search.png" alt="검색 결과" width="520">
+<img src="docs/manual/addin-07-search.png" alt="검색 결과" width="442">
 
 하단 컴포저에 키워드를 입력하고 ↑(또는 Enter)를 누르면 검색됩니다.
 
@@ -154,7 +154,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-6. 즐겨찾기 · 최근
 
-<img src="docs/manual/addin-08-recent.png" alt="최근 탭" width="520">
+<img src="docs/manual/addin-08-recent.png" alt="최근 탭" width="442">
 
 - **즐겨찾기 탭**: 북마크한 자산만 모아 봅니다. 자주 쓰는 표지·아이콘을 등록해 두면 매번 검색할 필요가 없습니다.
 - **최근 탭**(캡처): **내가 최근에 삽입한 자산** 목록입니다. "지난번에 썼던 그 사진" 을 다시 찾을 때 가장 빠른 경로입니다.
@@ -162,7 +162,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-7. 웹 이미지 검색
 
-<img src="docs/manual/addin-09-webimage.png" alt="웹 이미지 탭" width="520">
+<img src="docs/manual/addin-09-webimage.png" alt="웹 이미지 탭" width="442">
 
 사내 라이브러리에 없는 이미지가 필요할 때, 작업창 안에서 **외부 무료 이미지를 검색해 바로 삽입**할 수 있습니다.
 
@@ -173,7 +173,7 @@ PowerPoint 작업창에서 회사 자산(아이콘·사진·일러스트·다이
 
 ### 2-8. 콘텐츠 요청
 
-<img src="docs/manual/addin-10-request.png" alt="콘텐츠 요청 바텀시트" width="520">
+<img src="docs/manual/addin-10-request.png" alt="콘텐츠 요청 바텀시트" width="442">
 
 필요한 자료가 라이브러리에 없으면 **관리자에게 직접 요청**할 수 있습니다. (검색 무결과 화면의 "자료 요청하기" 버튼 또는 프로필 메뉴에서 열림)
 

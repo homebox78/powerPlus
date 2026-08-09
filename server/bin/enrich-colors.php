@@ -7,9 +7,9 @@ declare(strict_types=1);
  * 보안: ?key= 필요. 멱등(다시 실행해도 중복 태그는 병합·제거됨).
  *
  * 사용: bin/ 은 .htaccess 차단 → 웹루트로 임시 업로드 후
- *       curl "https://.../enrich-colors.php?key=pp_enrich_7Yq2"
+ *       curl "https://.../enrich-colors.php?key=pp_enrich_34c3caad1930"
  */
-if (($_GET['key'] ?? '') !== 'pp_enrich_7Yq2') { http_response_code(404); exit; }
+if (($_GET['key'] ?? '') !== 'pp_enrich_34c3caad1930') { http_response_code(404); exit; }
 @set_time_limit(0);
 @ignore_user_abort(true);
 header('Content-Type: text/plain; charset=utf-8');
