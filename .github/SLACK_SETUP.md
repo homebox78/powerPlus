@@ -5,8 +5,8 @@ main 브랜치에 푸시하면 `#21-개발하는디자이너` 채널에 커밋 �
 
 ## 1. Slack 웹훅 만들기 (soli-hack 워크스페이스)
 
-1. https://api.slack.com/apps → **Create New App** → *From scratch*
-2. 이름 `powerPlus 보고봇`, 워크스페이스 **Soli-Hack** 선택
+1. https://api.slack.com/apps → **Create New App** → 템플릿 중 **Blank app** (Empty app with minimal setup) → Continue
+2. 이름 `powerPlus 보고봇`, 워크스페이스 **Soli-Hack** 선택 → Create
 3. 좌측 **Incoming Webhooks** → 토글 **On** → **Add New Webhook to Workspace**
 4. 채널 `#21-개발하는디자이너` 선택 → 허용
 5. 생성된 `https://hooks.slack.com/services/...` URL 복사
