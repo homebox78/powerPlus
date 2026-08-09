@@ -28,3 +28,6 @@ data*.zip
 # Windows 썸네일 캐시(추적 금지)
 Thumbs.db
 thumbs.db
+
+# 화면 캡처 원본(개인정보 미마스킹 — 마스킹본은 docs/manual/에 커밋)
+/_capture/
