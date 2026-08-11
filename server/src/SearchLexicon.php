@@ -58,6 +58,26 @@ final class SearchLexicon
         ['바우처','voucher','지원금','지원'],
         ['건설','construction','시공','건축'],
         ['신분증','id','인증','신원확인'],
+        ['제안서','제안','proposal','rfp','입찰'],
+        ['패키지','package','묶음'],
+        ['사업','프로젝트','project','과제'],
+        ['교육','학습','training','education','연수'],
+        ['의료','병원','medical','hospital','진료'],
+        ['금융','은행','finance','bank','핀테크'],
+        ['물류','배송','logistics','유통'],
+        ['제조','공장','manufacturing','생산','스마트팩토리'],
+        ['에너지','전력','energy','발전','재생에너지'],
+    ];
+
+    /**
+     * 복합어 분해용 어휘(GROUPS 전 단어 + 자주 붙여 쓰는 낱말).
+     * "기후위기제안서"처럼 띄어쓰기 없이 입력해도 조각으로 나눠 찾게 한다.
+     */
+    private const EXTRA_VOCAB = [
+        '구축','운영','관리','지원','서비스','시스템','플랫폼','인프라','솔루션',
+        '표지','목차','간지','본문','마무리','전략','목표','배경','추진','현황','계획',
+        '기후','위기','환경','탄소','중립','데이터','분석','통계','보고','성과',
+        '소상공인','공공','정부','기업','고객','사용자','국가','지자체',
     ];
 
     /** 카테고리 힌트: 토큰 -> category key */
@@ -67,6 +87,7 @@ final class SearchLexicon
         '일러스트'=>'illust','illustration'=>'illust','그림'=>'illust','삽화'=>'illust',
         '다이어그램'=>'diagram','diagram'=>'diagram','도식'=>'diagram',
         '장표'=>'ppt','슬라이드'=>'ppt','ppt'=>'ppt','피피티'=>'ppt',
+        '제안서'=>'ppt','제안'=>'ppt',
         '로고'=>'logo','logo'=>'logo','심볼'=>'logo',
     ];
 
@@ -98,9 +119,70 @@ final class SearchLexicon
             $p = trim($p);
             if ($p === '' || mb_strlen($p) < 1) continue;
             if (in_array($p, self::STOP, true)) continue;
-            if (!in_array($p, $out, true)) $out[] = $p;
+            // 붙여 쓴 복합어는 아는 낱말로 쪼갠다("기후위기제안서" → 기후위기 + 제안서)
+            $parts = self::decompose($p);
+            foreach ($parts ?: [$p] as $piece) {
+                if ($piece === '' || in_array($piece, self::STOP, true)) continue;
+                if (!in_array($piece, $out, true)) $out[] = $piece;
+            }
         }
         return $out;
+    }
+
+    /** 분해용 어휘 목록(길이 내림차순) — 최장일치 우선. */
+    private static ?array $vocab = null;
+
+    private static function vocab(): array
+    {
+        if (self::$vocab !== null) return self::$vocab;
+        $words = self::EXTRA_VOCAB;
+        foreach (self::GROUPS as $g) foreach ($g as $w) $words[] = $w;
+        $words = array_values(array_unique(array_map(fn($w) => mb_strtolower(trim($w)), $words)));
+        $words = array_values(array_filter($words, fn($w) => mb_strlen($w) >= 2 && !str_contains($w, ' ')));
+        usort($words, fn($a, $b) => mb_strlen($b) <=> mb_strlen($a)); // 긴 낱말 먼저
+        self::$vocab = $words;
+        return self::$vocab;
+    }
+
+    /**
+     * 띄어쓰기 없는 복합어를 아는 낱말로 쪼갠다(최장일치).
+     * "기후위기제안서" → ['기후위기','제안서'] · 분해 실패 시 빈 배열(원문 그대로 쓰라는 뜻).
+     * 어휘에 없는 구간은 2글자 이상일 때만 조각으로 남긴다(1글자 노이즈 방지).
+     */
+    public static function decompose(string $token): array
+    {
+        self::buildIndex();
+        $t = mb_strtolower(trim($token));
+        if (mb_strlen($t) < 4) return [];          // 짧은 말은 쪼갤 이유가 없다
+        if (isset(self::$index[$t])) return [];    // 사전에 그대로 있는 말은 두 번 나누지 않는다
+
+        $parts = [];
+        $buf = '';
+        $i = 0;
+        $len = mb_strlen($t);
+        $matched = false;
+        while ($i < $len) {
+            $hit = null;
+            foreach (self::vocab() as $w) {
+                $wl = mb_strlen($w);
+                if ($wl <= $len - $i && mb_substr($t, $i, $wl) === $w) { $hit = $w; break; }
+            }
+            if ($hit !== null) {
+                if (mb_strlen($buf) >= 2) $parts[] = $buf;
+                $buf = '';
+                $parts[] = $hit;
+                $i += mb_strlen($hit);
+                $matched = true;
+            } else {
+                $buf .= mb_substr($t, $i, 1);
+                $i++;
+            }
+        }
+        if (mb_strlen($buf) >= 2) $parts[] = $buf;
+
+        // 아는 낱말이 하나도 없으면 분해로 볼 수 없다(엉뚱한 조각 방지)
+        if (!$matched || count($parts) < 2) return [];
+        return array_values(array_unique($parts));
     }
 
     /** 토큰 -> 동의어 확장 집합(자기 자신 포함). */

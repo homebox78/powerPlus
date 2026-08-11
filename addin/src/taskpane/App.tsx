@@ -181,6 +181,7 @@ export default function App() {
   const pageRef = React.useRef(1);
 
   const { insertingId, message, error, insert, clearMessage } = useInsert();
+  const [hint, setHint] = React.useState<string | null>(null); // 검색 안내(한 글자 등)
   const { favorites, toggleFavorite, isFavorite } = useFavorites(email);
   const { recent, pushRecent } = useRecent(email);
 
@@ -305,6 +306,13 @@ export default function App() {
   // 검색 완료 → "N개 찾았어요" 플래시. **검색 버튼을 눌렀을 때(searchAnim)만** — 탭/카테고리 이동 제외.
   const prevLoadingRef = React.useRef(false);
   const flashTimer = React.useRef<number | undefined>(undefined); // 자동 사라짐 타이머(ref로 보관 → effect 재실행에 취소되지 않음)
+  const hintTimer = React.useRef<number | undefined>(undefined);
+  /** 검색 안내 토스트(삽입 토스트와 같은 자리에 표시). 타이머는 ref 보관 — effect cleanup에 취소되지 않게 */
+  function showHint(text: string) {
+    setHint(text);
+    if (hintTimer.current) window.clearTimeout(hintTimer.current);
+    hintTimer.current = window.setTimeout(() => setHint(null), 2200);
+  }
   React.useEffect(() => {
     if (prevLoadingRef.current && !loading && searchAnim) {
       setSearchAnim(false); // 한 번만 — 이후 탭 이동 시 재발동 방지
@@ -413,6 +421,11 @@ export default function App() {
   /** 컴포저 검색어 확정. 입력 초안은 ComposerInput 로컬 state — 타이핑마다 App(수백 카드) 리렌더 방지 */
   function sendQuery(raw: string) {
     const q = raw.trim();
+    // 한 글자는 다른 낱말 속 음절까지 걸려("말" → 도움말·맺음말) 엉뚱한 결과가 쏟아진다.
+    if (q.length === 1) {
+      showHint("검색어는 두 글자 이상 입력해 주세요.");
+      return;
+    }
     setActiveQuery(q);
     setSearchAnim(!!q); // 검색 버튼 눌렀을 때만 캐릭터 애니메이션
     setView("all");
@@ -858,13 +871,13 @@ export default function App() {
       </div>
       )}
 
-      {/* 토스트 */}
-      {message && (
-        <div className={"toast" + (error ? " toast--error" : "")} role="status">
+      {/* 토스트 — 삽입 결과 / 검색 안내 공용 */}
+      {(message || hint) && (
+        <div className={"toast" + (error || (!message && hint) ? " toast--error" : "")} role="status">
           <span className="toast__check" aria-hidden>
             {Ic.check}
           </span>
-          {message}
+          {message || hint}
         </div>
       )}
 

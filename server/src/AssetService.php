@@ -41,7 +41,9 @@ final class AssetService
     {
         $pdo = Database::pdo();
         $where = [];
-        $whereParams = [];   // COUNT/WHERE 용
+        $whereParams = [];   // COUNT/WHERE 용(카테고리·장표 필터 등 기본 조건)
+        $termParams  = [];   // 검색 낱말 조건
+        $catParams   = [];   // 카테고리 제한 조건("사진·아이콘" 같은 종류 낱말)
         $scoreParams = [];   // 관련도 점수식 전용(SELECT 에서만 사용)
         if ($category !== '' && $category !== 'all') {
             $where[] = 'a.category = :category';
@@ -59,55 +61,121 @@ final class AssetService
 
         // 자연어 질의: 토큰화 → 동의어/한↔영/색상 확장 → 가중 관련도 점수
         $scoreExpr = null;
+        $steps = [];         // 좁은 조건 → 넓은 조건 순서(첫 결과가 나오는 단계를 쓴다)
         $q = trim($q);
         if ($q !== '') {
             $tokens = SearchLexicon::tokenize($q);
-            $terms = [];
+            $catHints = SearchLexicon::categoryHints($tokens);
+
+            // 토큰마다 "동의어 묶음"을 따로 유지한다 — 묶음 안은 OR, 묶음끼리는 AND(아래).
+            $groups = [];
+            $scoreParts = [];
+            $i = 0;
             foreach ($tokens as $tok) {
+                // "사진·일러스트·장표"처럼 종류를 가리키는 낱말은 태그가 아니라 분류다.
+                // 자산 태그에 "사진"이 들어있는 경우는 드물어서, 이걸 AND 조건에 넣으면 결과가 0에 가까워진다.
+                // → 점수(가점)에는 반영하되, 조건은 아래 카테고리 제한으로 건다.
+                $isCatWord = SearchLexicon::categoryHints([$tok]) !== [];
+                $terms = [];
                 foreach (SearchLexicon::expand($tok) as $t) {
                     $t = trim($t);
                     if ($t !== '' && !in_array($t, $terms, true)) $terms[] = $t;
                 }
-            }
-            $terms = array_slice($terms, 0, 24);
-            $catHints = SearchLexicon::categoryHints($tokens);
-
-            $scoreParts = [];
-            $orParts = [];
-            $i = 0;
-            foreach ($terms as $t) {
-                $like = '%' . $t . '%';
-                $quoted = '%"' . $t . '"%';          // JSON 태그 거의-정확 매칭
-                $a = ":a$i"; $b = ":b$i"; $c = ":c$i"; $d = ":d$i"; $e = ":e$i";
-                $scoreParams[$a] = $like;            // name 부분일치(점수)
-                $scoreParams[$b] = $quoted;          // tags 정확태그(점수)
-                $scoreParams[$c] = $like;            // tags 부분일치(점수)
-                $whereParams[$d] = $like;            // tags 부분일치(조건)
-                $whereParams[$e] = $like;            // name 부분일치(조건)
-                $scoreParts[] = "(a.name LIKE $a)*4 + (a.tags LIKE $b)*3 + (a.tags LIKE $c)*1";
-                $orParts[] = "a.tags LIKE $d OR a.name LIKE $e";
-                $i++;
+                $terms = array_slice($terms, 0, 12);
+                // 한 글자 낱말은 부분일치를 끈다 — "말"이 "도움말·맺음말"에 걸려 엉뚱한 게 쏟아진다.
+                $exactOnly = mb_strlen($tok) < 2;
+                $groupOr = [];
+                foreach ($terms as $t) {
+                    // ⚠️ name/tags 가 NULL 이면 (col LIKE x) 가 NULL 이고, 그 NULL 이 덧셈 전체를 NULL 로 만든다.
+                    //    이름 없는 자산(아이콘·사진·일러스트 대부분)이 점수 NULL → 정렬 맨 뒤로 밀렸던 원인.
+                    $quoted = '%"' . $t . '"%';      // JSON 태그 정확 매칭
+                    $b = ":b$i";
+                    $scoreParams[$b] = $quoted;
+                    if ($isCatWord) {
+                        // 가점만 — 이름/태그에 그 낱말이 있으면 조금 더 위로
+                        $scoreParams[":ca$i"] = '%' . $t . '%';
+                        $scoreParts[] = "(COALESCE(a.name,'') LIKE :ca$i)*2 + (COALESCE(a.tags,'') LIKE $b)*2";
+                        $i++;
+                        continue;
+                    }
+                    if ($exactOnly) {
+                        // ⚠️ 쓰지 않는 파라미터를 바인딩하면 PDO(EMULATE_PREPARES=false)가 거부한다 —
+                        //    WHERE 에 실제로 들어가는 것만 whereParams 에 넣는다.
+                        $termParams[":wb$i"] = $quoted;
+                        $scoreParts[] = "(COALESCE(a.tags,'') LIKE $b)*4";
+                        $groupOr[] = "COALESCE(a.tags,'') LIKE :wb$i";
+                    } else {
+                        $like = '%' . $t . '%';
+                        $a = ":a$i"; $c = ":c$i";
+                        $scoreParams[$a] = $like;    // name 부분일치(점수)
+                        $scoreParams[$c] = $like;    // tags 부분일치(점수)
+                        $termParams[":wd$i"] = $like;
+                        $termParams[":we$i"] = $like;
+                        $scoreParts[] = "(COALESCE(a.name,'') LIKE $a)*4 + (COALESCE(a.tags,'') LIKE $b)*3 + (COALESCE(a.tags,'') LIKE $c)*1";
+                        $groupOr[] = "COALESCE(a.tags,'') LIKE :wd$i OR COALESCE(a.name,'') LIKE :we$i";
+                    }
+                    $i++;
+                }
+                if ($groupOr) $groups[] = '(' . implode(' OR ', $groupOr) . ')';
             }
             $j = 0;
+            $catOr = [];
             foreach ($catHints as $ch) {
                 $cs = ":cs$j"; $cw = ":cw$j";
                 $scoreParams[$cs] = $ch;             // 카테고리 힌트 가점
-                $whereParams[$cw] = $ch;             // 카테고리 힌트도 결과에 포함
-                $scoreParts[] = "(a.category = $cs)*5";
-                $orParts[] = "a.category = $cw";
+                $catParams[$cw] = $ch;
+                // 사용자가 "아이콘"처럼 종류를 짚어 말했으면 그 카테고리를 확실히 앞으로 올린다.
+                $scoreParts[] = "(a.category = $cs)*8";
+                $catOr[] = "a.category = $cw";
                 $j++;
             }
-            if ($orParts) {
-                $where[] = '(' . implode(' OR ', $orParts) . ')';
-                $scoreExpr = '(' . implode(' + ', $scoreParts) . ')';
+            if ($groups || $catOr) {
+                // 좁은 것부터 차례로 시도한다. 앞 단계에 결과가 있으면 거기서 멈춘다.
+                //  ① 종류 + 낱말 전부   "기후 사진" = 사진 중에서 기후
+                //  ② 낱말 전부          (그 종류엔 없을 때. 종류는 가점으로만 남아 위로 올라온다)
+                //  ③ 낱말 하나라도      (그래도 없을 때)
+                $catClause = $catOr ? '(' . implode(' OR ', $catOr) . ')' : null;
+                $allWords  = $groups ? '(' . implode(' AND ', $groups) . ')' : null;
+                if ($allWords !== null && $catClause !== null) {
+                    $steps[] = ['sql' => "($allWords AND $catClause)", 'cat' => true];
+                    $steps[] = ['sql' => $allWords, 'cat' => false];
+                } elseif ($allWords !== null) {
+                    $steps[] = ['sql' => $allWords, 'cat' => false];
+                } elseif ($catClause !== null) {
+                    $steps[] = ['sql' => $catClause, 'cat' => true];
+                }
+                $steps[] = ['sql' => '(' . implode(' OR ', array_merge($groups, $catOr)) . ')', 'cat' => true];
+                $scoreExpr = $scoreParts ? '(' . implode(' + ', $scoreParts) . ')' : null;
             }
         }
 
-        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+        $baseParams = $whereParams;  // 기본 조건 파라미터(검색 낱말 붙이기 전)
+        $mkWhere = static fn(?string $search) => ($search !== null && $search !== '')
+            ? ($where ? ('WHERE ' . implode(' AND ', array_merge($where, [$search]))) : "WHERE $search")
+            : ($where ? ('WHERE ' . implode(' AND ', $where)) : '');
 
-        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM assets a $whereSql");
-        $countStmt->execute($whereParams);
-        $total = (int) $countStmt->fetchColumn();
+        // 좁은 조건부터 차례로 세어 보고, 결과가 나오는 첫 단계를 쓴다.
+        // ⚠️ 조건마다 실제로 쓰이는 파라미터만 바인딩해야 한다(EMULATE_PREPARES=false).
+        $whereSql = $mkWhere(null);
+        $total = 0;
+        if ($steps) {
+            $last = count($steps) - 1;
+            foreach ($steps as $n => $step) {
+                $sql    = $mkWhere($step['sql']);
+                $params = array_merge($baseParams, $termParams, $step['cat'] ? $catParams : []);
+                $st = $pdo->prepare("SELECT COUNT(*) FROM assets a $sql");
+                $st->execute($params);
+                $cnt = (int) $st->fetchColumn();
+                if ($cnt > 0 || $n === $last) {
+                    $whereSql = $sql; $whereParams = $params; $total = $cnt;
+                    break;
+                }
+            }
+        } else {
+            $countStmt = $pdo->prepare("SELECT COUNT(*) FROM assets a $whereSql");
+            $countStmt->execute($whereParams);
+            $total = (int) $countStmt->fetchColumn();
+        }
 
         $cols = preg_replace('/(^|,\s*)/', '$1a.', self::COLS); // 모든 컬럼에 a. 별칭
         $offset = ($page - 1) * $limit;
@@ -178,8 +246,8 @@ final class AssetService
             $s = ":s$i"; $w = ":w$i";
             $scoreParams[$s] = $quoted;
             $whereParams[$w] = $quoted;
-            $scoreParts[] = "(a.tags LIKE $s)*1";
-            $orParts[] = "a.tags LIKE $w";
+            $scoreParts[] = "(COALESCE(a.tags,'') LIKE $s)*1";   // NULL 이면 점수 합이 통째로 NULL 이 된다
+            $orParts[] = "COALESCE(a.tags,'') LIKE $w";
             $i++;
         }
         // 카테고리 가점(+ 태그가 없으면 같은 카테고리로 폴백)
