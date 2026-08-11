@@ -85,6 +85,53 @@ async function insertSlidesAfterSelection(base64: string): Promise<void> {
   }
 }
 
+/** 문서에 선택(삽입 지점)이 없으면 setSelectedDataAsync가 "내부 오류"로 실패한다.
+ *  작업창만 클릭하고 슬라이드를 한 번도 안 건드린 상태가 대표적 — 첫 슬라이드를 선택해 삽입 지점을 만든다. */
+async function ensureSlideSelected(): Promise<void> {
+  try {
+    await PowerPoint.run(async (context) => {
+      const pres = context.presentation;
+      const sel = pres.getSelectedSlides();
+      sel.load("items/id");
+      const all = pres.slides;
+      all.load("items/id");
+      await context.sync();
+      if (sel.items.length === 0 && all.items.length > 0) {
+        pres.setSelectedSlides([all.items[0].id]);
+        await context.sync();
+      }
+    });
+  } catch {
+    // setSelectedSlides 미지원(구 API)이면 그냥 진행 — 아래 폴백이 받는다
+  }
+}
+
+/** Common API(setSelectedDataAsync) 실패 시 폴백: 슬라이드 shape로 직접 이미지 추가.
+ *  PowerPointApi 1.8+ (Microsoft 365/2024)에서만 동작 — 미지원이면 throw 되어 상위에서 처리. */
+async function insertImageAsShape(
+  base64: string,
+  pos: { left: number; top: number } | null,
+  widthPt: number
+): Promise<void> {
+  await PowerPoint.run(async (context) => {
+    const pres = context.presentation;
+    const sel = pres.getSelectedSlides();
+    sel.load("items/id");
+    const all = pres.slides;
+    all.load("items/id");
+    await context.sync();
+    const slide = sel.items.length ? sel.items[sel.items.length - 1] : all.items[0];
+    if (!slide) throw new Error("슬라이드가 없습니다. 슬라이드를 추가한 뒤 다시 시도해 주세요.");
+    // addImage는 API 1.8+에만 존재 — 타입/런타임 모두 가드
+    const shapes = slide.shapes as unknown as {
+      addImage?: (b64: string, o?: { left?: number; top?: number; width?: number }) => unknown;
+    };
+    if (typeof shapes.addImage !== "function") throw new Error("이 Office 버전은 이미지 직접 추가를 지원하지 않습니다.");
+    shapes.addImage(base64, { width: widthPt, ...(pos ? { left: pos.left, top: pos.top } : {}) });
+    await context.sync();
+  });
+}
+
 const isPowerPoint = (): boolean =>
   typeof Office !== "undefined" &&
   Office.context?.host === Office.HostType.PowerPoint;
@@ -150,24 +197,43 @@ export function useInsert() {
       // 가로 기준 합리적 기본 크기로 삽입(세로는 비율 자동) → 원본이 너무 커서
       // 슬라이드를 벗어나는 일 방지. 이후 사용자가 자유롭게 조절.
       const DEFAULT_WIDTH_PT = 200;
-      await new Promise<void>((resolve, reject) => {
-        const opts: Office.SetSelectedDataOptions & {
-          imageWidth?: number;
-          imageLeft?: number;
-          imageTop?: number;
-        } = {
-          coercionType: Office.CoercionType.Image,
-          imageWidth: DEFAULT_WIDTH_PT, // 세로는 비율 유지로 자동 계산
-        };
-        if (pos) {
-          opts.imageLeft = pos.left; // 선택한 개체 위치에 삽입
-          opts.imageTop = pos.top;
-        }
-        Office.context.document.setSelectedDataAsync(base64, opts, (res) => {
-          if (res.status === Office.AsyncResultStatus.Succeeded) resolve();
-          else reject(new Error(res.error?.message || "삽입에 실패했습니다."));
+      const setSelectedImage = () =>
+        new Promise<void>((resolve, reject) => {
+          const opts: Office.SetSelectedDataOptions & {
+            imageWidth?: number;
+            imageLeft?: number;
+            imageTop?: number;
+          } = {
+            coercionType: Office.CoercionType.Image,
+            imageWidth: DEFAULT_WIDTH_PT, // 세로는 비율 유지로 자동 계산
+          };
+          if (pos) {
+            opts.imageLeft = pos.left; // 선택한 개체 위치에 삽입
+            opts.imageTop = pos.top;
+          }
+          Office.context.document.setSelectedDataAsync(base64, opts, (res) => {
+            if (res.status === Office.AsyncResultStatus.Succeeded) resolve();
+            else reject(new Error(res.error?.message || "삽입에 실패했습니다."));
+          });
         });
-      });
+
+      // setSelectedDataAsync는 문서에 유효한 선택(삽입 지점)이 없으면 "내부 오류"로 실패한다.
+      // ① 그대로 시도 → ② 첫 슬라이드를 선택해 삽입 지점을 만든 뒤 재시도 → ③ shape 직접 추가(1.8+) 폴백
+      try {
+        await setSelectedImage();
+      } catch (first) {
+        await ensureSlideSelected();
+        try {
+          await setSelectedImage();
+        } catch {
+          try {
+            await insertImageAsShape(base64, pos, DEFAULT_WIDTH_PT);
+          } catch {
+            const detail = first instanceof Error ? first.message : String(first);
+            throw new Error(`${detail} — 슬라이드를 한 번 클릭해 커서를 둔 뒤 다시 시도해 주세요.`);
+          }
+        }
+      }
 
       setState({
         insertingId: null,
