@@ -25,8 +25,12 @@ final class AdminController
         if ($email === null) {
             return false;
         }
+        // Config::get 은 환경변수(ADMIN_EMAILS)를 문자열로 돌려주므로 배열이 아니면 콤마 분해한다.
+        // (문자열을 그대로 버리면 환경변수로 설정한 순간 모든 /api/admin/* 이 403 이 된다)
         $admins = Config::get('admin_emails', []);
-        $admins = is_array($admins) ? $admins : [];
+        if (!is_array($admins)) {
+            $admins = array_filter(array_map('trim', explode(',', (string) $admins)));
+        }
         return in_array(strtolower($email), array_map('strtolower', $admins), true);
     }
 

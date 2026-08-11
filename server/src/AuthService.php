@@ -21,9 +21,9 @@ final class AuthService
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['ok' => false, 'error' => '올바른 이메일 형식이 아닙니다.'];
         }
-        $domain = strtolower((string) Config::get('allowed_domain', ''));
-        if ($domain !== '' && !str_ends_with($email, '@' . $domain)) {
-            return ['ok' => false, 'error' => '@' . $domain . ' 이메일만 사용할 수 있습니다.'];
+        $deny = $this->rejectReason($email);
+        if ($deny !== null) {
+            return ['ok' => false, 'error' => $deny];
         }
 
         $pdo = Database::pdo();
@@ -67,6 +67,76 @@ final class AuthService
             return ['ok' => false, 'error' => '메일 발송에 실패했습니다. 관리자에게 문의하세요.'];
         }
         return ['ok' => true];
+    }
+
+    /**
+     * 로그인 허용 여부. 허용이면 null, 아니면 사용자에게 보여줄 사유.
+     *
+     * 우선순위
+     *  1) 허용 도메인(allowed_domain / allowed_domains) 에 속하면 통과
+     *  2) 상시 허용 이메일(allowed_emails) 에 있으면 통과
+     *  3) 개방 기간(open_until, YYYY-MM-DD) 안이면
+     *     - open_emails 가 있으면 그 목록만 통과
+     *     - 비어 있으면 모든 이메일 통과 (해커톤 심사 등 한시 개방)
+     * open_until 이 지나면 자동으로 1)·2) 정책으로 돌아간다 — 설정을 지우는 걸 잊어도 안전.
+     */
+    private function rejectReason(string $email): ?string
+    {
+        $domains = self::list('allowed_domains');
+        $single  = strtolower(trim((string) Config::get('allowed_domain', '')));
+        if ($single !== '') {
+            $domains[] = $single;
+        }
+        $domains = array_values(array_unique(array_filter($domains)));
+
+        if ($domains === []) {
+            return null; // 도메인 제한 없음
+        }
+        foreach ($domains as $d) {
+            if (str_ends_with($email, '@' . $d)) {
+                return null;
+            }
+        }
+        if (in_array($email, self::list('allowed_emails'), true)) {
+            return null;
+        }
+
+        if (self::openPeriodActive()) {
+            $open = self::list('open_emails');
+            if ($open === [] || in_array($email, $open, true)) {
+                return null;
+            }
+        }
+
+        return '@' . $domains[0] . ' 이메일만 사용할 수 있습니다.';
+    }
+
+    /** open_until(YYYY-MM-DD) 이 오늘 이후(당일 포함)면 개방 기간. */
+    private static function openPeriodActive(): bool
+    {
+        $until = trim((string) Config::get('open_until', ''));
+        if ($until === '') {
+            return false;
+        }
+        $ts = strtotime($until . ' 23:59:59');
+        return $ts !== false && $ts >= time();
+    }
+
+    /** 설정값을 소문자 문자열 배열로. 배열/콤마 구분 문자열 모두 허용. */
+    private static function list(string $key): array
+    {
+        $v = Config::get($key, []);
+        if (!is_array($v)) {
+            $v = explode(',', (string) $v);
+        }
+        $out = [];
+        foreach ($v as $item) {
+            $item = strtolower(trim((string) $item));
+            if ($item !== '') {
+                $out[] = $item;
+            }
+        }
+        return $out;
     }
 
     /**

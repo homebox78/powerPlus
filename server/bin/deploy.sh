@@ -16,7 +16,15 @@ KEY_SRC="${DEPLOY_KEY:-google_key.pem}"
 KEY="$(mktemp)"; cp "$KEY_SRC" "$KEY"; chmod 600 "$KEY"
 trap 'rm -f "$KEY"' EXIT
 
-SSHOPT="-i $KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=20"
+# 서버 신원 확인(MITM 방지). known_hosts 가 없으면 최초 1회 자동 등록 후 이후엔 고정 대조.
+# 수동 갱신(서버 재설치 등): ssh-keyscan -p 22 "$DEPLOY_HOST" > config/known_hosts
+KNOWN="config/known_hosts"
+if [ ! -s "$KNOWN" ]; then
+  echo "→ known_hosts 최초 등록: $DEPLOY_HOST"
+  ssh-keyscan -p 22 "$DEPLOY_HOST" > "$KNOWN" 2>/dev/null
+  [ -s "$KNOWN" ] || { echo "ssh-keyscan 실패 — 호스트 키를 가져오지 못했습니다: $DEPLOY_HOST"; exit 1; }
+fi
+SSHOPT="-i $KEY -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$KNOWN -o ConnectTimeout=20"
 R="$DEPLOY_USER@$DEPLOY_HOST"
 RP="$DEPLOY_REMOTE_PATH"
 
@@ -24,7 +32,9 @@ echo "→ 애드인 빌드"
 ( cd ../addin && npm run build >/dev/null 2>&1 ) && echo "  빌드 완료" || echo "  (빌드 실패/건너뜀 — 기존 dist 사용)"
 
 echo "→ 원격 폴더 준비"
-ssh $SSHOPT -p 22 "$R" "mkdir -p '$RP/src' '$RP/admin' '$RP/admin/vendor' '$RP/lib/PHPMailer' '$RP/sql' '$RP/bin' '$RP/app/assets' '$RP/uploads' '$RP/config' '$RP/logs' && chmod 777 '$RP/uploads'"
+# uploads 는 웹서버(www-data)가 써야 하므로 그룹 소유 + 2775(setgid: 새 파일도 그룹 상속).
+# 그룹 변경 권한이 없으면 기존 권한을 그대로 두어 업로드가 깨지지 않게 한다(777 로 되돌리지 않음).
+ssh $SSHOPT -p 22 "$R" "mkdir -p '$RP/src' '$RP/admin' '$RP/admin/vendor' '$RP/lib/PHPMailer' '$RP/sql' '$RP/bin' '$RP/app/assets' '$RP/uploads' '$RP/config' '$RP/logs' && { chgrp www-data '$RP/uploads' 2>/dev/null && chmod 2775 '$RP/uploads'; } || echo '  (uploads 권한 유지 — 그룹 변경 권한 없음)'"
 
 echo "→ 서버 코드 업로드"
 scp $SSHOPT -P 22 index.php .htaccess README.md "$R:$RP/"

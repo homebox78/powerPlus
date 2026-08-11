@@ -1,5 +1,9 @@
 # 업로드 폴더 보안 — 여기선 PHP/스크립트 실행 금지 (이미지 정적 서빙만)
-php_flag engine off
+# php_flag 는 mod_php 전용 지시자 → php-fpm/LiteSpeed 환경에선 500 이 나므로 IfModule 로 감싼다.
+# 아래 FilesMatch 가 실제 차단을 담당하므로 mod_php 가 아니어도 보안은 유지된다.
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
 <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
   Require all denied
 </FilesMatch>

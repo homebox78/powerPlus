@@ -158,6 +158,17 @@ if ($hasFavIdx === 0) {
     $pdo->exec("ALTER TABLE user_favorites ADD INDEX idx_asset (asset_id)");
 }
 
+// usage_log.email 인덱스 — PrefsService::recent()가 WHERE email = :e 로 조회하는데
+// 기존 인덱스는 idx_asset/idx_used 뿐이라 풀스캔. 로그는 계속 쌓이므로 시간이 갈수록 느려진다.
+$hasUsageEmailIdx = (int) $pdo->query(
+    "SELECT COUNT(*) FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='usage_log' AND INDEX_NAME='idx_email'"
+)->fetchColumn();
+if ($hasUsageEmailIdx === 0) {
+    // (email, asset_id, used_at) 복합 = 이 쿼리의 커버링 인덱스(조회·그룹·정렬 컬럼 전부 포함)
+    $pdo->exec("ALTER TABLE usage_log ADD INDEX idx_email (email, asset_id, used_at)");
+}
+
 echo "migrate OK\n";
 echo "categories:\n";
 foreach ($pdo->query("SELECT `key`,label,sort_order FROM categories ORDER BY sort_order") as $r) {

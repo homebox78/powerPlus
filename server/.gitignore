@@ -1,5 +1,7 @@
 # config 폴더 전체 비추적 — 비밀 설정(DB·메일·FTP)·SSH 키 포함, 절대 커밋 금지
-/config/
+# 단 값이 전부 플레이스홀더인 템플릿(config.example.php)만 추적해 신규 환경 셋업이 가능하게 한다.
+/config/*
+!/config/config.example.php
 vendor/
 *.log
 .env
