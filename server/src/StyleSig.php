@@ -15,7 +15,7 @@ declare(strict_types=1);
  * 즉 **비중 하나로는 안 갈리고, "한 색이 지배 + 채도가 높다"는 조합**이 톤 스타일을 집어낸다.
  * (피부·머리색이 지배적인 사실적 인물은 채도가 낮아 자동으로 빠진다.)
  *
- * 지문 값: "t0".."t5"(그 색조로 통일된 스타일) · "c"(여러 색을 쓰는 일반 컬러) · "n"(무채색)
+ * 지문 값: "t0".."t5"(밝은 그 색조) · "t0d".."t5d"(짙은 그 색조) · "c"(일반 컬러) · "n"(무채색)
  */
 final class StyleSig
 {
@@ -36,6 +36,7 @@ final class StyleSig
         $ink = 0;      // 배경 아닌 픽셀
         $chroma = 0;   // 그중 색을 가진 픽셀
         $satSum = 0;   // 평균 채도(톤 스타일 판정의 두 번째 축)
+        $valSum = 0;   // 평균 밝기(세 번째 축 — 짙은 남색 양복 실사풍과 밝은 플랫을 가른다)
 
         for ($y = 0; $y < $h; $y += $stepY) {
             for ($x = 0; $x < $w; $x += $stepX) {
@@ -49,6 +50,7 @@ final class StyleSig
                 $d  = $mx - $mn;
                 if ($mx > 0.96 && $d < 0.06) continue;                    // 흰 배경
                 $ink++;
+                $valSum += $mx;
                 $s = $mx > 0 ? $d / $mx : 0;
                 $satSum += $s;
                 if ($s < 0.18) continue;                                  // 무채색은 색상 집계 제외
@@ -70,10 +72,15 @@ final class StyleSig
         foreach ($hues as $i => $n) if ($n > $hues[$top]) $top = $i;
         $dominance = $hues[$top] / $tot;    // 한 색조가 얼마나 지배하는가
         $avgSat = $satSum / $ink;           // 전체적으로 얼마나 쨍한가
+        $avgVal = $valSum / $ink;           // 밝은 톤인가 짙은 톤인가
 
         // 한 색조가 지배하면서 채도까지 높아야 "그 색으로 통일된 스타일"이다.
         // 채도 기준이 없으면 피부·머리색이 지배적인 사실적 인물까지 톤 스타일로 잡힌다(실측).
-        return ($dominance >= 0.70 && $avgSat >= 0.40) ? ('t' . $top) : 'c';
+        if ($dominance < 0.70 || $avgSat < 0.40) return 'c';
+
+        // ⭐ 같은 파랑이어도 **짙은 남색 양복 실사풍**과 **밝은 플랫 일러스트**는 다른 스타일이다.
+        //    (사용자 지적) 실측하니 양복 실사풍은 평균 밝기 0.33~0.50, 밝은 플랫은 0.56 이상으로 딱 갈렸다.
+        return 't' . $top . ($avgVal < 0.55 ? 'd' : '');
     }
 
     /** 자산 행(image_path·thumb_path)에서 파일 경로를 골라 지문을 만든다. */

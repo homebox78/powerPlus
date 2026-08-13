@@ -39,13 +39,20 @@ body {
   height: 100vh;
 }
 
+/* 작업창이 좁아 스크롤바를 잡기 어렵다는 지적 → 넉넉히(사용자 요청 2026-08-13) */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4dae2;
-  border-radius: 4px;
+  background: #c3cbd6;
+  border-radius: 8px;
+  border: 3px solid transparent;   /* 트랙과 여백을 둬 손잡이가 굵어도 답답하지 않게 */
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9aa5b4;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
