@@ -61,8 +61,65 @@
     .field>label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
     .code-input { text-align:center; letter-spacing:.4em; font-size:22px; font-weight:800; padding:14px; }
 
-    /* 레이아웃 */
-    .wrap { max-width:1080px; margin:0 auto; padding:16px; }
+    /* 레이아웃 — 좌 내비 / 본문 / 우 상세 3단(2026-08-13 개편) */
+    .wrap { max-width:1680px; margin:0 auto; padding:16px 20px 28px; }
+    .shell { display:grid; grid-template-columns:216px minmax(0,1fr); gap:20px; align-items:start; }
+    .shell--detail { grid-template-columns:216px minmax(0,1fr) 340px; }
+    .main { min-width:0; }
+    @media (max-width:1100px){ .shell, .shell--detail { grid-template-columns:minmax(0,1fr); } .side { display:none; } }
+
+    /* 좌측 내비 */
+    .side { position:sticky; top:16px; background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; padding:10px 8px; box-shadow:0 2px 10px rgba(28,39,51,.04); }
+    .side__group + .side__group { margin-top:6px; padding-top:6px; border-top:1px solid #f0f2f5; }
+    .side__gh { font-size:11px; font-weight:800; color:var(--muted); padding:8px 10px 6px; letter-spacing:-.01em; }
+    .side__link { display:flex; align-items:center; gap:9px; width:100%; border:none; background:none;
+      color:var(--ink2); font-size:13px; font-weight:700; padding:9px 10px; border-radius:10px; text-align:left;
+      transition:background .12s,color .12s; }
+    .side__link svg { width:16px; height:16px; flex:none; }
+    .side__link span { flex:1; }
+    .side__link:hover { background:#f6f8fa; color:var(--text); }
+    .side__link--on, .side__link--on:hover { background:var(--accent-soft); color:var(--accent-d); }
+    .side__n { font-style:normal; font-size:11px; font-weight:800; color:var(--muted);
+      background:#f1f3f6; border-radius:999px; padding:2px 7px; }
+    .side__n--hot:not(:empty) { background:var(--accent); color:#fff; }
+    .side__n:empty { display:none; }
+
+    /* 우측 상세 패널 */
+    .detail { position:sticky; top:16px; background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; box-shadow:0 2px 10px rgba(28,39,51,.04); display:flex; flex-direction:column;
+      max-height:calc(100vh - 32px); overflow:hidden; }
+    .detail__top { display:flex; align-items:center; justify-content:space-between; padding:14px 16px;
+      border-bottom:1px solid #f0f2f5; }
+    .detail__top h3 { margin:0; font-size:15px; font-weight:800; }
+    .detail__x { border:none; background:none; font-size:22px; line-height:1; color:var(--muted); padding:0 2px; }
+    .detail__x:hover { color:var(--text); }
+    .detail__body { padding:16px; overflow-y:auto; flex:1; }
+    .detail__foot { padding:12px 16px; border-top:1px solid #f0f2f5; background:var(--surface); }
+    .dt-hero { display:flex; gap:12px; align-items:flex-start; margin-bottom:16px; }
+    .dt-thumb { width:112px; height:112px; flex:none; border:1px solid var(--border); border-radius:12px;
+      background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .dt-thumb img { max-width:88%; max-height:88%; object-fit:contain; }
+    .dt-meta { font-size:12px; color:var(--muted); line-height:1.9; }
+    .dt-meta b { color:var(--ink2); font-weight:700; margin-right:6px; }
+    .dt-badge { display:inline-block; font-size:11px; font-weight:800; border-radius:999px;
+      padding:3px 10px; background:#e7f6ee; color:var(--ok); margin-bottom:7px; }
+    .dt-f { margin-bottom:12px; }
+    .dt-f > label { display:flex; align-items:center; justify-content:space-between; font-size:12px;
+      color:var(--muted); font-weight:700; margin-bottom:5px; }
+    .dt-f__v { border:1.5px solid var(--border); border-radius:11px; background:#fafbfc; padding:10px 12px;
+      font-size:13px; color:var(--ink2); word-break:break-all; min-height:40px; }
+    .dt-copy { border:none; background:none; color:var(--muted); padding:0 2px; }
+    .dt-copy:hover { color:var(--accent); }
+    .dt-chips { display:flex; flex-wrap:wrap; gap:5px; }
+
+    /* 그리드 툴바 */
+    .gridbar { display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+    .gridbar__sp { flex:1; }
+    .sel--sm { min-width:104px; padding:7px 30px 7px 11px; font-size:12px; border-radius:9px; }
+    .sizer { display:flex; align-items:center; gap:7px; }
+    .sizer input[type=range] { width:96px; padding:0; border:none; background:none; accent-color:var(--accent); cursor:pointer; }
+    .pager--inline { margin:0; padding:0; }
     .topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:20px; }
     .topbar h1 { font-size:20px; font-weight:800; letter-spacing:-.02em; margin:0; }
     .topbar__user { font-size:13px; color:var(--ink2); font-weight:600; margin-right:12px; }
@@ -85,10 +142,14 @@
     /* 자산 카드 그리드 */
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
     /* 자산 목록: 가로 5개 고정(30개 = 5×6줄). 좁은 화면은 단계적 축소 */
-    #asset-grid { grid-template-columns:repeat(5,1fr); }
-    @media (max-width:1180px){ #asset-grid { grid-template-columns:repeat(4,1fr); } }
-    @media (max-width:820px){ #asset-grid { grid-template-columns:repeat(3,1fr); } }
-    @media (max-width:560px){ #asset-grid { grid-template-columns:repeat(2,1fr); } }
+    /* 열 수는 상단 슬라이더가 정한다(--cols) */
+    #asset-grid { grid-template-columns:repeat(var(--cols,5),minmax(0,1fr)); gap:14px; }
+    @media (max-width:1180px){ #asset-grid { grid-template-columns:repeat(min(var(--cols,5),4),minmax(0,1fr)); } }
+    @media (max-width:820px){ #asset-grid { grid-template-columns:repeat(min(var(--cols,5),3),minmax(0,1fr)); } }
+    @media (max-width:560px){ #asset-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .card--on { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent) inset, 0 8px 20px rgba(196,62,28,.12); }
+    .card__file { font:600 10.5px "JetBrains Mono",monospace; color:var(--muted); text-align:center;
+      padding:0 8px 10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .card { background:var(--surface); border:1px solid var(--border); border-radius:16px;
       overflow:hidden; box-shadow:0 2px 10px rgba(28,39,51,.04); transition:.12s;
       display:flex; flex-direction:column; }
@@ -332,12 +393,41 @@
       <div><span class="topbar__user" id="who"></span>
         <button id="btn-logout" class="btn btn--ghost">로그아웃</button></div>
     </div>
-    <div class="tabs">
-      <button class="tab tab--active" data-tab="stats">대시보드</button>
-      <button class="tab" data-tab="assets">자산</button>
-      <button class="tab" data-tab="ann">공지</button>
-      <button class="tab" data-tab="req">요청</button>
-    </div>
+    <div class="shell" id="shell">
+      <!-- 좌측 내비 (그룹형) -->
+      <aside class="side" id="side">
+        <div class="side__group">
+          <div class="side__gh">현황</div>
+          <button class="side__link side__link--on tab" data-tab="stats">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10M10 19V5M16 19v-6M22 19H2"/></svg>
+            <span>대시보드</span>
+          </button>
+        </div>
+        <div class="side__group">
+          <div class="side__gh">콘텐츠 관리</div>
+          <button class="side__link tab" data-tab="assets">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.8"/></svg>
+            <span>자산</span><em class="side__n" id="n-assets"></em>
+          </button>
+          <button class="side__link" id="side-cats">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            <span>카테고리 관리</span>
+          </button>
+        </div>
+        <div class="side__group">
+          <div class="side__gh">사용자 소통</div>
+          <button class="side__link tab" data-tab="ann">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM17 9a4 4 0 0 1 0 6"/></svg>
+            <span>공지</span><em class="side__n" id="n-ann"></em>
+          </button>
+          <button class="side__link tab" data-tab="req">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>
+            <span>요청</span><em class="side__n side__n--hot" id="n-req"></em>
+          </button>
+        </div>
+      </aside>
+
+      <div class="main" id="main-col">
 
     <!-- 대시보드 탭 -->
     <section id="tab-stats">
@@ -436,9 +526,23 @@
         <button id="btn-cats" class="btn btn--ghost" title="카테고리 관리">카테고리 관리</button>
         <button id="btn-new" class="btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>새 자산</button>
       </div>
-      <div id="asset-count" class="listcount"></div>
+      <div class="gridbar">
+        <span id="asset-count" class="listcount"></span>
+        <span class="gridbar__sp"></span>
+        <span class="sizer" title="썸네일 크기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.9"><rect x="4" y="4" width="16" height="16" rx="2.5"/></svg>
+          <input type="range" id="size-range" min="3" max="8" step="1" value="5" aria-label="썸네일 크기" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2.5"/></svg>
+        </span>
+        <select id="page-size" class="sel sel--sm" title="페이지당 개수">
+          <option value="30">30개씩</option>
+          <option value="50">50개씩</option>
+          <option value="100">100개씩</option>
+        </select>
+        <div id="asset-pager" class="pager pager--inline"></div>
+      </div>
       <div id="asset-grid" class="grid"></div>
-      <div id="asset-pager" class="pager"></div>
+      <div id="asset-pager-b" class="pager"></div>
     </section>
 
     <!-- 카테고리 관리는 자산 페이지 '카테고리 관리' 버튼 → 모달(cats-modal)로 이동 -->
@@ -463,6 +567,20 @@
     </section>
 
     <!-- 통계 탭은 대시보드에 통합됨 (2026-07-02) -->
+      </div><!-- /.main -->
+
+      <!-- 우측 상세 패널 (자산 카드 클릭 시) -->
+      <aside class="detail hidden" id="detail">
+        <div class="detail__top">
+          <h3>자산 정보</h3>
+          <button class="detail__x" id="detail-close" aria-label="닫기">×</button>
+        </div>
+        <div class="detail__body" id="detail-body"></div>
+        <div class="detail__foot">
+          <button class="btn" style="width:100%" id="detail-edit">메타데이터 수정</button>
+        </div>
+      </aside>
+    </div><!-- /.shell -->
   </div>
 
   <!-- 자산 모달 -->
@@ -621,7 +739,8 @@
 
     /* ── 탭 ── */
     document.querySelectorAll(".tab").forEach((t) => t.onclick = () => {
-      document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("tab--active", x === t));
+      document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("side__link--on", x === t));
+      closeDetail();   // 화면을 옮기면 열려 있던 상세는 닫는다
       $("tab-assets").classList.toggle("hidden", t.dataset.tab !== "assets");
       $("tab-stats").classList.toggle("hidden", t.dataset.tab !== "stats");
       $("tab-ann").classList.toggle("hidden", t.dataset.tab !== "ann");
@@ -646,6 +765,8 @@
         : s === "rejected"
           ? `<span class="tag" style="background:#fdebee;color:#f0566a">거절</span>`
           : `<span class="tag" style="background:#fbeee4;color:#e0701f">대기</span>`;
+      const nR = $("n-req");
+      if (nR) { const wait = reqs.filter((r) => r.status === "new" || !r.status).length; nR.textContent = wait ? String(wait) : ""; }
       $("req-rows").innerHTML = reqs.length ? reqs.map((r) => `<tr>
         <td class="tc"><span class="tag">${esc(r.type)}</span></td>
         <td><div style="font-weight:700">${esc(r.title)}</div>${r.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px" class="t-nowrap">${esc(r.description)}</div>` : ""}${r.link ? (safeHttpUrl(r.link) ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:12px">${esc(r.link)}</a>` : `<span style="color:var(--muted);font-size:12px">${esc(r.link)}</span>`) : ""}</td>
@@ -672,6 +793,7 @@
       } catch (e) { $("ann-rows").innerHTML = `<tr><td colspan="5" class="msg--err" style="padding:20px">${esc(e.message)}</td></tr>`; }
     }
     function renderAnns() {
+      const nAn = $("n-ann"); if (nAn) nAn.textContent = anns.length ? String(anns.length) : "";
       $("ann-rows").innerHTML = anns.length ? anns.map((a) => {
         const body = esc(a.body || "");
         const badge = a.is_active
@@ -970,6 +1092,7 @@
     $("c-cancel").onclick = () => $("cat-modal").classList.add("hidden");
     // 카테고리 관리 모달(자산 페이지 버튼으로 열림)
     $("btn-cats").onclick = () => { renderCats(); $("cats-modal").classList.remove("hidden"); };
+    $("side-cats").onclick = () => { renderCats(); $("cats-modal").classList.remove("hidden"); };
     $("cats-close").onclick = () => $("cats-modal").classList.add("hidden");
     function openCat(c) {
       editingCatKey = c ? c.key : null;
@@ -1011,8 +1134,88 @@
     // 자산탭 진입 시 1회만 전체 로드(이후 재사용)
     async function ensureAssets() { if (assetsLoaded) { renderAssets(); } else { await loadAssets(); } }
     let assetPage = 1;
-    const PER_PAGE = 30;
+    let PER_PAGE = 30;
     const resetAndRender = () => { assetPage = 1; renderAssets(); };
+
+    /* ── 그리드 툴바: 썸네일 크기 · 페이지당 개수 (설정은 브라우저에 기억) ── */
+    const gridPrefs = (() => {
+      try { return JSON.parse(localStorage.getItem("pp_admin_grid") || "{}") || {}; } catch (e) { return {}; }
+    })();
+    const saveGridPrefs = () => { try { localStorage.setItem("pp_admin_grid", JSON.stringify(gridPrefs)); } catch (e) {} };
+    function applyCols(n) {
+      gridPrefs.cols = n;
+      $("asset-grid").style.setProperty("--cols", String(n));
+      saveGridPrefs();
+    }
+    if (gridPrefs.per) { PER_PAGE = +gridPrefs.per || 30; $("page-size").value = String(PER_PAGE); }
+    $("size-range").value = String(gridPrefs.cols || 5);
+    // 슬라이더는 오른쪽으로 갈수록 "크게" = 열 수는 줄어든다(값 3~8 → 열 8~3)
+    const colsOf = (v) => 11 - (+v);
+    $("size-range").oninput = () => { applyCols(colsOf($("size-range").value)); };
+    applyCols(colsOf($("size-range").value));
+    $("page-size").onchange = () => {
+      PER_PAGE = +$("page-size").value || 30;
+      gridPrefs.per = PER_PAGE; saveGridPrefs();
+      resetAndRender();
+    };
+
+    /* ── 우측 상세 패널 ── */
+    let detailId = null;
+    function closeDetail() {
+      detailId = null;
+      $("detail").classList.add("hidden");
+      $("shell").classList.remove("shell--detail");
+      document.querySelectorAll("#asset-grid .card--on").forEach((c) => c.classList.remove("card--on"));
+    }
+    $("detail-close").onclick = closeDetail;
+    $("detail-edit").onclick = () => {
+      const a = assets.find((x) => x.id === detailId);
+      if (a) openAsset(a);
+    };
+    function fileNameOf(a) {
+      const u = a.image_url || a.thumb_url || a.slide_url || "";
+      const base = String(u).split("?")[0].split("/").pop() || "";
+      return base || (a.id + "");
+    }
+    function openDetail(a) {
+      if (!a) return;
+      detailId = a.id;
+      const src = a.thumb_url || a.image_url;
+      const catLabel = (k) => (categories.find((c) => c.key === k) || {}).label || k;
+      const sub = a.category === "ppt" && a.slide_kind
+        ? (a.slide_kind === "package" ? "패키지" : "단일 · " + (PAGE_LABELS[a.slide_page] || "기타"))
+        : "";
+      const chips = (list, cls) => (list || []).map((t) => `<span class="tag${cls}">${esc(t)}</span>`).join("");
+      const field = (label, value, copy) =>
+        `<div class="dt-f"><label>${esc(label)}${copy ? `<button class="dt-copy" data-copy="${esc(copy)}" title="복사">⧉</button>` : ""}</label>
+           <div class="dt-f__v">${esc(value || "—")}</div></div>`;
+      $("detail-body").innerHTML =
+        `<div class="dt-hero">
+           <div class="dt-thumb">${src ? `<img src="${esc(src)}" alt="">` : `<span class="mono" style="font-size:11px;color:#bbb">${esc(a.category)}</span>`}</div>
+           <div>
+             <span class="dt-badge">${(a.views || 0) > 0 ? "사용됨" : "미사용"}</span>
+             <div class="dt-meta">
+               <div><b>분류</b>${esc(catLabel(a.category))}${sub ? " · " + esc(sub) : ""}</div>
+               <div><b>삽입</b>${nfmt(a.views || 0)}회</div>
+               <div><b>즐겨찾기</b>${nfmt(a.fav_count || 0)}</div>
+             </div>
+           </div>
+         </div>` +
+        field("파일명", fileNameOf(a), fileNameOf(a)) +
+        field("자산 ID", a.id, a.id) +
+        field("이름", a.name || "") +
+        `<div class="dt-f"><label>국문 키워드 <span style="font-weight:600">${(a.tags_ko || []).length}</span></label>
+           <div class="dt-f__v"><div class="dt-chips">${chips(a.tags_ko, "") || "—"}</div></div></div>
+         <div class="dt-f"><label>영문 키워드 <span style="font-weight:600">${(a.tags_en || []).length}</span></label>
+           <div class="dt-f__v"><div class="dt-chips">${chips(a.tags_en, " tag--en") || "—"}</div></div></div>`;
+      $("detail-body").querySelectorAll("[data-copy]").forEach((b) => b.onclick = () => {
+        try { navigator.clipboard.writeText(b.dataset.copy); toast("복사했습니다"); } catch (e) {}
+      });
+      $("detail").classList.remove("hidden");
+      $("shell").classList.add("shell--detail");
+      document.querySelectorAll("#asset-grid .card").forEach((c) =>
+        c.classList.toggle("card--on", c.dataset.id === String(a.id)));
+    }
     $("filter-cat").onchange = () => {
       $("filter-slide").classList.toggle("hidden", $("filter-cat").value !== "ppt");
       resetAndRender();
@@ -1051,8 +1254,9 @@
       const totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
       if (assetPage > totalPages) assetPage = totalPages;
       const pageList = list.slice((assetPage - 1) * PER_PAGE, assetPage * PER_PAGE);
-      $("asset-count").textContent = list.length
-        ? ("전체 " + list.length + "개 · " + assetPage + "/" + totalPages + " 페이지 (페이지당 " + PER_PAGE + "개)") : "";
+      $("asset-count").innerHTML = list.length
+        ? ("총 <b>" + nfmt(list.length) + "</b>개 · " + assetPage + " / " + totalPages + " 페이지") : "";
+      const nA = $("n-assets"); if (nA) nA.textContent = assets.length ? nfmt(assets.length) : "";
       $("asset-grid").innerHTML = pageList.length ? pageList.map((a) => {
         const src = a.thumb_url || a.image_url; // 항상 썸네일 우선(원본 대신) — 목록 속도
         // 서버가 svg 원문을 더 이상 내려보내지 않음(stored-XSS 증폭 방지) — 이미지 없으면 카테고리 텍스트만
@@ -1064,8 +1268,9 @@
         const sub = a.category === "ppt" && a.slide_kind
           ? (a.slide_kind === "package" ? " · 패키지" : " · 단일·" + (PAGE_LABELS[a.slide_page] || "기타"))
           : "";
-        return `<div class="card">
+        return `<div class="card${String(a.id) === String(detailId) ? " card--on" : ""}" data-id="${esc(a.id)}">
           <div class="card__img" style="background:#fff">${thumb}</div>
+          <div class="card__file" title="${esc(fileNameOf(a))}">${esc(fileNameOf(a))}</div>
           <div class="card__body">
             <div class="card__cat">${esc(catLabel(a.category))}${esc(sub)}</div>
             <div class="card__stat"><span title="삽입 수" class="${(a.views||0)?'':'z'}">▶ <b>${nfmt(a.views||0)}</b></span><span title="즐겨찾기 수" class="${(a.fav_count||0)?'':'z'}">★ <b>${nfmt(a.fav_count||0)}</b></span></div>
@@ -1076,12 +1281,20 @@
             </div>
           </div></div>`;
       }).join("") : `<div class="empty">자산이 없습니다. "+ 새 자산"으로 추가하세요.</div>`;
-      $("asset-grid").querySelectorAll("[data-e]").forEach((b) => b.onclick = () => openAsset(assets.find((a)=>a.id===b.dataset.e)));
-      $("asset-grid").querySelectorAll("[data-d]").forEach((b) => b.onclick = () => delAsset(b.dataset.d));
+      $("asset-grid").querySelectorAll("[data-e]").forEach((b) => b.onclick = (ev) => { ev.stopPropagation(); openAsset(assets.find((a)=>a.id===b.dataset.e)); });
+      $("asset-grid").querySelectorAll("[data-d]").forEach((b) => b.onclick = (ev) => { ev.stopPropagation(); delAsset(b.dataset.d); });
+      // 카드(버튼 외 영역) 클릭 → 우측 상세 패널
+      $("asset-grid").querySelectorAll(".card").forEach((c) => c.onclick = () => {
+        const a = assets.find((x) => String(x.id) === c.dataset.id);
+        if (String(a && a.id) === String(detailId)) closeDetail(); else openDetail(a);
+      });
       renderPager(totalPages);
     }
     function renderPager(totalPages) {
-      const el = $("asset-pager");
+      // 상단 툴바(#asset-pager)·목록 하단(#asset-pager-b) 두 곳에 같은 페이저를 건다
+      [$("asset-pager"), $("asset-pager-b")].forEach((el) => el && renderPagerInto(el, totalPages));
+    }
+    function renderPagerInto(el, totalPages) {
       if (totalPages <= 1) { el.innerHTML = ""; return; }
       const p = assetPage, SIZE = 5;               // 5페이지씩 윈도우
       const start = Math.floor((p - 1) / SIZE) * SIZE + 1;

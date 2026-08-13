@@ -506,7 +506,7 @@ body {
   color: var(--ink2);
   border-radius: 999px;
   padding: 6px 11px;
-  font-size: 9.5px;
+  font-size: 12.5px;
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -515,7 +515,7 @@ body {
 }
 .catchip__n {
   margin-left: 4px;
-  font-size: 8.5px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -548,7 +548,7 @@ body {
   color: var(--ink2);
   border-radius: 999px;
   padding: 5px 9px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -557,7 +557,7 @@ body {
 }
 .topicchip__n {
   margin-left: 3px;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--muted);
 }
