@@ -84,6 +84,10 @@ try {
         (new AssetController())->list($_GET, null, true);
         exit;
     }
+    if (preg_match('#/api/public/assets/topics$#', $path) && $method === 'GET') {
+        (new AssetController())->topics($_GET);   // 주제 목록은 메타데이터라 공개해도 안전
+        exit;
+    }
     if (preg_match('#/api/public/assets/([^/]+)/similar$#', $path, $m) && $method === 'GET') {
         (new AssetController())->similar(urldecode($m[1]), $_GET, true);
         exit;
@@ -345,6 +349,14 @@ try {
             exit;
         }
         $controller = new AssetController();
+        if (preg_match('#/api/assets/suggest$#', $path)) {
+            $controller->suggest($_GET);
+            exit;
+        }
+        if (preg_match('#/api/assets/topics$#', $path)) {
+            $controller->topics($_GET);
+            exit;
+        }
         if (preg_match('#/api/assets/([^/]+)/similar$#', $path, $m)) {
             $controller->similar(urldecode($m[1]), $_GET);
             exit;

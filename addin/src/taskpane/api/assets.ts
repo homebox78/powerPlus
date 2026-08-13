@@ -33,7 +33,8 @@ export async function fetchAssets(
   signal?: AbortSignal,
   sort: string = "latest",
   kind: string = "",
-  ptype: string = ""
+  ptype: string = "",
+  topic: string = ""
 ): Promise<FetchResult> {
   const params = new URLSearchParams({
     category,
@@ -44,6 +45,7 @@ export async function fetchAssets(
   });
   if (kind) params.set("kind", kind);
   if (ptype) params.set("ptype", ptype);
+  if (topic) params.set("topic", topic);
 
   const token = getToken();
 
@@ -65,6 +67,47 @@ export async function fetchAssets(
     // 서버 미연결 → 로컬 mock 데이터로 폴백 (오프라인 데모, mock은 소량이라 1페이지)
     const all = filterAssets(category, query);
     return { assets: page === 1 ? all : [], total: all.length, offline: true };
+  }
+}
+
+export interface Topic {
+  key: string;
+  label: string;
+  count: number;
+}
+
+/** 카테고리 안의 주제 목록(자산 수 포함). 실패하면 빈 배열 — 주제 줄만 안 보인다. */
+export async function fetchTopics(category: string, signal?: AbortSignal): Promise<Topic[]> {
+  if (!category || category === "all") return [];
+  const token = getToken();
+  try {
+    const res = await fetch(`${API_BASE}/assets/topics?category=${encodeURIComponent(category)}`, {
+      signal,
+      cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { data?: Topic[] };
+    return body.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** 입력 중 추천 검색어(태그 사전 기반). 실패하면 빈 배열. */
+export async function fetchSuggest(q: string, signal?: AbortSignal): Promise<string[]> {
+  const token = getToken();
+  try {
+    const res = await fetch(`${API_BASE}/assets/suggest?q=${encodeURIComponent(q)}`, {
+      signal,
+      cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { data?: string[] };
+    return body.data ?? [];
+  } catch {
+    return [];
   }
 }
 

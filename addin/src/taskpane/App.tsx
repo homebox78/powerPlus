@@ -3,7 +3,15 @@ import AssetGrid from "./components/AssetGrid";
 import Login from "./components/Login";
 import { CATEGORIES } from "./data/mockAssets";
 import type { Asset, Category } from "./data/mockAssets";
-import { fetchAssets, fetchByIds, fetchSimilar, fetchStyleSet, AuthRequiredError } from "./api/assets";
+import {
+  fetchAssets,
+  fetchByIds,
+  fetchSimilar,
+  fetchStyleSet,
+  fetchTopics,
+  AuthRequiredError,
+  type Topic,
+} from "./api/assets";
 import { searchImages, imageProxyUrl, type ImageHit } from "./api/imagesearch";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
 import { recordUsage } from "./api/usage";
@@ -158,6 +166,8 @@ export default function App() {
   const [view, setView] = React.useState<string>("all"); // 추천/즐겨찾기/최근
   const [cat, setCat] = React.useState("all"); // 컴포저 카테고리 pill
   const [pptFilter, setPptFilter] = React.useState("all"); // 장표 서브필터(전체/패키지/표지/간지/콘텐츠…)
+  const [topic, setTopic] = React.useState(""); // 주제 세분화(카테고리 안에서 한 번 더 좁히기)
+  const [topics, setTopics] = React.useState<Topic[]>([]);
   const [foundFlash, setFoundFlash] = React.useState<number | null>(null); // "N개 찾았어요" 플래시
   const [searchAnim, setSearchAnim] = React.useState(false); // 검색 버튼 눌렀을 때만 애니메이션(탭/카테고리 이동 제외)
   const [browserQuery, setBrowserQuery] = React.useState(""); // 브라우저 탭 검색어
@@ -323,7 +333,7 @@ export default function App() {
           total: assets.length,
           offline: false,
         }))
-      : fetchAssets(serverCategory, activeQuery, 1, PAGE_SIZE, ctrl.signal, sort, pptKind, pptType);
+      : fetchAssets(serverCategory, activeQuery, 1, PAGE_SIZE, ctrl.signal, sort, pptKind, pptType, topic);
     run
       .then((r) => {
         setRawAssets(r.assets);
@@ -342,7 +352,19 @@ export default function App() {
       });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, cat, activeQuery, email, sort, pptFilter, specialKey]);
+  }, [view, cat, activeQuery, email, sort, pptFilter, topic, specialKey]);
+
+  // 주제 목록 — 카테고리가 바뀌면 그 카테고리의 주제를 받아 온다(0건 주제는 서버가 뺀다)
+  React.useEffect(() => {
+    if (!email || isBrowser || isSpecial || cat === "all") {
+      setTopics([]);
+      return;
+    }
+    const ctrl = new AbortController();
+    fetchTopics(cat, ctrl.signal).then(setTopics).catch(() => undefined);
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cat, email, isBrowser, isSpecial]);
 
   // 검색 완료 → "N개 찾았어요" 플래시. **검색 버튼을 눌렀을 때(searchAnim)만** — 탭/카테고리 이동 제외.
   const prevLoadingRef = React.useRef(false);
@@ -370,7 +392,7 @@ export default function App() {
     setLoadingMore(true);
     try {
       pageRef.current += 1;
-      const r = await fetchAssets(serverCategory, activeQuery, pageRef.current, PAGE_SIZE, undefined, sort, pptKind, pptType);
+      const r = await fetchAssets(serverCategory, activeQuery, pageRef.current, PAGE_SIZE, undefined, sort, pptKind, pptType, topic);
       setRawAssets((prev) => [...prev, ...r.assets]);
       setTotal(r.total);
     } catch (e) {
@@ -399,7 +421,7 @@ export default function App() {
     );
     io.observe(sentinel);
     return () => io.disconnect();
-  }, [hasMore, loadingMore, serverCategory, activeQuery, sort, pptFilter]);
+  }, [hasMore, loadingMore, serverCategory, activeQuery, sort, pptFilter, topic]);
 
   const displayed = React.useMemo(() => {
     if (view === "favorites") return rawAssets.filter((a) => favorites.has(a.id));
@@ -698,12 +720,39 @@ export default function App() {
                 onClick={() => {
                   setCat(c.key);
                   setPptFilter("all"); // 카테고리 전환 시 장표 서브필터 초기화
+                  setTopic("");        // 주제도 초기화(다른 카테고리의 주제를 물고 가면 0건이 된다)
                   setView("all");
                   closeMenus();
                 }}
               >
                 {c.label}
                 {c.count ? <span className="catchip__n">{c.count.toLocaleString()}</span> : null}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 주제 — 카테고리 안에서 한 번 더 좁히기(아이콘 1,200개를 훑지 않게) */}
+        {!isBrowser && !isSpecial && topics.length > 0 && !activeQuery && !similarOf && (
+          <div className="topicbar" role="tablist" aria-label="주제">
+            <button
+              role="tab"
+              aria-selected={topic === ""}
+              className={"topicchip" + (topic === "" ? " topicchip--active" : "")}
+              onClick={() => setTopic("")}
+            >
+              전체
+            </button>
+            {topics.map((t) => (
+              <button
+                key={t.key}
+                role="tab"
+                aria-selected={topic === t.key}
+                className={"topicchip" + (topic === t.key ? " topicchip--active" : "")}
+                onClick={() => setTopic(topic === t.key ? "" : t.key)}
+              >
+                {t.label}
+                <span className="topicchip__n">{t.count}</span>
               </button>
             ))}
           </div>

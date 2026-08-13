@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/SearchLexicon.php';
+require_once __DIR__ . '/AssetTopics.php';
 
 /** 자산 조회/검색/CRUD. SQL은 모두 prepared statement. */
 final class AssetService
@@ -37,7 +38,7 @@ final class AssetService
      * 카테고리 + 검색어(태그/이름) 필터 + 정렬 + 페이지네이션.
      * @return array{data:array<int,array>,total:int,page:int,limit:int}
      */
-    public function list(string $category, string $q, int $page, int $limit, string $sort = 'latest', string $slideKind = '', string $slidePage = ''): array
+    public function list(string $category, string $q, int $page, int $limit, string $sort = 'latest', string $slideKind = '', string $slidePage = '', string $topic = ''): array
     {
         $pdo = Database::pdo();
         $where = [];
@@ -57,6 +58,14 @@ final class AssetService
         if ($slidePage !== '') {
             $where[] = 'a.slide_page = :spage';
             $whereParams[':spage'] = $slidePage;
+        }
+        // 주제 세분화(카테고리 안에서 한 번 더 좁히기) — 태그 묶음 또는 장표 컬럼
+        if ($topic !== '' && $category !== '' && AssetTopics::exists($category, $topic)) {
+            [$tSql, $tParams] = AssetTopics::clause($category, $topic);
+            if ($tSql !== '') {
+                $where[] = $tSql;
+                $whereParams = array_merge($whereParams, $tParams);
+            }
         }
 
         // 자연어 질의: 토큰화 → 동의어/한↔영/색상 확장 → 가중 관련도 점수
@@ -163,16 +172,29 @@ final class AssetService
         $total = 0;
         if ($steps) {
             $last = count($steps) - 1;
+            // 결과가 이보다 적으면 한 단계 넓혀 본다. 넓은 단계는 좁은 단계를 포함하고
+            // 랭킹(_score)이 "낱말 다 맞은 것"을 위로 올리므로 정확한 결과를 잃지 않는다.
+            // ("표지 디자인"이 1건에서 멈춰 자료가 없는 것처럼 보이던 문제)
+            $MIN_GOOD = 6;
+            $picked = null;
             foreach ($steps as $n => $step) {
                 $sql    = $mkWhere($step['sql']);
                 $params = array_merge($baseParams, $termParams, $step['cat'] ? $catParams : []);
                 $st = $pdo->prepare("SELECT COUNT(*) FROM assets a $sql");
                 $st->execute($params);
                 $cnt = (int) $st->fetchColumn();
-                if ($cnt > 0 || $n === $last) {
-                    $whereSql = $sql; $whereParams = $params; $total = $cnt;
-                    break;
+                if ($cnt > 0 && ($picked === null || $cnt > $picked['total'])) {
+                    $picked = ['sql' => $sql, 'params' => $params, 'total' => $cnt];
                 }
+                if (($picked && $picked['total'] >= $MIN_GOOD) || $n === $last) break;
+            }
+            if ($picked) {
+                $whereSql = $picked['sql']; $whereParams = $picked['params']; $total = $picked['total'];
+            } else {
+                $lastStep = $steps[$last];
+                $whereSql = $mkWhere($lastStep['sql']);
+                $whereParams = array_merge($baseParams, $termParams, $lastStep['cat'] ? $catParams : []);
+                $total = 0;
             }
         } else {
             $countStmt = $pdo->prepare("SELECT COUNT(*) FROM assets a $whereSql");
@@ -232,6 +254,76 @@ final class AssetService
      * 유사 자산 추천: 대상 자산의 태그를 공유하는 자산을 태그 중첩 수로 점수화.
      * 같은 카테고리 가점. 자기 자신 제외. (임베딩 도입 시 이 메서드를 벡터 검색으로 교체)
      */
+    /**
+     * 카테고리의 주제별 자산 수. [{key,label,count}] — 0건 주제는 빼서 헛클릭을 없앤다.
+     * 한 번의 SUM(CASE) 질의로 센다(주제마다 COUNT 돌리면 느리다).
+     */
+    public function topicCounts(string $category): array
+    {
+        $topics = AssetTopics::of($category);
+        if (!$topics) return [];
+        $sel = []; $params = [':category' => $category]; $n = 0;
+        foreach (array_keys($topics) as $key) {
+            [$sql, $p] = AssetTopics::clause($category, $key, ':t' . $n);
+            if ($sql === '') continue;
+            $sel[] = "SUM(CASE WHEN $sql THEN 1 ELSE 0 END) AS c$n";
+            $params = array_merge($params, $p);
+            $n++;
+        }
+        if (!$sel) return [];
+        try {
+            $st = Database::pdo()->prepare('SELECT ' . implode(', ', $sel) . ' FROM assets a WHERE a.category = :category');
+            $st->execute($params);
+            $row = $st->fetch(\PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+        $out = []; $i = 0;
+        foreach ($topics as $key => $label) {
+            $c = (int) ($row['c' . $i] ?? 0);
+            $i++;
+            if ($c > 0) $out[] = ['key' => $key, 'label' => $label, 'count' => $c];
+        }
+        return $out;
+    }
+
+    /**
+     * 입력 중 추천 검색어. q 가 있으면 실제 태그·사전에서 앞글자 우선으로 고르고,
+     * 비어 있으면 최근 30일 인기 검색어(결과가 있었던 것만)를 준다.
+     * — 무엇을 칠지 몰라 헤매는 걸 줄이려는 것이라, 없는 말은 절대 만들어 주지 않는다.
+     */
+    public function suggest(string $q, int $limit = 8): array
+    {
+        $q = mb_strtolower(trim($q));
+        if ($q === '') {
+            try {
+                $st = Database::pdo()->query(
+                    "SELECT query q, COUNT(*) n FROM search_logs
+                      WHERE searched_at >= (NOW() - INTERVAL 30 DAY) AND results > 0 AND CHAR_LENGTH(query) BETWEEN 2 AND 20
+                      GROUP BY query ORDER BY n DESC, q LIMIT $limit"
+                );
+                $out = [];
+                foreach ($st->fetchAll(\PDO::FETCH_ASSOC) ?: [] as $r) $out[] = (string) $r['q'];
+                if ($out) return $out;
+            } catch (\Throwable $e) { /* 로그 테이블 없으면 사전에서 뽑는다 */ }
+            $pool = SearchLexicon::suggestPool();
+            arsort($pool);
+            return array_slice(array_keys($pool), 0, $limit);
+        }
+
+        $pool = SearchLexicon::suggestPool();
+        $starts = []; $has = [];
+        foreach ($pool as $w => $n) {
+            $w = (string) $w;
+            if ($w === $q) continue;                       // 이미 친 말은 제안할 필요 없다
+            if (str_starts_with($w, $q))      $starts[$w] = $n;
+            elseif (str_contains($w, $q))     $has[$w]    = $n;
+        }
+        arsort($starts); arsort($has);
+        $out = array_merge(array_keys($starts), array_keys($has));
+        return array_slice($out, 0, $limit);
+    }
+
     public function similar(string $id, int $limit = 12): array
     {
         $asset = $this->find($id);

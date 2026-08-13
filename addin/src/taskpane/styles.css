@@ -532,6 +532,48 @@ body {
   color: #fff;
 }
 
+/* 주제 칩 — 카테고리 아래 한 단계 더 좁히기. 카테고리(주황 채움)와 구분되게 연한 틴트로. */
+.topicbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+}
+.topicchip {
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  background: var(--surface);
+  color: var(--ink2);
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.topicchip__n {
+  margin-left: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.topicchip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.topicchip--active {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary-d);
+}
+.topicchip--active .topicchip__n {
+  color: var(--primary-d);
+}
+
 /* 카운트 + 정렬 */
 .countrow {
   display: flex;

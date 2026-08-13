@@ -35,7 +35,9 @@ final class AssetController
         $kind     = isset($query['kind']) ? (string) $query['kind'] : '';   // package|single
         $ptype    = isset($query['ptype']) ? (string) $query['ptype'] : ''; // cover|toc|divider|content|greeting|qa|etc
 
-        $result = $this->service->list($category, $q, $page, $limit, $sort, $kind, $ptype);
+        $topic    = isset($query['topic']) ? (string) $query['topic'] : '';  // 주제 세분화
+
+        $result = $this->service->list($category, $q, $page, $limit, $sort, $kind, $ptype, $topic);
         if ($public) $result['data'] = array_map([self::class, 'stripPrivate'], $result['data']);
 
         // 검색 로그(무결과율·수요 파악) — 로그인 사용자 1페이지만 기록(무한스크롤 중복·봇 트래픽의 지표 오염 방지)
@@ -63,6 +65,21 @@ final class AssetController
         $page  = max(1, (int) ($query['page'] ?? 1));
         $limit = max(1, min(120, (int) ($query['limit'] ?? 60)));
         $this->json($this->service->styleSet($id, $page, $limit));
+    }
+
+    /** GET /api/assets/topics?category=icon — 그 카테고리의 주제 목록(자산 수 포함) */
+    public function topics(array $query = []): void
+    {
+        $cat = trim((string) ($query['category'] ?? ''));
+        $this->json(['data' => $cat === '' ? [] : $this->service->topicCounts($cat)]);
+    }
+
+    /** GET /api/assets/suggest?q= — 입력 중 추천 검색어(태그 사전 기반, q 없으면 인기 검색어) */
+    public function suggest(array $query = []): void
+    {
+        $q = trim((string) ($query['q'] ?? ''));
+        $limit = max(1, min(12, (int) ($query['limit'] ?? 8)));
+        $this->json(['data' => $this->service->suggest($q, $limit)]);
     }
 
     public function similar(string $id, array $query = [], bool $public = false): void

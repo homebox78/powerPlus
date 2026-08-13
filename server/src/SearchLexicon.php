@@ -79,6 +79,37 @@ final class SearchLexicon
         ['물류','배송','logistics','유통'],
         ['제조','공장','manufacturing','생산','스마트팩토리'],
         ['에너지','전력','energy','발전','재생에너지'],
+        // 업무 장면·행동 (실사용 질의 실측으로 보강 2026-08-13)
+        ['회의','미팅','meeting','회의실','컨퍼런스','conference','토론'],
+        ['발표','프레젠테이션','presentation','presenting','강연','브리핑'],
+        ['협업','팀워크','teamwork','collaboration','팀','team','함께'],
+        ['고객','사용자','user','customer','client','소비자','유저'],
+        ['상담','문의','support','헬프데스크','콜센터','call center'],
+        ['계약','서명','contract','signature','협약','sign'],
+        ['일정','캘린더','calendar','스케줄','schedule','날짜','달력'],
+        ['알림','공지','notification','알람','bell','벨','안내'],
+        ['검색','찾기','search','돋보기','magnifier','조회'],
+        ['설문','설문조사','survey','리서치','research','questionnaire','피드백','feedback'],
+        ['목표','타겟','target','goal','과녁','달성'],
+        ['아이디어','전구','idea','lightbulb','창의','발상','혁신','innovation'],
+        ['성장','상승','증가','growth','increase','up','우상향'],
+        ['감소','하락','절감','축소','decrease','down','비용절감','cost'],
+        ['비용','금액','가격','price','cost','예산','budget','돈','머니','money'],
+        ['결제','카드','payment','card','지불','구매','쇼핑','cart','장바구니'],
+        ['문서','서류','document','파일','file','보고서','report','리포트'],
+        ['위치','지도','map','location','핀','pin','주소'],
+        ['시간','clock','시계','타이머','timer'],
+        ['조직도','조직','organization','구조','structure','계층','hierarchy'],
+        ['체크리스트','체크','check','확인','완료','done','checklist','todo','할일'],
+        ['위험','경고','warning','주의','caution','리스크','risk','alert'],
+        ['질문','물음표','question','faq','궁금'],
+        ['사람','인물','person','people','유저','직원','임직원','staff'],
+        ['이메일','메일','email','mail','편지','메시지','message','채팅','chat'],
+        ['노트북','컴퓨터','laptop','pc','computer','데스크톱'],
+        ['클릭','터치','click','touch','탭','커서','cursor','포인터'],
+        ['품질','인증마크','quality','배지','badge','메달','trophy','트로피','수상'],
+        ['공유','share','전송','send','업로드','upload','다운로드','download'],
+        ['설정','환경설정','setting','settings','톱니','gear','config'],
     ];
 
     /**
@@ -131,6 +162,9 @@ final class SearchLexicon
             $p = trim($p);
             if ($p === '' || mb_strlen($p) < 1) continue;
             if (in_array($p, self::STOP, true)) continue;
+            // 조사·어미 정리("회의를"→회의, "발표하는"→발표) — 실제 낱말이 될 때만
+            $st = self::stem($p);
+            if ($st !== null) $p = $st;
             // 붙여 쓴 복합어는 아는 낱말로 쪼갠다("기후위기제안서" → 기후위기 + 제안서)
             $parts = self::decompose($p);
             foreach ($parts ?: [$p] as $piece) {
@@ -139,6 +173,36 @@ final class SearchLexicon
             }
         }
         return self::glue($out);
+    }
+
+    /**
+     * 토큰 끝의 조사·활용어미를 벗긴다("회의를"→회의, "발표하는"→발표, "사람들"→사람).
+     * ⚠️ 벗긴 결과가 **실제 태그나 사전에 있을 때만** 채택한다 —
+     *    아무 말이나 자르면 멀쩡한 낱말이 깨진다("화살표"→"화살", "고객"→"고").
+     * 이미 아는 말은 손대지 않는다(오타 교정과 같은 원칙).
+     */
+    private const TAILS = [
+        // 긴 것부터 — 활용 어미
+        '하는','되는','있는','없는','시키는','하기','되기','하다','되다','스러운','스러운','로운',
+        '중인','했던','하던','되던','하고','되고','한','된','할','될','인','는','던',
+        // 조사·접미
+        '에서','으로','에게','부터','까지','처럼','보다','마다','이나','라도','들의','들이','들을','들',
+        '을','를','이','가','은','의','에','와','과','도','만','로','랑','아','야',
+    ];
+
+    public static function stem(string $token): ?string
+    {
+        $t = mb_strtolower(trim($token));
+        if (mb_strlen($t) < 3) return null;              // 짧은 말은 자를 여지가 없다
+        $dict = self::dict();
+        if (isset($dict[$t])) return null;               // 아는 말 = 그대로 둔다
+        foreach (self::TAILS as $tail) {
+            if (!str_ends_with($t, $tail)) continue;
+            $base = mb_substr($t, 0, mb_strlen($t) - mb_strlen($tail));
+            if (mb_strlen($base) < 2) continue;
+            if (isset($dict[$base])) return $base;       // 실제로 쓰이는 낱말일 때만
+        }
+        return null;
     }
 
     /**
@@ -230,7 +294,35 @@ final class SearchLexicon
         $t = mb_strtolower(trim($token));
         $set = self::$index[$t] ?? [$t];
         if (!in_array($t, $set, true)) $set[] = $t;
+        // "사람들"처럼 그 자체가 실제 태그여서 stem()이 손대지 않는 말도
+        // 어간("사람")을 **동의어로** 얹는다 — 좁히기(AND)는 그대로 두고 폭만 넓힌다.
+        $base = self::stemLoose($t);
+        if ($base !== null) {
+            foreach (self::expandBase($base) as $w) if (!in_array($w, $set, true)) $set[] = $w;
+        }
         return array_values(array_unique($set));
+    }
+
+    /** 아는 말이어도 어미를 벗겨 본다(확장 전용 — 치환에는 쓰지 않는다). */
+    private static function stemLoose(string $t): ?string
+    {
+        if (mb_strlen($t) < 3) return null;
+        $dict = self::dict();
+        foreach (self::TAILS as $tail) {
+            if (!str_ends_with($t, $tail)) continue;
+            $base = mb_substr($t, 0, mb_strlen($t) - mb_strlen($tail));
+            if (mb_strlen($base) >= 2 && isset($dict[$base])) return $base;
+        }
+        return null;
+    }
+
+    /** 어간의 동의어 묶음(재귀 방지용 단순 조회). */
+    private static function expandBase(string $base): array
+    {
+        self::buildIndex();
+        $set = self::$index[$base] ?? [$base];
+        if (!in_array($base, $set, true)) $set[] = $base;
+        return $set;
     }
 
     // ───────────────────────── 오타 교정 ─────────────────────────
@@ -328,6 +420,12 @@ final class SearchLexicon
 
         self::$tagDict = $words;
         return self::$tagDict;
+    }
+
+    /** 추천 검색어 후보 = 실제 태그 + 사전 낱말 (낱말 => 가중치). */
+    public static function suggestPool(): array
+    {
+        return self::dict();
     }
 
     /**
