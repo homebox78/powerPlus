@@ -437,6 +437,11 @@ body {
   border-radius: 12px;
   padding: 10px 13px;
   margin-top: 10px; /* 탭과 검색결과 표시 사이 여백 */
+  /* 결과를 한참 내려보다가도 '전체 보기'로 빠져나올 수 있게 위에 붙여 둔다 */
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 6px 14px rgba(28, 39, 51, 0.08);
 }
 .querybar__text {
   font-size: 13px;
@@ -832,6 +837,20 @@ body {
 .empty__action:hover {
   background: #1f1f1f;
 }
+/* 무결과에서 되돌아가기(보조) — 검색을 풀고 전체 목록으로 */
+.empty__back {
+  margin-top: 10px;
+  border: 0;
+  background: none;
+  color: var(--ink2);
+  font: 700 12.5px Pretendard, sans-serif;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.empty__back:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
 
 .scroll-sentinel {
   height: 1px;
@@ -883,6 +902,25 @@ body {
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+}
+/* 검색 해제 — 손이 닿는 입력창 옆에 두어 결과에서 바로 빠져나오게 */
+.composer__clear {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink2);
+  font: 700 13px Pretendard, sans-serif;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.composer__clear:hover {
+  background: #f2f4f7;
+  color: var(--ink);
 }
 .composer__send {
   width: 32px;

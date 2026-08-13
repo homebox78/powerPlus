@@ -16,6 +16,9 @@ interface Props {
   /** 빈 상태 하단 액션 버튼(예: 무결과 → "이 키워드로 요청하기") */
   emptyActionLabel?: string;
   onEmptyAction?: () => void;
+  /** 보조 액션(예: 무결과 → "전체 보기"로 검색 해제) */
+  emptyBackLabel?: string;
+  onEmptyBack?: () => void;
   loading?: boolean;
   /** 한 줄에 몇 개(아이콘/일러스트=3, 그 외=2) */
   cols?: number;
@@ -57,6 +60,8 @@ export default function AssetGrid({
   emptySub = "다른 카테고리를 선택해 보세요.",
   emptyActionLabel,
   onEmptyAction,
+  emptyBackLabel,
+  onEmptyBack,
   loading = false,
   cols = 2,
 }: Props) {
@@ -83,6 +88,11 @@ export default function AssetGrid({
         {emptyActionLabel && onEmptyAction && (
           <button type="button" className="empty__action" onClick={onEmptyAction}>
             {emptyActionLabel}
+          </button>
+        )}
+        {emptyBackLabel && onEmptyBack && (
+          <button type="button" className="empty__back" onClick={onEmptyBack}>
+            {emptyBackLabel}
           </button>
         )}
       </div>

@@ -95,10 +95,12 @@ const Ic = {
 function ComposerInput({
   activeQuery,
   onSend,
+  onClear,
   catButton,
 }: {
   activeQuery: string;
   onSend: (q: string) => void;
+  onClear: () => void;
   catButton: React.ReactNode;
 }) {
   const [draft, setDraft] = React.useState(activeQuery);
@@ -116,10 +118,29 @@ function ComposerInput({
             e.preventDefault();
             onSend(draft);
           }
+          if (e.key === "Escape") {
+            e.preventDefault();
+            setDraft("");
+            onClear();
+          }
         }}
         aria-label="자산 검색"
       />
       <div className="composer__actions">
+        {/* 검색 중이면 지우기 — 결과에서 빠져나오는 길을 손 닿는 자리(입력창)에 둔다 */}
+        {(draft || activeQuery) && (
+          <button
+            className="composer__clear"
+            onClick={() => {
+              setDraft("");
+              onClear();
+            }}
+            aria-label="검색어 지우기"
+            title="검색 해제(Esc)"
+          >
+            ✕
+          </button>
+        )}
         {catButton}
         <button className="composer__send" onClick={() => onSend(draft)} aria-label="검색">
           {Ic.send}
@@ -858,6 +879,8 @@ export default function App() {
           emptySub={similarOf ? "다른 자산에서 다시 시도해 보세요." : emptySub}
           emptyActionLabel={!similarOf && activeQuery ? `‘${activeQuery}’ 자료 요청하기` : undefined}
           onEmptyAction={!similarOf && activeQuery ? openRequestFromSearch : undefined}
+          emptyBackLabel={similarOf ? "닫고 전체 보기" : activeQuery ? "← 전체 자료로 돌아가기" : undefined}
+          onEmptyBack={similarOf ? clearSimilar : activeQuery ? clearQuery : undefined}
           loading={similarOf ? similarLoading : loading}
           cols={!isSpecial && (cat === "icon" || cat === "illust") ? 3 : 2}
         />
@@ -893,7 +916,7 @@ export default function App() {
       {!isBrowser && (
       <div className="composer">
         {/* 카테고리는 상단 칩바로 이동 — 컴포저는 검색에만 집중 */}
-        <ComposerInput activeQuery={activeQuery} onSend={sendQuery} catButton={null} />
+        <ComposerInput activeQuery={activeQuery} onSend={sendQuery} onClear={clearQuery} catButton={null} />
       </div>
       )}
 

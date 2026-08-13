@@ -42,7 +42,19 @@ final class SearchLexicon
         // 도메인/주제
         ['소상공인','자영업','small business','smb'],
         ['빅데이터','bigdata','big data','데이터','data'],
-        ['클라우드','cloud','saas'],
+        ['데이터베이스','디비','db','database','dbms','디비베이스','데이타베이스','rdbms','sql'],
+        ['클라우드','cloud','saas','iaas','paas'],
+        ['서버','server','서버랙','호스트','host'],
+        ['네트워크','network','통신','랜','lan','네트웍'],
+        ['api','에이피아이','인터페이스','interface','rest','restful','엔드포인트','endpoint'],
+        ['개발','코딩','coding','development','프로그래밍','programming','소스코드','코드','code'],
+        ['백업','backup','복구','recovery','이중화'],
+        ['저장소','스토리지','storage','디스크','disk','ssd'],
+        ['방화벽','firewall','접근제어'],
+        ['인증','로그인','login','auth','토큰','token','oauth','jwt'],
+        ['화살표','arrow','arrows','방향','direction','지시'],
+        ['순환','반복','loop','cycle','circular','재활용','refresh','새로고침'],
+        ['흐름','플로우','flow','프로세스','process','절차','단계'],
         ['보안','security','정보보호'],
         ['인공지능','ai','에이아이','머신러닝','딥러닝','ml'],
         ['정부','공공','행정','government','public','공공기관'],
@@ -126,7 +138,33 @@ final class SearchLexicon
                 if (!in_array($piece, $out, true)) $out[] = $piece;
             }
         }
-        return $out;
+        return self::glue($out);
+    }
+
+    /**
+     * 띄어 쓴 한 낱말을 도로 붙인다("데이터 베이스" → "데이터베이스").
+     * 붙인 말이 사전에 있을 때만 합친다 — 아무 말이나 붙이면 엉뚱한 낱말이 된다.
+     * 세 조각까지 본다("빅 데이터 베이스").
+     */
+    public static function glue(array $tokens): array
+    {
+        self::buildIndex();
+        $known = function (string $w): bool {
+            return isset(self::$index[$w]) || in_array($w, self::vocab(), true);
+        };
+        $out = [];
+        $n = count($tokens);
+        for ($i = 0; $i < $n; ) {
+            $hit = null; $take = 1;
+            for ($len = 3; $len >= 2; $len--) {
+                if ($i + $len > $n) continue;
+                $joined = mb_strtolower(implode('', array_slice($tokens, $i, $len)));
+                if ($known($joined)) { $hit = $joined; $take = $len; break; }
+            }
+            $out[] = $hit ?? $tokens[$i];
+            $i += $take;
+        }
+        return array_values(array_unique($out));
     }
 
     /** 분해용 어휘 목록(길이 내림차순) — 최장일치 우선. */
