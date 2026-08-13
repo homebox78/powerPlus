@@ -7,13 +7,34 @@ name: Slack 진행 보고
 on:
   push:
     branches: [main]
+  # 사람이 읽을 요약 보고를 직접 보낼 때(커밋 불릿 대신 작성한 문구 그대로 전송)
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Slack에 보낼 보고 본문(비우면 안내만)"
+        required: true
+        type: string
 
 jobs:
   notify:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-slack]') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip-slack]') }}
     steps:
+      - name: 수동 보고 전송
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          MSG: ${{ inputs.message }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "SLACK_WEBHOOK_URL 미설정 — 알림 건너뜀"; exit 0
+          fi
+          TEXT=$(jq -n --arg m "$MSG" '{"text": $m}')
+          curl -sf -X POST -H 'Content-Type: application/json' -d "$TEXT" "$WEBHOOK" \
+            && echo "Slack 전송 완료" || echo "Slack 전송 실패"
+
       - name: Slack으로 업데이트 요약 전송
+        if: ${{ github.event_name == 'push' }}
         env:
           WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           COMPARE_URL: ${{ github.event.compare }}
