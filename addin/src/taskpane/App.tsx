@@ -376,13 +376,28 @@ export default function App() {
     if (hintTimer.current) window.clearTimeout(hintTimer.current);
     hintTimer.current = window.setTimeout(() => setHint(null), 2200);
   }
+  // 빠른 검색에서는 '찾는 중' 오버레이를 띄우지 않는다 — 떴다 사라지는 깜빡임이 오히려 느리게 느껴진다
+  const [slowSearch, setSlowSearch] = React.useState(false);
+  const slowTimer = React.useRef<number | undefined>(undefined);
+  React.useEffect(() => {
+    if (slowTimer.current) window.clearTimeout(slowTimer.current);
+    if (loading && searchAnim) {
+      slowTimer.current = window.setTimeout(() => setSlowSearch(true), 300);
+    } else {
+      setSlowSearch(false);
+    }
+    return () => {
+      if (slowTimer.current) window.clearTimeout(slowTimer.current);
+    };
+  }, [loading, searchAnim]);
+
   React.useEffect(() => {
     if (prevLoadingRef.current && !loading && searchAnim) {
       setSearchAnim(false); // 한 번만 — 이후 탭 이동 시 재발동 방지
-      if (total > 0) {
+      if (total > 0 && slowSearch) {
         setFoundFlash(total);
         if (flashTimer.current) window.clearTimeout(flashTimer.current);
-        flashTimer.current = window.setTimeout(() => setFoundFlash(null), 1700);
+        flashTimer.current = window.setTimeout(() => setFoundFlash(null), 700);
       }
     }
     prevLoadingRef.current = loading;
@@ -780,7 +795,7 @@ export default function App() {
               )}
             </span>
             <button className="querybar__clear" onClick={clearQuery}>
-              전체 보기
+              뒤로가기
             </button>
           </div>
         ) : null)}
@@ -928,7 +943,7 @@ export default function App() {
           emptySub={similarOf ? "다른 자산에서 다시 시도해 보세요." : emptySub}
           emptyActionLabel={!similarOf && activeQuery ? `‘${activeQuery}’ 자료 요청하기` : undefined}
           onEmptyAction={!similarOf && activeQuery ? openRequestFromSearch : undefined}
-          emptyBackLabel={similarOf ? "닫고 전체 보기" : activeQuery ? "← 전체 자료로 돌아가기" : undefined}
+          emptyBackLabel={similarOf ? "← 뒤로가기" : activeQuery ? "← 뒤로가기" : undefined}
           onEmptyBack={similarOf ? clearSimilar : activeQuery ? clearQuery : undefined}
           loading={similarOf ? similarLoading : loading}
           cols={!isSpecial && (cat === "icon" || cat === "illust") ? 3 : 2}
@@ -944,7 +959,7 @@ export default function App() {
       </div>
 
       {/* 검색 중 — '자료 찾는 중' 캐릭터 레이어 */}
-      {loading && searchAnim && (
+      {loading && searchAnim && slowSearch && (
         <div style={{ position: "absolute", inset: 0, zIndex: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(240,243,246,0.94)", pointerEvents: "none" }}>
           <img src="assets/state-searching.svg" alt="" className="state-anim state-anim--search" style={{ width: 204, height: "auto" }} />
           <div style={{ marginTop: 6, fontWeight: 700, fontSize: 14, color: "#566070" }}>자료 찾는 중…</div>

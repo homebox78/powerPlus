@@ -436,6 +436,16 @@ final class AssetService
         $where = 'WHERE a.category = :cat AND a.created_at BETWEEN :s AND :e';
         $params = [':cat' => $asset['category'], ':s' => $range[0], ':e' => $range[1]];
 
+        // ⭐ 같은 배치라도 색감이 다르면 같은 세트가 아니다(사용자 지적: 파란 단색과 컬러풀이 한 세트로 나옴).
+        //    스타일 지문(StyleSig)이 같은 것만 남긴다. 지문이 없는 옛 자산은 배치 기준으로 남겨 둔다.
+        $sigSt = $pdo->prepare('SELECT style_sig FROM assets WHERE id = :id');
+        $sigSt->execute([':id' => $id]);
+        $sig = $sigSt->fetchColumn();
+        if ($sig !== false && $sig !== null && $sig !== '') {
+            $where .= ' AND (a.style_sig = :sig OR a.style_sig IS NULL)';
+            $params[':sig'] = $sig;
+        }
+
         $st = $pdo->prepare("SELECT COUNT(*) FROM assets a $where");
         $st->execute($params);
         $total = (int) $st->fetchColumn();
@@ -514,7 +524,23 @@ final class AssetService
             ':slide_kind' => $d['slide_kind'] ?? null,
             ':slide_page' => $d['slide_page'] ?? null,
         ]);
+        self::refreshStyleSig((string) $d['id'], $d);   // 색감 지문(세트 판정용) — 등록 즉시
         return $this->find($d['id']) ?? [];
+    }
+
+    /**
+     * 이미지가 새로 붙거나 바뀌면 색감 지문을 다시 계산해 둔다.
+     * 실패해도 등록·수정 자체는 막지 않는다(지문이 없으면 세트는 등록 배치 기준으로 동작).
+     */
+    public static function refreshStyleSig(string $id, array $row): void
+    {
+        try {
+            require_once __DIR__ . '/StyleSig.php';
+            $sig = StyleSig::forRow($row, dirname(__DIR__));
+            if ($sig === null) return;
+            Database::pdo()->prepare('UPDATE assets SET style_sig = :s WHERE id = :id')
+                ->execute([':s' => $sig, ':id' => $id]);
+        } catch (\Throwable $e) { /* 지문은 부가 정보 — 조용히 넘어간다 */ }
     }
 
     /** 부분 수정: 전달된 키만 갱신. */
@@ -552,6 +578,10 @@ final class AssetService
             ':slide_kind' => $slide_kind,
             ':slide_page' => $slide_page,
         ]);
+        // 이미지가 바뀌었으면 색감 지문도 다시 잰다(관리자 이미지 교체 등)
+        if (array_key_exists('image_path', $d) || array_key_exists('thumb_path', $d)) {
+            self::refreshStyleSig($id, ['image_path' => $image_path, 'thumb_path' => $thumb_path]);
+        }
         return true;
     }
 

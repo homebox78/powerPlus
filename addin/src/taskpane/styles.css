@@ -531,6 +531,15 @@ body {
   border-color: var(--primary);
   color: #fff;
 }
+/* 활성 칩에는 hover 색이 덮이면 안 된다 — 주황 위 주황이 되어 글자가 사라진다 */
+.catchip--active:hover {
+  background: var(--primary-d);
+  border-color: var(--primary-d);
+  color: #fff;
+}
+.catchip--active:hover .catchip__n {
+  color: rgba(255, 255, 255, 0.85);
+}
 
 /* 주제 칩 — 카테고리 아래 한 단계 더 좁히기. 카테고리(주황 채움)와 구분되게 연한 틴트로. */
 .topicbar {
@@ -571,6 +580,11 @@ body {
   color: var(--primary-d);
 }
 .topicchip--active .topicchip__n {
+  color: var(--primary-d);
+}
+.topicchip--active:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary-d);
   color: var(--primary-d);
 }
 

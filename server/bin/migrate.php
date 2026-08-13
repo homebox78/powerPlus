@@ -40,6 +40,16 @@ if ($hasSlide === 0) {
     $pdo->exec("ALTER TABLE assets ADD COLUMN slide_path VARCHAR(255) NULL AFTER image_path");
 }
 
+// 스타일 지문(색감) — 같은 세트 판정용. 등록 배치만으로는 파란 단색과 컬러풀이 한 세트가 된다.
+$hasSig = (int) $pdo->query(
+    "SELECT COUNT(*) FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='assets' AND COLUMN_NAME='style_sig'"
+)->fetchColumn();
+if ($hasSig === 0) {
+    $pdo->exec("ALTER TABLE assets ADD COLUMN style_sig VARCHAR(8) NULL AFTER thumb_path");
+    $pdo->exec("CREATE INDEX idx_style ON assets (category, style_sig)");
+}
+
 // 사용 통계 로그 테이블 (Phase: 통계)
 $pdo->exec("CREATE TABLE IF NOT EXISTS usage_log (
   id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
