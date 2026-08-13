@@ -195,6 +195,146 @@ final class SearchLexicon
         return array_values(array_unique($set));
     }
 
+    // ───────────────────────── 오타 교정 ─────────────────────────
+    // 사용자는 "코드"를 "코ㅡㄷ"·"코그"처럼 자모가 밀리거나 바뀐 채로 친다.
+    // 자산마다 오타 태그를 저장하는 대신, 검색어를 자모로 풀어 실제 태그와 대조해 고친다
+    // (데이터가 안 늘고, 앞으로 등록되는 자산에도 그대로 적용된다).
+
+    private const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    private const JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+    private const JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+    /** 한글을 자모 배열로 푼다("코드" → ㅋ ㅗ ㄷ ㅡ). 한글이 아니면 글자 그대로. */
+    public static function jamo(string $s): array
+    {
+        $out = [];
+        $len = mb_strlen($s);
+        for ($i = 0; $i < $len; $i++) {
+            $ch = mb_substr($s, $i, 1);
+            $code = mb_ord($ch, 'UTF-8');
+            if ($code >= 0xAC00 && $code <= 0xD7A3) {
+                $n = $code - 0xAC00;
+                $out[] = self::CHO[intdiv($n, 588)];
+                $out[] = self::JUNG[intdiv($n % 588, 28)];
+                $j = self::JONG[$n % 28];
+                if ($j !== '') $out[] = $j;
+            } else {
+                $out[] = $ch;
+            }
+        }
+        return $out;
+    }
+
+    /** 자모 편집거리(글자 바뀜·빠짐·더해짐 + 앞뒤 뒤바뀜까지 1로 센다). */
+    private static function dist(array $a, array $b, int $cap): int
+    {
+        $la = count($a); $lb = count($b);
+        if (abs($la - $lb) > $cap) return $cap + 1;
+        $prev2 = []; $prev = range(0, $lb); $cur = [];
+        for ($i = 1; $i <= $la; $i++) {
+            $cur = [$i];
+            $best = $i;
+            for ($j = 1; $j <= $lb; $j++) {
+                $cost = ($a[$i - 1] === $b[$j - 1]) ? 0 : 1;
+                $v = min($prev[$j] + 1, $cur[$j - 1] + 1, $prev[$j - 1] + $cost);
+                // 뒤바뀜("ㄷㅡ" ↔ "ㅡㄷ")도 한 번의 실수로 센다
+                if ($i > 1 && $j > 1 && $a[$i - 1] === $b[$j - 2] && $a[$i - 2] === $b[$j - 1]) {
+                    $v = min($v, $prev2[$j - 2] + 1);
+                }
+                $cur[$j] = $v;
+                if ($v < $best) $best = $v;
+            }
+            if ($best > $cap) return $cap + 1;   // 더 볼 것도 없음
+            $prev2 = $prev; $prev = $cur;
+        }
+        return $prev[$lb];
+    }
+
+    private static ?array $tagDict = null;
+
+    /**
+     * 교정 후보 낱말 사전 = 실제 등록된 태그 + 동의어 사전.
+     * 태그는 매번 훑기 무거워서 하루 단위로 파일에 캐시한다(실패해도 사전만으로 동작).
+     */
+    private static function dict(): array
+    {
+        if (self::$tagDict !== null) return self::$tagDict;
+        $words = [];
+        foreach (self::vocab() as $w) $words[$w] = 100;   // 사전 낱말은 기본 가중
+
+        $cache = rtrim(sys_get_temp_dir(), '/\\') . '/pp_tagdict.json';
+        $fresh = is_readable($cache) && (time() - (int) @filemtime($cache) < 86400);
+        $tags = null;
+        if ($fresh) {
+            $raw = @file_get_contents($cache);
+            $tags = $raw ? json_decode($raw, true) : null;
+        }
+        if (!is_array($tags)) {
+            $tags = [];
+            try {
+                $st = Database::pdo()->query('SELECT tags FROM assets WHERE tags IS NOT NULL');
+                while (($t = $st->fetchColumn()) !== false) {
+                    foreach ((json_decode((string) $t, true) ?: []) as $w) {
+                        $w = mb_strtolower(trim((string) $w));
+                        if ($w === '' || mb_strlen($w) < 2 || mb_strlen($w) > 10) continue;
+                        $tags[$w] = ($tags[$w] ?? 0) + 1;
+                    }
+                }
+                $tags = array_filter($tags, fn($n) => $n >= 2);   // 한 번뿐인 태그는 오타일 수도
+                @file_put_contents($cache, json_encode($tags, JSON_UNESCAPED_UNICODE));
+            } catch (\Throwable $e) {
+                $tags = [];   // DB를 못 읽어도 사전만으로 교정은 된다
+            }
+        }
+        foreach ($tags as $w => $n) $words[$w] = ($words[$w] ?? 0) + (int) $n;
+
+        self::$tagDict = $words;
+        return self::$tagDict;
+    }
+
+    /**
+     * 오타로 보이는 낱말을 실제 낱말로 고친다. 고칠 게 없으면 null.
+     * 사전에 이미 있는 말은 건드리지 않는다(멀쩡한 검색어를 바꾸면 더 나쁘다).
+     */
+    public static function correct(string $token): ?string
+    {
+        $t = mb_strtolower(trim($token));
+        $len = mb_strlen($t);
+        if ($len < 2 || $len > 10) return null;
+
+        $dict = self::dict();
+        if (isset($dict[$t])) return null;              // 아는 말 = 오타 아님
+
+        $tj = self::jamo($t);
+        $cap = $len <= 3 ? 1 : 2;                        // 짧은 말일수록 엄격하게
+        $best = null; $bestD = $cap + 1; $bestN = 0;
+        foreach ($dict as $w => $n) {
+            $wl = mb_strlen((string) $w);
+            if (abs($wl - $len) > 1) continue;           // 길이가 많이 다르면 다른 말
+            $wj = self::jamo((string) $w);
+            if (abs(count($wj) - count($tj)) > $cap) continue;
+            $d = self::dist($tj, $wj, $cap);
+            if ($d > $cap) continue;
+            if ($d < $bestD || ($d === $bestD && $n > $bestN)) { $best = (string) $w; $bestD = $d; $bestN = $n; }
+        }
+        return $best;
+    }
+
+    /**
+     * 토큰 목록을 훑어 오타를 고친다. [고친 토큰들, 원본=>교정 대응표] 반환.
+     * 대응표는 화면에 "‘코드’로 검색했어요"를 보여주기 위한 것.
+     */
+    public static function correctTokens(array $tokens): array
+    {
+        $out = []; $fixed = [];
+        foreach ($tokens as $t) {
+            $c = self::correct($t);
+            if ($c !== null && $c !== $t) { $fixed[$t] = $c; $out[] = $c; }
+            else $out[] = $t;
+        }
+        return [array_values(array_unique($out)), $fixed];
+    }
+
     /** 토큰들 중 카테고리를 가리키는 것이 있으면 그 category key 들을 반환. */
     public static function categoryHints(array $tokens): array
     {

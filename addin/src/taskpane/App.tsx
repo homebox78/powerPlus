@@ -179,6 +179,8 @@ export default function App() {
   const [setsLoading, setSetsLoading] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [offline, setOffline] = React.useState(false);
+  // 오타 교정 안내(입력한 말 => 실제 검색한 말)
+  const [corrected, setCorrected] = React.useState<Record<string, string> | null>(null);
   const [total, setTotal] = React.useState(0);
   const [loadingMore, setLoadingMore] = React.useState(false);
   const pageRef = React.useRef(1);
@@ -292,6 +294,7 @@ export default function App() {
         setRawAssets(r.assets);
         setTotal(r.total);
         setOffline(r.offline);
+        setCorrected((r as { corrected?: Record<string, string> | null }).corrected ?? null);
       })
       .catch((e) => {
         if (e instanceof AuthRequiredError) {
@@ -683,7 +686,13 @@ export default function App() {
         ) : activeQuery ? (
           <div className="querybar">
             <span className="querybar__text">
-              ‘<b>{activeQuery}</b>’ 검색 결과 {count}개
+              {corrected && Object.keys(corrected).length > 0 ? (
+                <>
+                  ‘<b>{Object.values(corrected).join(" ")}</b>’로 고쳐서 찾았어요 · {count}개
+                </>
+              ) : (
+                <>‘<b>{activeQuery}</b>’ 검색 결과 {count}개</>
+              )}
             </span>
             <button className="querybar__clear" onClick={clearQuery}>
               전체 보기

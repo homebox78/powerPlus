@@ -61,10 +61,13 @@ final class AssetService
 
         // 자연어 질의: 토큰화 → 동의어/한↔영/색상 확장 → 가중 관련도 점수
         $scoreExpr = null;
+        $corrected = [];     // 오타 교정 결과(원본 => 고친 말) — 화면 안내용
         $steps = [];         // 좁은 조건 → 넓은 조건 순서(첫 결과가 나오는 단계를 쓴다)
         $q = trim($q);
         if ($q !== '') {
             $tokens = SearchLexicon::tokenize($q);
+            // 오타 교정("코ㅡㄷ"·"코그" → "코드") — 아는 낱말은 그대로 두고 모르는 것만 고친다
+            [$tokens, $corrected] = SearchLexicon::correctTokens($tokens);
             $catHints = SearchLexicon::categoryHints($tokens);
 
             // 토큰마다 "동의어 묶음"을 따로 유지한다 — 묶음 안은 OR, 묶음끼리는 AND(아래).
@@ -195,10 +198,11 @@ final class AssetService
         $stmt->execute();
 
         return [
-            'data'  => array_map([$this, 'hydrate'], $stmt->fetchAll()),
-            'total' => $total,
-            'page'  => $page,
-            'limit' => $limit,
+            'data'      => array_map([$this, 'hydrate'], $stmt->fetchAll()),
+            'total'     => $total,
+            'page'      => $page,
+            'limit'     => $limit,
+            'corrected' => $corrected ?: null,
         ];
     }
 

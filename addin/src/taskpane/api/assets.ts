@@ -11,6 +11,8 @@ interface AssetsResponse {
   total: number;
   page: number;
   limit: number;
+  /** 오타 교정 결과(입력한 말 => 실제로 검색한 말) */
+  corrected?: Record<string, string> | null;
 }
 
 export interface FetchResult {
@@ -18,6 +20,8 @@ export interface FetchResult {
   total: number;
   /** 서버 미연결로 로컬 mock을 사용했는지 여부 */
   offline: boolean;
+  /** 오타 교정 결과(입력한 말 => 실제로 검색한 말) */
+  corrected?: Record<string, string> | null;
 }
 
 /** 서버에서 자산 목록을 가져온다(페이지 단위). 서버 미연결 시 로컬 mock으로 폴백. */
@@ -52,7 +56,7 @@ export async function fetchAssets(
     if (res.status === 401) throw new AuthRequiredError("로그인이 필요합니다.");
     if (!res.ok) throw new Error(`서버 응답 ${res.status}`);
     const body = (await res.json()) as AssetsResponse;
-    return { assets: body.data, total: body.total, offline: false };
+    return { assets: body.data, total: body.total, offline: false, corrected: body.corrected ?? null };
   } catch (e) {
     // 요청이 취소된 경우는 상위에서 무시하도록 그대로 전파
     if (signal?.aborted) throw e;
