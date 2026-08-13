@@ -52,6 +52,7 @@ final class SearchLexicon
         ['저장소','스토리지','storage','디스크','disk','ssd'],
         ['방화벽','firewall','접근제어'],
         ['인증','로그인','login','auth','토큰','token','oauth','jwt'],
+        ['키','key','열쇠','keys','비밀번호','password','패스워드','자물쇠','lock'],
         ['화살표','arrow','arrows','방향','direction','지시'],
         ['순환','반복','loop','cycle','circular','재활용','refresh','새로고침'],
         ['흐름','플로우','flow','프로세스','process','절차','단계'],

@@ -361,17 +361,32 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, cat, activeQuery, email, sort, pptFilter, topic, specialKey]);
 
-  // 주제 목록 — 카테고리가 바뀌면 그 카테고리의 주제를 받아 온다(0건 주제는 서버가 뺀다)
+  // 주제 목록 — 한 번 받은 카테고리는 캐시해 두고, 나머지도 미리 받아 둔다(전환 즉시 표시)
+  const topicCache = React.useRef<Record<string, Topic[]>>({});
   React.useEffect(() => {
     if (!email || isBrowser || isSpecial || cat === "all") {
       setTopics([]);
       return;
     }
+    const cached = topicCache.current[cat];
+    if (cached) setTopics(cached);          // 있으면 깜빡임 없이 바로
     const ctrl = new AbortController();
-    fetchTopics(cat, ctrl.signal).then(setTopics).catch(() => undefined);
+    fetchTopics(cat, ctrl.signal)
+      .then((t) => { topicCache.current[cat] = t; setTopics(t); })
+      .catch(() => undefined);
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cat, email, isBrowser, isSpecial]);
+
+  // 카테고리 목록이 오면 주제도 미리 받아 둔다 — 칩을 눌렀을 때 기다리지 않게
+  React.useEffect(() => {
+    if (!email || isBrowser) return;
+    cats.forEach((c) => {
+      if (c.key === "all" || topicCache.current[c.key]) return;
+      fetchTopics(c.key).then((t) => { topicCache.current[c.key] = t; }).catch(() => undefined);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cats, email, isBrowser]);
 
   // 검색 완료 → "N개 찾았어요" 플래시. **검색 버튼을 눌렀을 때(searchAnim)만** — 탭/카테고리 이동 제외.
   const prevLoadingRef = React.useRef(false);
@@ -520,11 +535,7 @@ export default function App() {
   /** 컴포저 검색어 확정. 입력 초안은 ComposerInput 로컬 state — 타이핑마다 App(수백 카드) 리렌더 방지 */
   function sendQuery(raw: string) {
     const q = raw.trim();
-    // 한 글자는 다른 낱말 속 음절까지 걸려("말" → 도움말·맺음말) 엉뚱한 결과가 쏟아진다.
-    if (q.length === 1) {
-      showHint("검색어는 두 글자 이상 입력해 주세요.");
-      return;
-    }
+    // 한 글자도 검색된다 — 서버가 정확 태그를 먼저 보고, 결과가 적을 때만 부분일치를 연다.
     setActiveQuery(q);
     setSearchAnim(!!q); // 검색 버튼 눌렀을 때만 캐릭터 애니메이션
     setView("all");

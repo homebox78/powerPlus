@@ -43,7 +43,8 @@ final class AssetService
         $pdo = Database::pdo();
         $where = [];
         $whereParams = [];   // COUNT/WHERE 용(카테고리·장표 필터 등 기본 조건)
-        $termParams  = [];   // 검색 낱말 조건
+        $termParams  = [];   // 검색 낱말 조건(엄격 단계)
+        $looseParams = [];   // 검색 낱말 조건(느슨 단계 — 한 글자 부분일치 허용)
         $catParams   = [];   // 카테고리 제한 조건("사진·아이콘" 같은 종류 낱말)
         $scoreParams = [];   // 관련도 점수식 전용(SELECT 에서만 사용)
         if ($category !== '' && $category !== 'all') {
@@ -81,6 +82,8 @@ final class AssetService
 
             // 토큰마다 "동의어 묶음"을 따로 유지한다 — 묶음 안은 OR, 묶음끼리는 AND(아래).
             $groups = [];
+            $groupsLoose = [];       // 한 글자 낱말에 부분일치를 허용한 판(뒷단계용)
+            $hasOneChar = false;
             $scoreParts = [];
             $i = 0;
             foreach ($tokens as $tok) {
@@ -94,9 +97,12 @@ final class AssetService
                     if ($t !== '' && !in_array($t, $terms, true)) $terms[] = $t;
                 }
                 $terms = array_slice($terms, 0, 12);
-                // 한 글자 낱말은 부분일치를 끈다 — "말"이 "도움말·맺음말"에 걸려 엉뚱한 게 쏟아진다.
-                $exactOnly = mb_strlen($tok) < 2;
+                // ⭐ 판정은 **낱말 단위**로 한다(질의 길이가 아니라).
+                //    "키"와 "key"는 같은 동의어 묶음이라 확장 결과가 같은데, 질의 길이로 판정하면
+                //    "키"만 정확일치로 좁혀져 결과가 달라진다(61 vs 203). 낱말 단위면 둘이 같아진다.
+                //    한 글자 낱말 자체는 여전히 정확 태그만 — "말"이 "도움말"에 걸리는 걸 막는다.
                 $groupOr = [];
+                $groupOrLoose = [];
                 foreach ($terms as $t) {
                     // ⚠️ name/tags 가 NULL 이면 (col LIKE x) 가 NULL 이고, 그 NULL 이 덧셈 전체를 NULL 로 만든다.
                     //    이름 없는 자산(아이콘·사진·일러스트 대부분)이 점수 NULL → 정렬 맨 뒤로 밀렸던 원인.
@@ -110,25 +116,35 @@ final class AssetService
                         $i++;
                         continue;
                     }
+                    $like = '%' . $t . '%';
+                    $exactOnly = mb_strlen($t) < 2;      // 그 낱말이 한 글자일 때만 정확일치
                     if ($exactOnly) {
                         // ⚠️ 쓰지 않는 파라미터를 바인딩하면 PDO(EMULATE_PREPARES=false)가 거부한다 —
-                        //    WHERE 에 실제로 들어가는 것만 whereParams 에 넣는다.
+                        //    단계마다 그 단계가 실제로 쓰는 파라미터만 따로 모은다(strict / loose).
+                        $hasOneChar = true;
                         $termParams[":wb$i"] = $quoted;
+                        $looseParams[":lb$i"] = $quoted;
+                        $looseParams[":lc$i"] = $like;
                         $scoreParts[] = "(COALESCE(a.tags,'') LIKE $b)*4";
                         $groupOr[] = "COALESCE(a.tags,'') LIKE :wb$i";
+                        // 느슨한 단계: 정확 태그 OR 태그 부분일치(이름은 제외 — 한 글자가 이름에 걸리면 노이즈가 크다)
+                        $groupOrLoose[] = "COALESCE(a.tags,'') LIKE :lb$i OR COALESCE(a.tags,'') LIKE :lc$i";
                     } else {
-                        $like = '%' . $t . '%';
                         $a = ":a$i"; $c = ":c$i";
                         $scoreParams[$a] = $like;    // name 부분일치(점수)
                         $scoreParams[$c] = $like;    // tags 부분일치(점수)
                         $termParams[":wd$i"] = $like;
                         $termParams[":we$i"] = $like;
+                        $looseParams[":ld$i"] = $like;
+                        $looseParams[":le$i"] = $like;
                         $scoreParts[] = "(COALESCE(a.name,'') LIKE $a)*4 + (COALESCE(a.tags,'') LIKE $b)*3 + (COALESCE(a.tags,'') LIKE $c)*1";
                         $groupOr[] = "COALESCE(a.tags,'') LIKE :wd$i OR COALESCE(a.name,'') LIKE :we$i";
+                        $groupOrLoose[] = "COALESCE(a.tags,'') LIKE :ld$i OR COALESCE(a.name,'') LIKE :le$i";
                     }
                     $i++;
                 }
                 if ($groupOr) $groups[] = '(' . implode(' OR ', $groupOr) . ')';
+                if ($groupOrLoose) $groupsLoose[] = '(' . implode(' OR ', $groupOrLoose) . ')';
             }
             $j = 0;
             $catOr = [];
@@ -157,6 +173,13 @@ final class AssetService
                     $steps[] = ['sql' => $catClause, 'cat' => true];
                 }
                 $steps[] = ['sql' => '(' . implode(' OR ', array_merge($groups, $catOr)) . ')', 'cat' => true];
+                // 한 글자 검색은 정확 태그로 못 찾을 때가 많다 → 마지막에 부분일치 판을 연다.
+                if ($hasOneChar && $groupsLoose) {
+                    // 한 글자로 아무것도 못 찾았을 때만 부분일치를 연다.
+                    // (결과가 이미 있는데 열면 "차"가 차트·절차·자동차까지 긁어와 600건이 된다 — 실측)
+                    $allLoose = '(' . implode(' AND ', $groupsLoose) . ')';
+                    $steps[] = ['sql' => $allLoose, 'cat' => false, 'loose' => true, 'onlyIfEmpty' => true];
+                }
                 $scoreExpr = $scoreParts ? '(' . implode(' + ', $scoreParts) . ')' : null;
             }
         }
@@ -179,10 +202,11 @@ final class AssetService
             $picked = null;
             foreach ($steps as $n => $step) {
                 $sql    = $mkWhere($step['sql']);
-                $params = array_merge($baseParams, $termParams, $step['cat'] ? $catParams : []);
+                $params = array_merge($baseParams, empty($step['loose']) ? $termParams : $looseParams, $step['cat'] ? $catParams : []);
                 $st = $pdo->prepare("SELECT COUNT(*) FROM assets a $sql");
                 $st->execute($params);
                 $cnt = (int) $st->fetchColumn();
+                if (!empty($step['onlyIfEmpty']) && $picked !== null) continue;   // 앞에서 이미 찾았으면 건너뛴다
                 if ($cnt > 0 && ($picked === null || $cnt > $picked['total'])) {
                     $picked = ['sql' => $sql, 'params' => $params, 'total' => $cnt];
                 }
@@ -193,7 +217,7 @@ final class AssetService
             } else {
                 $lastStep = $steps[$last];
                 $whereSql = $mkWhere($lastStep['sql']);
-                $whereParams = array_merge($baseParams, $termParams, $lastStep['cat'] ? $catParams : []);
+                $whereParams = array_merge($baseParams, empty($lastStep['loose']) ? $termParams : $looseParams, $lastStep['cat'] ? $catParams : []);
                 $total = 0;
             }
         } else {
