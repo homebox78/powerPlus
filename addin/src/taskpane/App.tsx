@@ -54,9 +54,15 @@ const Ic = {
       <path d="M13.7 21a2 2 0 01-3.4 0" strokeLinecap="round" />
     </svg>
   ),
-  send: (
+  search: (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2">
-      <path d="M12 19V6M6 12l6-6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.8-3.8" strokeLinecap="round" />
+    </svg>
+  ),
+  xmark: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4">
+      <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
     </svg>
   ),
   chev: (
@@ -135,24 +141,25 @@ function ComposerInput({
         aria-label="자산 검색"
       />
       <div className="composer__actions">
-        {/* 검색 중이면 지우기 — 결과에서 빠져나오는 길을 손 닿는 자리(입력창)에 둔다 */}
-        {(draft || activeQuery) && (
+        {catButton}
+        {/* 검색 중이면 같은 자리 버튼이 ✕(해제)로 바뀐다 — 누른 자리에서 되돌린다 */}
+        {activeQuery ? (
           <button
-            className="composer__clear"
+            className="composer__send composer__send--clear"
             onClick={() => {
               setDraft("");
               onClear();
             }}
-            aria-label="검색어 지우기"
+            aria-label="검색 해제"
             title="검색 해제(Esc)"
           >
-            ✕
+            {Ic.xmark}
+          </button>
+        ) : (
+          <button className="composer__send" onClick={() => onSend(draft)} aria-label="검색">
+            {Ic.search}
           </button>
         )}
-        {catButton}
-        <button className="composer__send" onClick={() => onSend(draft)} aria-label="검색">
-          {Ic.send}
-        </button>
       </div>
     </div>
   );
@@ -723,6 +730,13 @@ export default function App() {
           ))}
         </div>
 
+        {/* 검색 — 카테고리 위(사용자 요청: 하단 컴포저 → 상단으로 이동) */}
+        {!isBrowser && (
+          <div className="composer composer--top">
+            <ComposerInput activeQuery={activeQuery} onSend={sendQuery} onClear={clearQuery} catButton={null} />
+          </div>
+        )}
+
         {/* 카테고리 — 하단 컴포저 드롭다운에서 상단 칩으로 이동(한눈에 보이고 한 번에 선택) */}
         {!isBrowser && (
           <div className="catbar" role="tablist" aria-label="카테고리">
@@ -974,14 +988,6 @@ export default function App() {
             <div style={{ marginTop: 4, fontWeight: 800, fontSize: 15, color: "#1C2733" }}>{foundFlash}개의 자료를 찾았어요!</div>
           </div>
         </div>
-      )}
-
-      {/* 하단 컴포저 (검색) — 브라우저 탭에선 숨김 */}
-      {!isBrowser && (
-      <div className="composer">
-        {/* 카테고리는 상단 칩바로 이동 — 컴포저는 검색에만 집중 */}
-        <ComposerInput activeQuery={activeQuery} onSend={sendQuery} onClear={clearQuery} catButton={null} />
-      </div>
       )}
 
       {/* 같은 스타일 세트 모달 — 세트를 한눈에 훑고 그 자리에서 삽입 */}
