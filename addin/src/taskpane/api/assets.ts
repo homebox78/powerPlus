@@ -110,3 +110,30 @@ export async function fetchSimilar(
     return [];
   }
 }
+
+/** 같은 스타일 세트(같은 등록 배치) 자산 목록. 세트를 통째로 훑어보기 위한 용도. */
+export async function fetchStyleSet(
+  id: string,
+  page = 1,
+  limit = 60,
+  signal?: AbortSignal
+): Promise<{ data: Asset[]; total: number }> {
+  const token = getToken();
+  try {
+    const res = await fetch(
+      `${API_BASE}/assets/${encodeURIComponent(id)}/set?page=${page}&limit=${limit}`,
+      {
+        signal,
+        cache: "no-store",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
+    if (res.status === 401) throw new AuthRequiredError("로그인이 필요합니다.");
+    if (!res.ok) throw new Error(`서버 응답 ${res.status}`);
+    const body = (await res.json()) as { data: Asset[]; total: number };
+    return { data: body.data ?? [], total: body.total ?? 0 };
+  } catch (e) {
+    if (signal?.aborted || e instanceof AuthRequiredError) throw e;
+    return { data: [], total: 0 };
+  }
+}

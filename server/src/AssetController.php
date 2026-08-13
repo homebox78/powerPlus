@@ -57,6 +57,14 @@ final class AssetController
     }
 
     /** GET /api/assets/{id}/similar — 유사 자산 추천 */
+    /** 같은 스타일 세트(등록 배치) 목록 */
+    public function styleSet(string $id, array $query = []): void
+    {
+        $page  = max(1, (int) ($query['page'] ?? 1));
+        $limit = max(1, min(120, (int) ($query['limit'] ?? 60)));
+        $this->json($this->service->styleSet($id, $page, $limit));
+    }
+
     public function similar(string $id, array $query = [], bool $public = false): void
     {
         $limit = max(1, min(50, (int) ($query['limit'] ?? 12)));

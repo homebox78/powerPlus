@@ -3,7 +3,7 @@ import AssetGrid from "./components/AssetGrid";
 import Login from "./components/Login";
 import { CATEGORIES } from "./data/mockAssets";
 import type { Asset, Category } from "./data/mockAssets";
-import { fetchAssets, fetchByIds, fetchSimilar, AuthRequiredError } from "./api/assets";
+import { fetchAssets, fetchByIds, fetchSimilar, fetchStyleSet, AuthRequiredError } from "./api/assets";
 import { searchImages, imageProxyUrl, type ImageHit } from "./api/imagesearch";
 import { getToken, getEmail, clearSession, logout } from "./api/auth";
 import { recordUsage } from "./api/usage";
@@ -174,6 +174,11 @@ export default function App() {
   const [similarOf, setSimilarOf] = React.useState<Asset | null>(null);
   const [similarList, setSimilarList] = React.useState<Asset[]>([]);
   const [similarLoading, setSimilarLoading] = React.useState(false);
+  // 같은 스타일 세트 모달(카드 우측 하단 버튼)
+  const [setOf, setSetOf] = React.useState<Asset | null>(null);
+  const [setList, setSetList] = React.useState<Asset[]>([]);
+  const [setsTotal, setSetsTotal] = React.useState(0);
+  const [setsLoading, setSetsLoading] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [offline, setOffline] = React.useState(false);
   const [total, setTotal] = React.useState(0);
@@ -391,6 +396,20 @@ export default function App() {
   function clearSimilar() {
     setSimilarOf(null);
     setSimilarList([]);
+  }
+
+  // 같은 스타일 세트 모달 — 같은 배치로 등록된 자산을 한 화면에 모아 본다
+  async function handleShowSet(asset: Asset) {
+    setSetOf(asset);
+    setSetList([]);
+    setSetsLoading(true);
+    try {
+      const r = await fetchStyleSet(asset.id, 1, 60);
+      setSetList(r.data);
+      setSetsTotal(r.total);
+    } finally {
+      setSetsLoading(false);
+    }
   }
   // 카테고리/검색/세그먼트가 바뀌면 유사 모드 해제
   React.useEffect(() => {
@@ -792,6 +811,7 @@ export default function App() {
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
           onShowSimilar={handleShowSimilar}
+          onShowSet={handleShowSet}
           emptyTitle={similarOf ? "비슷한 자산이 없어요" : emptyTitle}
           emptySub={similarOf ? "다른 자산에서 다시 시도해 보세요." : emptySub}
           emptyActionLabel={!similarOf && activeQuery ? `‘${activeQuery}’ 자료 요청하기` : undefined}
@@ -869,6 +889,44 @@ export default function App() {
           }
         />
       </div>
+      )}
+
+      {/* 같은 스타일 세트 모달 — 세트를 한눈에 훑고 그 자리에서 삽입 */}
+      {setOf && (
+        <div className="sheet-scrim" onClick={() => setSetOf(null)}>
+          <div className="sheet setsheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet__grip" />
+            <div className="sheet__head">
+              <div>
+                <div className="sheet__title">같은 스타일 세트</div>
+                <div className="sheet__desc">
+                  {setsLoading ? "불러오는 중…" : `${setsTotal}개 · 함께 등록된 같은 스타일`}
+                </div>
+              </div>
+              <button className="sheet__close" onClick={() => setSetOf(null)} aria-label="닫기">
+                {Ic.close}
+              </button>
+            </div>
+            <div className="setsheet__body">
+              <div className="setgrid">
+                {setList.map((s) => (
+                  <button
+                    key={s.id}
+                    className={"setcard" + (s.id === setOf.id ? " setcard--self" : "")}
+                    title={s.name || s.tags?.[0] || s.id}
+                    disabled={insertingId === s.id}
+                    onClick={() => handleInsert(s)}
+                  >
+                    <img src={s.thumb_url || s.image_url} alt="" loading="lazy" decoding="async" />
+                  </button>
+                ))}
+              </div>
+              {!setsLoading && setList.length === 0 && (
+                <div className="setsheet__empty">세트 정보를 찾지 못했어요.</div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* 토스트 — 삽입 결과 / 검색 안내 공용 */}

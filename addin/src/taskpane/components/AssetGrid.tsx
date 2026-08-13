@@ -9,6 +9,8 @@ interface Props {
   onToggleFavorite: (id: string) => void;
   /** 전달 시 카드에 "유사" 버튼 노출 → 비슷한 자산 추천 */
   onShowSimilar?: (asset: Asset) => void;
+  /** 전달 시 카드 우측 하단에 세트 버튼 노출 → 같은 스타일 세트 모달 */
+  onShowSet?: (asset: Asset) => void;
   emptyTitle?: string;
   emptySub?: string;
   /** 빈 상태 하단 액션 버튼(예: 무결과 → "이 키워드로 요청하기") */
@@ -50,6 +52,7 @@ export default function AssetGrid({
   onInsert,
   isFavorite,
   onToggleFavorite,
+  onShowSet,
   emptyTitle = "자료가 없어요",
   emptySub = "다른 카테고리를 선택해 보세요.",
   emptyActionLabel,
@@ -118,18 +121,24 @@ export default function AssetGrid({
                     <span className="spinner" />
                   </span>
                 )}
-                {/* 호버 시 등록된 태그 미리보기(이미지만으론 모를 때) */}
-                {a.tags?.length ? (
-                  <span className="card__tags" aria-hidden>
-                    {a.tags.slice(0, 4).map((t, i) => (
-                      <span key={i} className="card__tag">
-                        {t}
-                      </span>
-                    ))}
-                  </span>
-                ) : null}
               </div>
             </button>
+            {/* 우측 하단: 같은 스타일 세트 모아 보기(호버 시 노출) */}
+            {onShowSet && (
+              <button
+                className="card__set"
+                title="같은 스타일 세트 보기"
+                aria-label="같은 스타일 세트 보기"
+                onClick={() => onShowSet(a)}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1.6" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.6" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.6" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.6" />
+                </svg>
+              </button>
+            )}
             <button
               className={"card__fav" + (fav ? " card__fav--on" : "")}
               title={fav ? "즐겨찾기 해제" : "즐겨찾기 추가"}

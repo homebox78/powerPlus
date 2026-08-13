@@ -349,6 +349,10 @@ try {
             $controller->similar(urldecode($m[1]), $_GET);
             exit;
         }
+        if (preg_match('#/api/assets/([^/]+)/set$#', $path, $m)) {
+            $controller->styleSet(urldecode($m[1]), $_GET);
+            exit;
+        }
         if (preg_match('#/api/assets/([^/]+)$#', $path, $m)) {
             $controller->get(urldecode($m[1]));
             exit;

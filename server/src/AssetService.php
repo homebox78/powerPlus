@@ -276,6 +276,98 @@ final class AssetService
         return ['data' => array_map([$this, 'hydrate'], $stmt->fetchAll())];
     }
 
+    /**
+     * 같은 스타일 세트(= 같은 등록 배치) 자산 목록.
+     *
+     * 아이콘 세트는 "한 번에 등록된 묶음"이 곧 같은 스타일이다(같은 소스·같은 태깅 파이프라인).
+     * 그래서 created_at 이 30분 이내로 붙어 있는 자산들을 한 배치로 묶는다.
+     * 재등록 1~2건짜리 자잘한 덩어리는 바로 앞 배치에 흡수(5건 미만).
+     */
+    public function styleSet(string $id, int $page = 1, int $limit = 60): array
+    {
+        $asset = $this->find($id);
+        if ($asset === null) return ['data' => [], 'total' => 0, 'page' => 1, 'limit' => $limit];
+        $pdo = Database::pdo();
+
+        // 그 자산의 등록 시각
+        $st = $pdo->prepare('SELECT created_at FROM assets WHERE id = :id');
+        $st->execute([':id' => $id]);
+        $at = $st->fetchColumn();
+        if (!$at) return ['data' => [], 'total' => 0, 'page' => 1, 'limit' => $limit];
+
+        // 같은 카테고리의 등록 시각 목록(시각별 개수)
+        $st = $pdo->prepare(
+            'SELECT created_at AS t, COUNT(*) AS n FROM assets
+             WHERE category = :cat AND created_at IS NOT NULL
+             GROUP BY created_at ORDER BY created_at'
+        );
+        $st->execute([':cat' => $asset['category']]);
+        $rows = $st->fetchAll();
+
+        $GAP = 30 * 60;   // 30분 이상 벌어지면 다른 배치
+        $MIN = 5;         // 5건 미만 덩어리는 앞 배치에 흡수
+        $clusters = [];   // [start, end, n]
+        foreach ($rows as $r) {
+            $t = strtotime((string) $r['t']);
+            $n = (int) $r['n'];
+            $last = $clusters ? $clusters[count($clusters) - 1] : null;
+            if ($last !== null && $t - strtotime($last[1]) <= $GAP) {
+                $clusters[count($clusters) - 1][1] = $r['t'];
+                $clusters[count($clusters) - 1][2] += $n;
+            } else {
+                $clusters[] = [$r['t'], $r['t'], $n];
+            }
+        }
+        // 작은 덩어리 흡수(앞 배치가 있을 때만)
+        $merged = [];
+        foreach ($clusters as $c) {
+            if ($merged && $c[2] < $MIN) {
+                $merged[count($merged) - 1][1] = $c[1];
+                $merged[count($merged) - 1][2] += $c[2];
+            } else {
+                $merged[] = $c;
+            }
+        }
+
+        // 대상 자산이 속한 배치 찾기
+        $atTs = strtotime((string) $at);
+        $range = null;
+        foreach ($merged as $c) {
+            if ($atTs >= strtotime($c[0]) && $atTs <= strtotime($c[1])) { $range = $c; break; }
+        }
+        if ($range === null) $range = [$at, $at, 1];
+
+        $where = 'WHERE a.category = :cat AND a.created_at BETWEEN :s AND :e';
+        $params = [':cat' => $asset['category'], ':s' => $range[0], ':e' => $range[1]];
+
+        $st = $pdo->prepare("SELECT COUNT(*) FROM assets a $where");
+        $st->execute($params);
+        $total = (int) $st->fetchColumn();
+
+        $page = max(1, $page);
+        $offset = ($page - 1) * $limit;
+        $cols = preg_replace('/(^|,\s*)/', '$1a.', self::COLS);
+        // 대상 자산을 맨 앞에
+        $st = $pdo->prepare(
+            "SELECT $cols, " . self::COUNT_COLS . "
+             FROM assets a $where
+             ORDER BY (a.id = :self) DESC, a.id
+             LIMIT :limit OFFSET :offset"
+        );
+        foreach ($params as $k => $v) $st->bindValue($k, $v);
+        $st->bindValue(':self', $id);
+        $st->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $st->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $st->execute();
+
+        return [
+            'data'  => array_map([$this, 'hydrate'], $st->fetchAll()),
+            'total' => $total,
+            'page'  => $page,
+            'limit' => $limit,
+        ];
+    }
+
     public function find(string $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT ' . self::COLS . ' FROM assets WHERE id = :id');
