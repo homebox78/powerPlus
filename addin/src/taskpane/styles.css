@@ -487,6 +487,43 @@ body {
   box-shadow: 0 1px 3px rgba(28, 39, 51, 0.1);
 }
 
+/* 카테고리 칩바 — 하단 드롭다운 대신 상단에서 바로 고른다 */
+.catbar {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+.catbar::-webkit-scrollbar {
+  display: none;
+}
+.catchip {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink2);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.catchip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.catchip--active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
 /* 카운트 + 정렬 */
 .countrow {
   display: flex;
@@ -840,19 +877,6 @@ body {
   gap: 8px;
   margin-top: 10px;
 }
-.composer__cat {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  border: none;
-  background: var(--primary-soft);
-  color: var(--primary);
-  border-radius: 9px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
 .composer__send {
   margin-left: auto;
   width: 36px;
@@ -868,19 +892,6 @@ body {
 }
 .composer__send:hover {
   background: #1f1f1f;
-}
-.catmenu {
-  position: absolute;
-  left: 13px;
-  bottom: 74px;
-  z-index: 42; /* menu-scrim(40) 위 — 안 그러면 컴포저와 겹치는 마지막 항목(장표)이 scrim에 가려 클릭 안 됨 */
-  width: 172px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  box-shadow: 0 14px 40px rgba(28, 39, 51, 0.2);
-  padding: 6px;
-  animation: ppDrop 0.12s ease;
 }
 
 /* ===== 로그인 ===== */

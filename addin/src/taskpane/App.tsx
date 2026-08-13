@@ -146,12 +146,10 @@ export default function App() {
   // 메뉴 상태
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
-  const [catOpen, setCatOpen] = React.useState(false);
   const [sortOpen, setSortOpen] = React.useState(false);
   const closeMenus = () => {
     setNotifOpen(false);
     setProfileOpen(false);
-    setCatOpen(false);
     setSortOpen(false);
   };
 
@@ -499,7 +497,6 @@ export default function App() {
   const avatarChar = local.charAt(0).toUpperCase();
   const gt = grandTotal ?? total;
   const count = isSpecial ? displayed.length : total;
-  const catLabel = cats.find((c) => c.key === cat)?.label || "전체";
 
   const emptyTitle = activeQuery
     ? "검색 결과가 없어요"
@@ -651,6 +648,28 @@ export default function App() {
           ))}
         </div>
 
+        {/* 카테고리 — 하단 컴포저 드롭다운에서 상단 칩으로 이동(한눈에 보이고 한 번에 선택) */}
+        {!isBrowser && (
+          <div className="catbar" role="tablist" aria-label="카테고리">
+            {cats.map((c) => (
+              <button
+                key={c.key}
+                role="tab"
+                aria-selected={cat === c.key}
+                className={"catchip" + (cat === c.key ? " catchip--active" : "")}
+                onClick={() => {
+                  setCat(c.key);
+                  setPptFilter("all"); // 카테고리 전환 시 장표 서브필터 초기화
+                  setView("all");
+                  closeMenus();
+                }}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* 검색/유사 결과 바 — 탭 아래로 이동(사용자 요청) */}
         {!isBrowser && (similarOf ? (
           <div className="querybar">
@@ -683,8 +702,7 @@ export default function App() {
               className="sortbtn"
               onClick={() => {
                 setSortOpen((v) => !v);
-                setCatOpen(false);
-              }}
+                          }}
             >
               {sortLabel(sort)}
               {Ic.chev}
@@ -850,44 +868,8 @@ export default function App() {
       {/* 하단 컴포저 (검색) — 브라우저 탭에선 숨김 */}
       {!isBrowser && (
       <div className="composer">
-        {catOpen && (
-          <>
-            <div className="menu-scrim" onClick={closeMenus} />
-            <div className="catmenu">
-              {cats.map((c) => (
-                <button
-                  key={c.key}
-                  className={"menu-item" + (cat === c.key ? " menu-item--active" : "")}
-                  onClick={() => {
-                    setCat(c.key);
-                    setPptFilter("all"); // 카테고리 전환 시 장표 서브필터 초기화(effect로 하면 fetch 2회)
-                    setView("all");
-                    closeMenus();
-                  }}
-                >
-                  {c.label}
-                  {cat === c.key && Ic.check}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        <ComposerInput
-          activeQuery={activeQuery}
-          onSend={sendQuery}
-          catButton={
-            <button
-              className="composer__cat"
-              onClick={() => {
-                setCatOpen((v) => !v);
-                setSortOpen(false);
-              }}
-            >
-              {catLabel}
-              {Ic.chev}
-            </button>
-          }
-        />
+        {/* 카테고리는 상단 칩바로 이동 — 컴포저는 검색에만 집중 */}
+        <ComposerInput activeQuery={activeQuery} onSend={sendQuery} catButton={null} />
       </div>
       )}
 
