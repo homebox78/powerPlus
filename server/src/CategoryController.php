@@ -16,7 +16,7 @@ final class CategoryController
     /** GET /api/categories */
     public function list(): void
     {
-        $this->json(['data' => $this->service->all()]);
+        $this->json(['data' => $this->service->allWithCounts()]);
     }
 
     /** POST /api/admin/categories  { key, label, sort_order? } */

@@ -19,6 +19,19 @@ final class CategoryService
         ], $rows);
     }
 
+    /**
+     * 카테고리 목록 + 등록 수(카운트 1회 집계로 붙인다 — 카테고리마다 세면 N+1).
+     * @return array<int,array{key:string,label:string,sort_order:int,count:int}>
+     */
+    public function allWithCounts(): array
+    {
+        $counts = [];
+        foreach (Database::pdo()->query('SELECT category, COUNT(*) n FROM assets GROUP BY category')->fetchAll() as $r) {
+            $counts[(string) $r['category']] = (int) $r['n'];
+        }
+        return array_map(static fn($c) => $c + ['count' => $counts[$c['key']] ?? 0], $this->all());
+    }
+
     public function exists(string $key): bool
     {
         $stmt = Database::pdo()->prepare('SELECT 1 FROM categories WHERE `key` = :k');

@@ -21,6 +21,8 @@ export interface Asset {
 export interface Category {
   key: string;
   label: string;
+  /** 등록된 자산 수(서버가 내려줌) */
+  count?: number;
 }
 
 export const CATEGORIES: Category[] = [

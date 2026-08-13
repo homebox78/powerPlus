@@ -21,6 +21,14 @@ const SORTS = [
   { key: "name", label: "이름순" },
   { key: "favorites", label: "즐겨찾기순" },
 ];
+/** 받침 유무로 '로/으로'를 고른다("아이콘으로" / "코드로"). */
+function roSuffix(w: string): string {
+  const last = w.charCodeAt(w.length - 1);
+  if (last < 0xac00 || last > 0xd7a3) return "로";
+  const jong = (last - 0xac00) % 28;
+  return jong === 0 || jong === 8 ? "로" : "으로";   // 받침 없음·ㄹ 받침이면 '로'
+}
+
 const sortLabel = (k: string) => SORTS.find((s) => s.key === k)?.label || "최신순";
 
 const VIEWS = [
@@ -260,7 +268,13 @@ export default function App() {
   React.useEffect(() => {
     if (!email) return;
     fetchCategories()
-      .then((list) => setCats([{ key: "all", label: "전체" }, ...list]))
+      .then((list) =>
+        setCats([
+          // '전체'는 각 카테고리 합
+          { key: "all", label: "전체", count: list.reduce((n, c) => n + (c.count ?? 0), 0) },
+          ...list,
+        ])
+      )
       .catch(() => undefined);
     fetchAssets("all", "", 1, 1)
       .then((r) => setGrandTotal(r.total))
@@ -668,6 +682,7 @@ export default function App() {
                 }}
               >
                 {c.label}
+                {c.count ? <span className="catchip__n">{c.count.toLocaleString()}</span> : null}
               </button>
             ))}
           </div>
@@ -688,7 +703,7 @@ export default function App() {
             <span className="querybar__text">
               {corrected && Object.keys(corrected).length > 0 ? (
                 <>
-                  ‘<b>{Object.values(corrected).join(" ")}</b>’로 고쳐서 찾았어요 · {count}개
+                  ‘<b>{Object.values(corrected).join(" ")}</b>’{roSuffix(Object.values(corrected).join(" "))} 고쳐서 찾았어요 · {count}개
                 </>
               ) : (
                 <>‘<b>{activeQuery}</b>’ 검색 결과 {count}개</>
