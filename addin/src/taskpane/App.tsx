@@ -971,7 +971,7 @@ export default function App() {
           emptyBackLabel={similarOf ? "← 뒤로가기" : activeQuery ? "← 뒤로가기" : undefined}
           onEmptyBack={similarOf ? clearSimilar : activeQuery ? clearQuery : undefined}
           loading={similarOf ? similarLoading : loading}
-          cols={!isSpecial && (cat === "icon" || cat === "illust") ? 3 : 2}
+          minCard={!isSpecial && (cat === "icon" || cat === "illust") ? 86 : 122}
         />
         <div ref={sentinelRef} className="scroll-sentinel" aria-hidden />
         {loadingMore && (

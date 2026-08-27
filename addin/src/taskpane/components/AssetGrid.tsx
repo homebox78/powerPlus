@@ -20,8 +20,33 @@ interface Props {
   emptyBackLabel?: string;
   onEmptyBack?: () => void;
   loading?: boolean;
-  /** 한 줄에 몇 개(아이콘/일러스트=3, 그 외=2) */
-  cols?: number;
+  /**
+   * 카드 최소 폭(px). 작업창을 넓히면 이 폭을 채우는 만큼 열이 늘어난다
+   * (아이콘/일러스트는 작게 = 더 많은 열, 사진/장표는 크게).
+   */
+  minCard?: number;
+}
+
+/** 작업창 폭을 실측해 한 줄 열 수를 정한다(2~7열). */
+function useGridCols(minCard: number) {
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  const [cols, setCols] = React.useState(2);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const GAP = 11; // .grid gap
+    const calc = (w: number) => {
+      if (!w) return;
+      const n = Math.floor((w + GAP) / (minCard + GAP));
+      setCols(Math.max(1, Math.min(7, n)));
+    };
+    // contentRect.width = padding 제외한 실제 카드 영역 폭
+    const ro = new ResizeObserver((es) => calc(es[0].contentRect.width));
+    ro.observe(el);
+    calc(el.clientWidth - 30);
+    return () => ro.disconnect();
+  }, [minCard]);
+  return { ref, cols };
 }
 
 // 카드 썸네일 배경: 약간의 미색 — 흰색 로고도 묻히지 않고 보이도록 (사용자 요청)
@@ -63,14 +88,15 @@ export default function AssetGrid({
   emptyBackLabel,
   onEmptyBack,
   loading = false,
-  cols = 2,
+  minCard = 122,
 }: Props) {
+  const { ref: gridRef, cols } = useGridCols(minCard);
   const gridStyle = { gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` } as React.CSSProperties;
   // 첫 로딩 → 스켈레톤
   if (loading && assets.length === 0) {
     return (
-      <div className="grid" style={gridStyle} aria-busy="true" aria-label="불러오는 중">
-        {Array.from({ length: 9 }).map((_, i) => (
+      <div ref={gridRef} className="grid" style={gridStyle} aria-busy="true" aria-label="불러오는 중">
+        {Array.from({ length: cols * 3 }).map((_, i) => (
           <div key={i} className="card card--skeleton">
             <div className="skel skel--thumb" />
           </div>
@@ -100,7 +126,7 @@ export default function AssetGrid({
   }
 
   return (
-    <div className="grid" style={gridStyle}>
+    <div ref={gridRef} className="grid" style={gridStyle}>
       {assets.map((a) => {
         const fav = isFavorite(a.id);
         const label = a.name || a.tags?.[0] || a.id;
