@@ -164,3 +164,4 @@ PY="C:/Users/hbox7/AppData/Local/Python/pythoncore-3.14-64/python.exe"
 | `arrow_gradient.py` | 오른쪽 화살표 도형: 좌 원색 100% → 우 #6890CD 15% 가로 그라데이션 | `Fill.TwoColorGradient` 후 `GradientStops` 색·투명도 지정 |
 | `band_round_top.py` | 카드 상단 라벨 밴드(카드와 좌·폭·상단 일치) → `round2SameRect` 윗모서리 10px | ⚠️ COM `AutoShapeType=148` 은 별 모양이다 — 열거값 추측 금지, XML prstGeom 으로 |
 | `card_fit_illust.example.py` | (예시) 카드 높이를 본문 BoundHeight+여백으로 줄이고, 비는 자리에 일러스트를 `AddPicture` — 슬라이드별 도형 Id 를 박은 일회성 스크립트 | 일러스트는 알파 트림 후 열 폭·남은 높이에 맞춰 비율 유지 |
+| `orphan_line.py` | 마지막 줄에 1~2글자만 남는 문단을 0.25pt 씩(최대 1.5pt) 줄여 고아 줄 제거 | 못 풀면 원래 크기로 되돌림. 어절 보정(VT)으로 생긴 2글자 끝줄은 대상 아님 |
