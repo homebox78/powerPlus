@@ -159,3 +159,6 @@ PY="C:/Users/hbox7/AppData/Local/Python/pythoncore-3.14-64/python.exe"
 
 - 아이콘 식별은 **PNG 바이트 sha1**(자산 트림 후 optimize 저장이 동일하므로) → python-pptx 로 `Name="PPICON"` 을 달아 두면 COM 에서 이름으로 찾는다.
 - 세로 정렬은 도형 박스가 아니라 **TextRange.BoundTop/BoundHeight(실제 글자 범위)** 기준이어야 한다 — 박스는 여백 때문에 어긋난다.
+| `smallfont_rule.py` | ≤10pt 런: 본문 a시월구일2 / 볼드 계열 서체 런은 a시월구일3 | 기호·불릿만인 런은 제외 |
+| `card_center.py` | 빈 카드 도형 안에 아이콘+텍스트만 있으면 블록을 카드 세로 중심으로 | 이동 0.25in 이내, 멤버 ≤5 |
+| `arrow_gradient.py` | 오른쪽 화살표 도형: 좌 원색 100% → 우 #6890CD 15% 가로 그라데이션 | `Fill.TwoColorGradient` 후 `GradientStops` 색·투명도 지정 |
