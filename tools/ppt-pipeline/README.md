@@ -165,3 +165,5 @@ PY="C:/Users/hbox7/AppData/Local/Python/pythoncore-3.14-64/python.exe"
 | `band_round_top.py` | 카드 상단 라벨 밴드(카드와 좌·폭·상단 일치) → `round2SameRect` 윗모서리 10px | ⚠️ COM `AutoShapeType=148` 은 별 모양이다 — 열거값 추측 금지, XML prstGeom 으로 |
 | `card_fit_illust.example.py` | (예시) 카드 높이를 본문 BoundHeight+여백으로 줄이고, 비는 자리에 일러스트를 `AddPicture` — 슬라이드별 도형 Id 를 박은 일회성 스크립트 | 일러스트는 알파 트림 후 열 폭·남은 높이에 맞춰 비율 유지 |
 | `orphan_line.py` | 마지막 줄에 1~2글자만 남는 문단을 0.25pt 씩(최대 1.5pt) 줄여 고아 줄 제거 | 못 풀면 원래 크기로 되돌림. 어절 보정(VT)으로 생긴 2글자 끝줄은 대상 아님 |
+
+- `card_center.py` 2판: **아이콘이 글자 위에 쌓인 셀(스택)** 은 블록 통째로만 옮기고, 좌우 배치 카드만 아이콘을 글자 중심에 다시 놓는다. 1판은 스택 셀의 아이콘을 글자 위로 끌어내렸다(s27·34·49). 텍스트 박스가 아이콘까지 감싸는 셀(s27)은 판정이 안 되므로 슬라이드 번호 인자로 제외.
