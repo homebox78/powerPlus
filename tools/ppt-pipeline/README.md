@@ -163,3 +163,4 @@ PY="C:/Users/hbox7/AppData/Local/Python/pythoncore-3.14-64/python.exe"
 | `card_center.py` | 빈 카드 도형 안에 아이콘+텍스트만 있으면 블록을 카드 세로 중심으로 | 이동 0.25in 이내, 멤버 ≤5 |
 | `arrow_gradient.py` | 오른쪽 화살표 도형: 좌 원색 100% → 우 #6890CD 15% 가로 그라데이션 | `Fill.TwoColorGradient` 후 `GradientStops` 색·투명도 지정 |
 | `band_round_top.py` | 카드 상단 라벨 밴드(카드와 좌·폭·상단 일치) → `round2SameRect` 윗모서리 10px | ⚠️ COM `AutoShapeType=148` 은 별 모양이다 — 열거값 추측 금지, XML prstGeom 으로 |
+| `card_fit_illust.example.py` | (예시) 카드 높이를 본문 BoundHeight+여백으로 줄이고, 비는 자리에 일러스트를 `AddPicture` — 슬라이드별 도형 Id 를 박은 일회성 스크립트 | 일러스트는 알파 트림 후 열 폭·남은 높이에 맞춰 비율 유지 |
