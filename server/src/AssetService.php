@@ -112,7 +112,7 @@ final class AssetService
                     if ($isCatWord) {
                         // 가점만 — 이름/태그에 그 낱말이 있으면 조금 더 위로
                         $scoreParams[":ca$i"] = '%' . $t . '%';
-                        $scoreParts[] = "(COALESCE(a.name,'') LIKE :ca$i)*2 + (COALESCE(a.tags,'') LIKE $b)*2";
+                        $scoreParts[] = "(COALESCE(a.name,'') LIKE :ca$i)*2 + (LOWER(COALESCE(a.tags,'')) LIKE $b)*2";
                         $i++;
                         continue;
                     }
@@ -125,10 +125,10 @@ final class AssetService
                         $termParams[":wb$i"] = $quoted;
                         $looseParams[":lb$i"] = $quoted;
                         $looseParams[":lc$i"] = $like;
-                        $scoreParts[] = "(COALESCE(a.tags,'') LIKE $b)*4";
-                        $groupOr[] = "COALESCE(a.tags,'') LIKE :wb$i";
+                        $scoreParts[] = "(LOWER(COALESCE(a.tags,'')) LIKE $b)*4";
+                        $groupOr[] = "LOWER(COALESCE(a.tags,'')) LIKE :wb$i";
                         // 느슨한 단계: 정확 태그 OR 태그 부분일치(이름은 제외 — 한 글자가 이름에 걸리면 노이즈가 크다)
-                        $groupOrLoose[] = "COALESCE(a.tags,'') LIKE :lb$i OR COALESCE(a.tags,'') LIKE :lc$i";
+                        $groupOrLoose[] = "LOWER(COALESCE(a.tags,'')) LIKE :lb$i OR LOWER(COALESCE(a.tags,'')) LIKE :lc$i";
                     } else {
                         $a = ":a$i"; $c = ":c$i";
                         $scoreParams[$a] = $like;    // name 부분일치(점수)
@@ -137,9 +137,9 @@ final class AssetService
                         $termParams[":we$i"] = $like;
                         $looseParams[":ld$i"] = $like;
                         $looseParams[":le$i"] = $like;
-                        $scoreParts[] = "(COALESCE(a.name,'') LIKE $a)*4 + (COALESCE(a.tags,'') LIKE $b)*3 + (COALESCE(a.tags,'') LIKE $c)*1";
-                        $groupOr[] = "COALESCE(a.tags,'') LIKE :wd$i OR COALESCE(a.name,'') LIKE :we$i";
-                        $groupOrLoose[] = "COALESCE(a.tags,'') LIKE :ld$i OR COALESCE(a.name,'') LIKE :le$i";
+                        $scoreParts[] = "(COALESCE(a.name,'') LIKE $a)*4 + (LOWER(COALESCE(a.tags,'')) LIKE $b)*3 + (LOWER(COALESCE(a.tags,'')) LIKE $c)*1";
+                        $groupOr[] = "LOWER(COALESCE(a.tags,'')) LIKE :wd$i OR COALESCE(a.name,'') LIKE :we$i";
+                        $groupOrLoose[] = "LOWER(COALESCE(a.tags,'')) LIKE :ld$i OR COALESCE(a.name,'') LIKE :le$i";
                     }
                     $i++;
                 }
@@ -366,8 +366,8 @@ final class AssetService
             $s = ":s$i"; $w = ":w$i";
             $scoreParams[$s] = $quoted;
             $whereParams[$w] = $quoted;
-            $scoreParts[] = "(COALESCE(a.tags,'') LIKE $s)*1";   // NULL 이면 점수 합이 통째로 NULL 이 된다
-            $orParts[] = "COALESCE(a.tags,'') LIKE $w";
+            $scoreParts[] = "(LOWER(COALESCE(a.tags,'')) LIKE $s)*1";   // NULL 이면 점수 합이 통째로 NULL 이 된다
+            $orParts[] = "LOWER(COALESCE(a.tags,'')) LIKE $w";
             $i++;
         }
         // 카테고리 가점(+ 태그가 없으면 같은 카테고리로 폴백)
