@@ -549,49 +549,49 @@ body {
 }
 
 /* 주제 칩 — 카테고리 아래 한 단계 더 좁히기. 카테고리(주황 채움)와 구분되게 연한 틴트로. */
+/* 주제 — 뱃지 없이 텍스트만, 항목 사이는 연한 회색 | 로 구분 */
 .topicbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  align-items: center;
+  row-gap: 4px;
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed var(--line);
 }
 .topicchip {
   flex: 0 0 auto;
-  border: 1px solid transparent;
-  background: var(--surface);
+  border: 0;
+  background: none;
   color: var(--ink2);
-  border-radius: 999px;
-  padding: 5px 9px;
+  padding: 2px 0;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition: color 0.12s;
+}
+.topicchip + .topicchip::before {
+  content: "|";
+  margin: 0 7px;
+  color: var(--line);
+  font-weight: 400;
 }
 .topicchip__n {
   margin-left: 3px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--muted);
 }
 .topicchip:hover {
-  border-color: var(--primary);
   color: var(--primary);
 }
 .topicchip--active {
-  background: var(--primary-soft);
-  border-color: var(--primary);
   color: var(--primary-d);
+  font-weight: 700;
 }
 .topicchip--active .topicchip__n {
-  color: var(--primary-d);
-}
-.topicchip--active:hover {
-  background: var(--primary-soft);
-  border-color: var(--primary-d);
   color: var(--primary-d);
 }
 
