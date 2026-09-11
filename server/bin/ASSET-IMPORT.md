@@ -24,3 +24,12 @@
 ## 키 / 경로
 - import key: 서버 `config/config.php`의 `import_key` 값(git 제외 — 소스에 키를 두지 않음)
 - 서버 배포·접속: `server/bin/deploy.sh`, `config/deploy.env`(gitignore)
+
+## 기존 자산 재태깅 (2026-09-11)
+얇게 태깅된 자산(태그 15개 미만)에 비전 태그를 덧붙일 때.
+1. 대상 id·썸네일 목록 → 번호 라벨 컨택트시트(6×5) + `idxmap.json`(idx→id) 생성
+2. 시트 2장/에이전트로 병렬 태깅 → `res_NN.json` (`[{idx,ko[20],en[15]}]`)
+3. `python bin/retag-merge.py` → `_retag.json` `{id:{ko,en}}` (커버리지·누락 idx 출력)
+4. `_retag.json` + `bin/retag-assets.php` 를 웹루트에 scp → `curl localhost/powerPlus/retag-assets.php?key=<import_key>&dry=1` 로 평균 확인 → `dry` 빼고 실적용 → 임시 파일 삭제
+   - 기존 tags_ko/tags_en 과 병합(NFC·소문자 dedup, 40개 상한), `tags` = ko∪en
+5. 전후 비교는 `bin/search-audit.php`(같은 방식으로 웹루트 curl) — search_logs 무결과 (query,category) 쌍 재실행 해소율 + 아이콘 태그 밀도 + 샘플 검색
