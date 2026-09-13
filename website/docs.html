@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="설치부터 관리자 화면까지 powerPlus 사용 방법을 정리한 문서.">
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>powerPlus Docs</title>
+<style>
+  @font-face{
+    font-family:"Spoqa Han Sans Neo";
+    src:url("spoqa-400.woff2") format("woff2");
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:"Spoqa Han Sans Neo";
+    src:url("spoqa-500.woff2") format("woff2");
+    font-weight:500; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:"Spoqa Han Sans Neo";
+    src:url("spoqa-700.woff2") format("woff2");
+    font-weight:700; font-style:normal; font-display:swap;
+  }
+
+  :root{
+    --paper:#FFFFFF;
+    --panel:#F4F5F8;
+    --ink:#1A1A1C;
+    --ink-2:#63666B;
+    --ink-3:#9A9DA3;
+    --line:#DCDEE1;
+    --hair:#E8E9EB;
+    --accent:#0A7CDA;
+    --brand:#E0701F;
+    --page:1240px;
+    --tint:#FBEEE4;
+    --sidebar:268px;
+    --toc:212px;
+    --ink-t:#1A1A1C;
+     --ink-d:#55585E;
+     --f:"Spoqa Han Sans Neo","Spoqa Han Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.85;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word;}
+  h1,h2,h3,h4{margin:0;font-weight:500;letter-spacing:-.02em;line-height:1.15;color:var(--ink-t);text-wrap:balance;}
+  p{margin:0;}
+  ul,ol{margin:0;padding:0;}
+  a{color:inherit;}
+  img{display:block;max-width:100%;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px;}
+  code{font-family:var(--mono);font-size:.88em;background:var(--panel);padding:2px 6px;border-radius:5px;}
+
+  /* top bar */
+  .top{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--hair);}
+  .top__in{max-width:1440px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;gap:12px;}
+  .brand{display:flex;align-items:center;gap:8px;text-decoration:none;}
+  .brand__m{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:linear-gradient(145deg,#F0894C,#C43E1C);}
+  .brand__t{font-size:17px;font-weight:500;letter-spacing:-.02em;}
+  .brand__d{font-size:13px;color:var(--ink-3);border-left:1px solid var(--line);padding-left:12px;margin-left:4px;letter-spacing:.02em;}
+  .top__r{margin-left:auto;display:flex;align-items:center;gap:14px;}
+  .top__r a{font-size:13.5px;text-decoration:none;color:var(--ink-2);}
+  .top__r a:hover{color:var(--ink);}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:14px;font-weight:500;
+    text-decoration:none;white-space:nowrap;height:36px;padding:0 18px;border-radius:999px;background:var(--ink);color:#fff;}
+  .btn:hover{background:#2b2b2b;color:#fff;}
+  .menu{display:none;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:#fff;font:inherit;font-size:13px;cursor:pointer;}
+
+  /* shell */
+  .shell{max-width:var(--page);margin:0 auto;padding:0 50px;border-left:1px solid var(--hair);border-right:1px solid var(--hair);display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr) var(--toc);gap:48px;align-items:start;}
+
+  /* sidebar */
+  .side{position:sticky;top:64px;max-height:calc(100vh - 64px);overflow-y:auto;padding:28px 0 60px;}
+  .filter{width:100%;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13.5px;background:var(--panel);}
+  .filter::placeholder{color:var(--ink-3);}
+  .sgroup{margin-top:26px;}
+  .sgroup h4{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:400;margin-bottom:9px;}
+  .sgroup a{display:block;font-size:13.5px;line-height:1.6;text-decoration:none;color:var(--ink-2);padding:5px 10px;border-radius:7px;margin-left:-10px;}
+  .sgroup a:hover{background:var(--panel);color:var(--ink);}
+  .sgroup a.on{color:var(--accent);background:rgba(10,124,218,.07);font-weight:500;}
+  .side__empty{font-size:13px;color:var(--ink-3);margin-top:20px;display:none;}
+
+  /* content */
+  .doc{padding:44px 0 120px;min-width:0;}
+  .kicker{display:inline-flex;align-items:center;height:33px;padding:0 20px;border-radius:999px;background:var(--tint);color:var(--ink);font-size:14px;font-weight:500;line-height:1;letter-spacing:normal;text-transform:none;}
+  .doc h1{font-size:48px;font-weight:500;line-height:1.1;margin-top:18px;}
+  .doc .lede{margin-top:24px;font-size:18px;line-height:1.5;color:var(--ink-d);font-weight:400;
+    letter-spacing:-.02em;max-width:60ch;}
+  .meta{margin-top:22px;display:flex;gap:8px;flex-wrap:wrap;}
+  .tag{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--ink-2);}
+  .tag b{color:var(--ink);font-weight:500;margin-right:4px;}
+
+  .sec{padding-top:64px;scroll-margin-top:84px;}
+  /* i-bricks 식 섹션 구분 — 양 끝이 투명해지는 2px 라인 */
+  .sec > h2{position:relative;border-bottom:0 !important;}
+  .sec > h2::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+    background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(102,102,102,.2) 25%,rgba(102,102,102,.2) 70%,rgba(255,255,255,0) 100%);}
+  .sec > h2{font-size:32px;font-weight:500;line-height:1.15;padding-bottom:16px;border-bottom:1px solid var(--hair);}
+  .sec h3{font-size:18px;margin-top:38px;scroll-margin-top:84px;}
+  .sec h4{font-size:15px;margin-top:26px;}
+  .sec p{margin-top:12px;color:var(--ink-d);font-weight:400;max-width:66ch;}
+  .sec p b,.sec li b{color:var(--ink);font-weight:500;}
+  .sec ul{margin-top:12px;list-style:none;display:grid;gap:8px;}
+  .sec ul li{position:relative;padding-left:16px;color:var(--ink-d);font-weight:400;max-width:66ch;}
+  .sec ul li::before{content:"";position:absolute;left:2px;top:12px;width:4px;height:4px;border-radius:50%;background:var(--ink-3);}
+  .sec ol{margin-top:12px;list-style:none;counter-reset:s;display:grid;gap:10px;}
+  .sec ol li{position:relative;padding-left:30px;color:var(--ink-d);font-weight:400;counter-increment:s;max-width:66ch;}
+  .sec ol li::before{content:counter(s);position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:50%;
+    background:var(--panel);color:var(--ink);font-size:11.5px;font-weight:500;display:grid;place-items:center;}
+
+  .shot{margin-top:22px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--panel);}
+  .shot img{width:100%;}
+  .cap{margin-top:9px;font-size:12.5px;color:var(--ink-3);}
+
+  .tbl{margin-top:20px;overflow-x:auto;border:1px solid var(--hair);border-radius:14px;}
+  table{border-collapse:collapse;width:100%;min-width:440px;font-size:13.5px;}
+  th{text-align:left;font-weight:500;padding:11px 14px;background:var(--panel);border-bottom:1px solid var(--hair);white-space:nowrap;}
+  td{padding:11px 14px;border-bottom:1px solid var(--hair);color:var(--ink-2);font-weight:400;vertical-align:top;}
+  tr:last-child td{border-bottom:0;}
+  td b{color:var(--ink);font-weight:500;}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);}
+
+  .note{margin-top:22px;border-left:2px solid var(--accent);background:rgba(10,124,218,.045);padding:14px 18px;border-radius:0 8px 8px 0;}
+  .note--warn{border-left-color:var(--brand);background:rgba(224,112,31,.05);}
+  .note__t{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-weight:500;}
+  .note--warn .note__t{color:var(--brand);}
+  .note p{margin-top:5px;color:var(--ink-2);font-size:14px;}
+
+  .path{margin-top:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:13px 16px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;}
+  .path span{color:var(--ink);font-weight:500;}
+  .path i{color:var(--ink-3);font-style:normal;}
+
+  .steps{margin-top:24px;display:grid;gap:0;border:1px solid var(--hair);border-radius:20px;overflow:hidden;}
+  .step{display:grid;grid-template-columns:74px 1fr;gap:18px;padding:18px 20px;border-bottom:1px solid var(--hair);align-items:start;}
+  .step:last-child{border-bottom:0;}
+  .step__n{font-size:11.5px;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;padding-top:3px;}
+  .step__b b{font-weight:500;}
+  .step__b p{margin-top:4px;font-size:13.5px;}
+
+  .rel{margin-top:24px;display:grid;gap:0;}
+  .rel__i{padding:22px 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:110px 1fr;gap:20px;}
+  .rel__d{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding-top:2px;}
+  .rel__b b{font-weight:500;}
+  .rel__b p{margin-top:5px;font-size:13.5px;}
+
+  .next{margin-top:72px;padding-top:26px;border-top:1px solid var(--hair);display:flex;gap:12px;flex-wrap:wrap;}
+  .next a{flex:1;min-width:220px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;}
+  .next a:hover{border-color:rgba(10,10,10,.22);}
+  .next span{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);}
+  .next b{display:block;margin-top:4px;font-weight:500;font-size:14.5px;}
+
+  /* toc */
+  .toc{position:sticky;top:56px;padding:52px 0 60px;max-height:calc(100vh - 56px);overflow-y:auto;}
+  .toc h4{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:400;margin-bottom:10px;}
+  .toc a{display:block;font-size:12.5px;line-height:1.55;color:var(--ink-2);text-decoration:none;padding:5px 0 5px 12px;border-left:1px solid var(--hair);}
+  .toc a:hover{color:var(--ink);}
+  .toc a.on{color:var(--accent);border-left-color:var(--accent);}
+  .toc a.sub{padding-left:24px;}
+
+  .foot{border-top:1px solid var(--hair);}
+  .foot__in{max-width:1440px;margin:0 auto;padding:22px 24px 48px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+  .foot__in p{font-size:12.5px;color:var(--ink-3);}
+  .foot__in .brand{margin-right:auto;}
+
+  @media (max-width:1180px){
+    .shell{grid-template-columns:var(--sidebar) minmax(0,1fr);gap:40px;}
+    .toc{display:none;}
+  }
+
+  /* ── 맨 위로 ───────────────────────────────────────────── */
+  .totop{position:fixed;right:24px;bottom:24px;z-index:80;width:46px;height:46px;
+    display:grid;place-items:center;border-radius:50%;border:1px solid var(--line);
+    background:rgba(255,255,255,.92);backdrop-filter:blur(10px);cursor:pointer;
+    color:var(--ink);box-shadow:0 6px 20px -6px rgba(10,10,10,.28);
+    opacity:0;visibility:hidden;transform:translateY(10px);
+    transition:opacity .22s,transform .22s,visibility .22s,border-color .16s;}
+  .totop.is-on{opacity:1;visibility:visible;transform:none;}
+  .totop:hover{border-color:#B9BCC1;}
+  .totop svg{display:block;}
+
+  /* ── 모바일 메뉴 ───────────────────────────────────────── */
+  .burger{display:none;width:36px;height:36px;border:1px solid var(--line);border-radius:999px;
+    background:#fff;cursor:pointer;padding:0;place-items:center;}
+  .skycard .burger{background:rgba(255,255,255,.7);border-color:rgba(9,11,12,.18);}
+  .burger i{display:block;width:15px;height:1.5px;background:var(--ink);border-radius:2px;
+    position:relative;transition:background .16s;}
+  .burger i::before,.burger i::after{content:"";position:absolute;left:0;width:15px;height:1.5px;
+    background:var(--ink);border-radius:2px;transition:transform .2s;}
+  .burger i::before{top:-5px;} .burger i::after{top:5px;}
+  .nav.is-open .burger i{background:transparent;}
+  .nav.is-open .burger i::before{transform:translateY(5px) rotate(45deg);}
+  .nav.is-open .burger i::after{transform:translateY(-5px) rotate(-45deg);}
+
+  /* ── FAQ 아코디언 ──────────────────────────────────────── */
+  .fq-btn{display:flex;width:100%;align-items:flex-start;justify-content:space-between;gap:16px;
+    appearance:none;border:0;background:none;font:inherit;text-align:left;cursor:pointer;padding:0;
+    color:inherit;}
+  .fq-btn .fq{flex:1;}
+  .fq-mark{flex:none;width:22px;height:22px;margin-top:2px;position:relative;}
+  .fq-mark::before,.fq-mark::after{content:"";position:absolute;left:50%;top:50%;background:var(--ink-3);
+    border-radius:2px;transform:translate(-50%,-50%);transition:transform .22s,background .16s;}
+  .fq-mark::before{width:12px;height:1.5px;}
+  .fq-mark::after{width:1.5px;height:12px;}
+  .fi.is-open .fq-mark::after{transform:translate(-50%,-50%) scaleY(0);}
+  .fi.is-open .fq-mark::before{background:var(--brand);}
+  .fq-btn:hover .fq-mark::before,.fq-btn:hover .fq-mark::after{background:var(--ink);}
+  .fa-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s ease;}
+  .fi.is-open .fa-wrap{grid-template-rows:1fr;}
+  .fa-wrap > div{overflow:hidden;}
+
+  /* ── 앵커 이동이 고정 내비에 가리지 않게 ───────────────── */
+  [id]{scroll-margin-top:80px;}
+
+
+  @media (max-width:560px){
+    .nav__r .btn--s{display:none;}   /* 좁은 화면에선 Docs 는 메뉴 안에 있다 */
+    .brand__t{font-size:16px;}
+  }
+  @media (max-width:1000px){
+    .burger{display:grid;}
+    .nav.is-open .nav__l{display:flex;position:absolute;left:0;right:0;top:56px;transform:none;
+      flex-direction:column;gap:0;background:#fff;border-top:1px solid var(--hair);
+      box-shadow:0 20px 34px -22px rgba(10,10,10,.45);padding:6px 16px 14px;}
+    .nav.is-open .nav__l a{padding:13px 2px;font-size:16px;border-bottom:1px solid var(--hair);}
+    .nav.is-open .nav__l a:last-child{border-bottom:0;}
+    .totop{right:16px;bottom:16px;width:42px;height:42px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .fa-wrap{transition:none;}
+  }
+
+  @media (max-width:1000px){
+    .shell{grid-template-columns:1fr;gap:0;}
+    .menu{display:inline-flex;align-items:center;}
+    .side{position:static;max-height:none;padding:18px 0 0;display:none;border-bottom:1px solid var(--hair);}
+    .side.open{display:block;padding-bottom:24px;}
+    .doc{padding-top:32px;}
+    .step{grid-template-columns:1fr;gap:6px;}
+    .rel__i{grid-template-columns:1fr;gap:6px;}
+  }
+/* ── 버튼 ─────────────────────────────────────────────── */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font:inherit;font-size:14px;
+    font-weight:500;text-decoration:none;white-space:nowrap;height:43px;padding:0 20px;border-radius:999px;
+    border:1px solid transparent;cursor:pointer;transition:background .18s,border-color .18s,color .18s;}
+  .btn--d{background:var(--ink);color:#fff;}
+  .btn--d:hover{background:#303033;}
+  .btn--s{background:#fff;color:var(--ink);border-color:var(--line);}
+  .btn--s:hover{border-color:#B9BCC1;}
+  .btn--sm{height:36px;padding:0 14px;font-size:14px;font-weight:500;}
+  .eyebrow{display:inline-flex;align-items:center;gap:5px;color:var(--accent);font-size:13px;font-weight:500;
+    text-decoration:none;letter-spacing:.01em;}
+  .eyebrow:hover{text-decoration:underline;text-underline-offset:3px;}
+  .kicker{display:inline-flex;align-items:center;height:33px;padding:0 20px;border-radius:999px;background:var(--tint);color:var(--ink);font-size:14px;font-weight:500;line-height:1;letter-spacing:normal;text-transform:none;}
+
+  /* ── 내비 ─────────────────────────────────────────────── */
+  .nav{position:sticky;top:0;left:0;z-index:50;width:100%;background:var(--paper);}
+  .nav__in{width:100%;padding:0 16px;height:56px;display:flex;align-items:center;}
+  .brand{display:flex;align-items:center;gap:9px;text-decoration:none;}
+  .brand__m{width:25px;height:25px;border-radius:7px;display:grid;place-items:center;
+    background:linear-gradient(145deg,#F0894C,#C43E1C);}
+  .brand__t{font-size:17.5px;font-weight:500;letter-spacing:-.025em;}
+  .nav__l{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:40px;font-size:14px;font-weight:500;
+    color:#3E4145;}
+  .nav__l a{text-decoration:none;}
+  .nav__l a:hover,.nav__l a.on{color:var(--ink);}
+  .nav__r{margin-left:auto;display:flex;align-items:center;gap:10px;}
+
+  /* ── 푸터 ─────────────────────────────────────────────── */
+  .foot{border-top:1px solid var(--hair);}
+  .foot__in{max-width:var(--page);margin:0 auto;padding:64px var(--pad) 0;
+    border-left:1px solid var(--hair);border-right:1px solid var(--hair);}
+  .fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:28px;}
+  .fcol h4{font-size:11.5px;color:var(--ink-3);font-weight:400;margin:0 0 14px;letter-spacing:.08em;
+    text-transform:uppercase;}
+  .fcol a{display:block;font-size:14px;text-decoration:none;color:var(--ink);margin-bottom:11px;}
+  .fcol a:hover{color:var(--accent);}
+  .fbar{margin-top:64px;padding:22px 0 52px;border-top:1px solid var(--hair);display:flex;gap:16px;
+    flex-wrap:wrap;align-items:center;}
+  .fbar p{font-size:12.5px;color:var(--ink-3);}
+  .fbar .brand{margin-right:auto;}
+
+  
+  /* 공유 셸 — 문서 페이지 적용 */
+  .foot__in{padding-top:56px;}
+  @media (max-width:1000px){
+    .nav__l{display:none;}
+    .fgrid{grid-template-columns:repeat(2,1fr);gap:32px;}
+    .shell{padding-left:22px;padding-right:22px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav"><div class="nav__in"><a class="brand" href="index.html"><span class="brand__m" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></span><span class="brand__t">powerPlus</span></a><nav class="nav__l"><a href="features.html">기능</a><a href="usecases.html">활용 사례</a><a href="pricing.html">요금제</a><a href="docs.html" class="on">문서</a></nav><div class="nav__r"><button class="menu" id="menu" aria-expanded="false">목차</button><a class="btn btn--sm btn--s" href="docs.html">Docs</a><button class="burger" type="button" aria-label="메뉴 열기" aria-expanded="false"><i aria-hidden="true"></i></button><a class="btn btn--sm btn--d" href="mailto:solideosai15@solideos.com?subject=powerPlus%20%EB%AC%B8%EC%9D%98">무료로 시작</a></div></div></header>
+
+<div class="shell">
+
+  <aside class="side" id="side">
+    <input class="filter" id="filter" type="search" placeholder="문서 검색 / Filter docs" aria-label="문서 검색">
+    <p class="side__empty" id="empty">일치하는 항목이 없습니다.</p>
+
+    <nav class="sgroup">
+      <h4>Getting started</h4>
+      <a href="#overview">개요</a>
+      <a href="#requirements">시스템 요구사항</a>
+      <a href="#install">설치하기</a>
+      <a href="#open">작업창 열기</a>
+    </nav>
+    <nav class="sgroup">
+      <h4>Task pane</h4>
+      <a href="#login">로그인 · 이메일 인증</a>
+      <a href="#layout">화면 구성</a>
+      <a href="#browse">자산 탐색과 삽입</a>
+      <a href="#categories">카테고리와 주제</a>
+      <a href="#search">검색</a>
+      <a href="#sets">같은 스타일 세트</a>
+      <a href="#decks">장표 삽입</a>
+      <a href="#saved">즐겨찾기 · 최근</a>
+      <a href="#web">웹 이미지</a>
+      <a href="#request">콘텐츠 요청</a>
+    </nav>
+    <nav class="sgroup">
+      <h4>Admin console</h4>
+      <a href="#admin">대시보드</a>
+      <a href="#assets">자산 관리</a>
+      <a href="#notices">공지 · 요청 관리</a>
+    </nav>
+    <nav class="sgroup">
+      <h4>Reference</h4>
+      <a href="#faq">문제 해결</a>
+      <a href="#stack">기술 스택</a>
+      <a href="#changelog">릴리스 노트</a>
+    </nav>
+  </aside>
+
+  <main class="doc" id="doc">
+    <p class="kicker">Documentation</p>
+    <h1>powerPlus 사용 설명서</h1>
+    <p class="lede">파워포인트 작업창에서 회사 자산을 검색해 클릭 한 번으로 슬라이드에 넣는 추가 기능입니다.<br>설치부터 관리자 화면까지 이 문서 한 장에 담았습니다.</p>
+    <div class="meta">
+      <span class="tag"><b>Version</b> 1.0.4</span>
+      <span class="tag"><b>Updated</b> 2026-09-12</span>
+      <span class="tag"><b>Assets</b> 3,734</span>
+      <span class="tag"><b>Platform</b> Windows · macOS</span>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section class="sec" id="overview">
+      <h2>개요</h2>
+      <p>powerPlus는 파워포인트 오른쪽에 열리는 <b>작업창(task pane)</b>입니다.<br>회사가 보유한 아이콘·사진·일러스트·다이어그램·로고와 지난 제안서 장표를 카테고리와 키워드로 찾아, 카드를 클릭하면 <b>지금 작업 중인 슬라이드에 바로 삽입</b>합니다.</p>
+      <p>자산과 애드인 본체는 모두 서버에서 불러오는 웹 방식입니다.<br>그래서 기능이 업데이트돼도 <b>재설치가 필요 없고</b>, 작업창을 닫았다 다시 열면 최신 화면이 뜹니다.</p>
+
+      <div class="shot"><img src="shots/shot-deck.jpg" alt="파워포인트 오른쪽에 powerPlus 작업창이 열려 아이콘이 격자로 나열된 화면" loading="lazy"></div>
+      <p class="cap">파워포인트 안에서 열린 powerPlus 작업창 — 실제 운영 화면입니다.</p>
+
+      <h3>지금 들어 있는 자산</h3>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>카테고리</th><th>수량</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td><b>아이콘</b></td><td class="num">1,586</td><td>업무·IT·바이오·전자정부·보안 라인 아이콘, 기후·환경·에너지 3D 아이콘. 투명 배경 PNG</td></tr>
+            <tr><td><b>장표</b></td><td class="num">731</td><td>지난 제안서를 표지·목차·간지·본문으로 잘라 등록한 PPT 슬라이드</td></tr>
+            <tr><td><b>로고</b></td><td class="num">539</td><td>정부 부처·지자체·공단·공사·진흥원 등 기관 성격별 분류</td></tr>
+            <tr><td><b>일러스트</b></td><td class="num">378</td><td>발표·회의·데이터분석·협업·콜센터·의료 등 장면 단위</td></tr>
+            <tr><td><b>사진</b></td><td class="num">354</td><td>IT·데이터센터·반도체·바이오·기후·신재생에너지 와이드 배경</td></tr>
+            <tr><td><b>다이어그램</b></td><td class="num">146</td><td>프로세스·구성도·화살표 등 구조 표현 요소</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap">2026-09-12 기준 라이브 데이터 · 자산 하나에 국문 25개, 영문 25개 키워드가 붙어 있습니다.</p>
+    </section>
+
+    <!-- REQUIREMENTS -->
+    <section class="sec" id="requirements">
+      <h2>시스템 요구사항</h2>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>항목</th><th>요구사항</th></tr></thead>
+          <tbody>
+            <tr><td><b>Office</b></td><td>PowerPoint <b>2019 이상</b> 또는 Microsoft 365 — 2016 이하는 지원하지 않습니다</td></tr>
+            <tr><td><b>OS</b></td><td>Windows 10 / 11 · macOS (Office Store 배포 시)</td></tr>
+            <tr><td><b>네트워크</b></td><td>인터넷 연결 — 자산과 애드인 본체를 서버에서 불러옵니다</td></tr>
+            <tr><td><b>계정</b></td><td>회사 이메일(<code>@solideos.com</code>) — 도메인 인증으로 접근을 제한합니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note note--warn">
+        <p class="note__t">Heads up · Office 2016</p>
+        <p>Office 2016 이하는 내부 웹 엔진이 IE11이라 작업창이 백지로 뜹니다.<br>설치 마법사가 레지스트리로 Office 버전을 자동 감지해 미리 안내하며, 작업창 쪽에도 안내 페이지가 대신 표시됩니다.<br>사내는 Office Professional 2021을 쓰지만 신규 설치를 하지 않은 PC에는 2016이 남아 있을 수 있습니다.</p>
+      </div>
+    </section>
+
+    <!-- INSTALL -->
+    <section class="sec" id="install">
+      <h2>설치하기</h2>
+      <p><code>powerPlus_Setup.exe</code>를 더블클릭하면 설치 마법사가 실행됩니다. <b>관리자 권한이 필요 없고</b> 5단계로 1분 안에 끝납니다.</p>
+
+      <div class="steps">
+        <div class="step"><div class="step__n">Step 1</div><div class="step__b"><b>시작</b><p>요구사항을 확인합니다.<br>좌측에 전체 5단계 진행 상태가 표시됩니다.</p></div></div>
+        <div class="step"><div class="step__n">Step 2</div><div class="step__b"><b>라이선스 동의</b><p>사내 사용 한정, 자산의 외부 무단 배포 금지, 삽입·즐겨찾기 통계는 서비스 개선 목적으로만 수집. 동의 체크 후 다음 버튼이 활성화됩니다.</p></div></div>
+        <div class="step"><div class="step__n">Step 3</div><div class="step__b"><b>설치 옵션</b><p>기본 경로 <code>%LOCALAPPDATA%\powerPlus</code> 그대로 두면 됩니다.<br>사용자 폴더라 관리자 권한이 필요 없습니다.</p></div></div>
+        <div class="step"><div class="step__n">Step 4</div><div class="step__b"><b>설치 진행</b><p>파일 복사와 파워포인트 추가 기능 등록이 자동으로 진행됩니다.<br>수 초면 끝납니다.</p></div></div>
+        <div class="step"><div class="step__n">Step 5</div><div class="step__b"><b>완료</b><p>“지금 PowerPoint 실행하기”를 체크한 채 완료를 누르면 파워포인트가 바로 열립니다.</p></div></div>
+      </div>
+
+      <div class="note">
+        <p class="note__t">Note · 업데이트</p>
+        <p>애드인 본체와 자산은 서버에서 불러오므로 로컬에는 등록 정보만 설치됩니다.<br>이후 기능이 업데이트돼도 재설치할 필요가 없습니다.<br>설치 파일은 리본 아이콘이나 매니페스트가 바뀔 때만 새로 받으면 됩니다.</p>
+      </div>
+    </section>
+
+    <!-- OPEN -->
+    <section class="sec" id="open">
+      <h2>작업창 열기</h2>
+      <p>설치 후 파워포인트 상단 메뉴에서 다음 경로로 들어갑니다.<br>한 번 열어 두면 이후에는 파워포인트를 켤 때 자동으로 같이 뜹니다.</p>
+      <div class="path"><span>삽입</span><i>→</i><span>추가 기능</span><i>→</i><span>개발자 추가 기능</span><i>→</i><span>powerPlus</span></div>
+    </section>
+
+    <!-- LOGIN -->
+    <section class="sec" id="login">
+      <h2>로그인 · 이메일 인증</h2>
+      <p>비밀번호가 없는 <b>이메일 인증코드(OTP)</b> 방식입니다.</p>
+      <ol>
+        <li>회사 이메일(<code>아이디@solideos.com</code>)을 입력하고 <b>인증코드 받기</b>를 누릅니다.</li>
+        <li>메일로 온 <b>6자리 코드</b>를 입력하면 로그인 완료.</li>
+        <li>로그인 상태는 유지됩니다.<br>토큰이 만료될 때만 다시 인증하면 됩니다.</li>
+      </ol>
+      <ul>
+        <li>회사 도메인 외 이메일은 사용할 수 없습니다.</li>
+        <li>인증 메일이 안 보이면 <b>스팸함·프로모션함</b>을 확인하세요.</li>
+        <li>인증코드는 <b>10분</b>간 유효하고, 재발송은 1분 간격으로 가능합니다.</li>
+      </ul>
+    </section>
+
+    <!-- LAYOUT -->
+    <section class="sec" id="layout">
+      <h2>화면 구성</h2>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>영역</th><th>위치</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><b>헤더</b></td><td>상단</td><td>로고 · 알림(관리자 공지, 새 공지가 있으면 배지) · 프로필</td></tr>
+            <tr><td><b>탭</b></td><td>헤더 아래</td><td>전체 / 즐겨찾기 / 최근 / 웹 이미지</td></tr>
+            <tr><td><b>검색창</b></td><td>탭 아래</td><td>키워드 입력 + 돋보기. 검색 후에는 같은 버튼이 해제(✕)로 바뀝니다</td></tr>
+            <tr><td><b>카테고리 칩</b></td><td>검색창 아래</td><td>전체·아이콘·사진·일러스트·다이어그램·장표·로고, 각 칩에 등록 수 표시</td></tr>
+            <tr><td><b>주제 칩</b></td><td>카테고리 아래</td><td>선택한 카테고리 안에서 주제를 한 번 더 좁힙니다</td></tr>
+            <tr><td><b>자산 그리드</b></td><td>중앙</td><td>카드 목록. 스크롤하면 계속 로드됩니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note">
+        <p class="note__t">Tip · 창을 넓히면 더 많이 보입니다</p>
+        <p>작업창 폭에 맞춰 그리드 열 수가 자동으로 늘어납니다(최대 7열). 작업창 경계를 드래그해 넓히면 한 화면에 더 많은 자산이 들어옵니다.</p>
+      </div>
+    </section>
+
+    <!-- BROWSE -->
+    <section class="sec" id="browse">
+      <h2>자산 탐색과 삽입</h2>
+      <ul>
+        <li><b>삽입</b> — 카드를 클릭하면 현재 슬라이드에 바로 들어갑니다.<br>이미지 자산은 이미지로, 장표 자산은 슬라이드 자체로 삽입됩니다.</li>
+        <li><b>위치 지정</b> — 슬라이드에서 도형이나 개체를 먼저 선택해 두면 그 위치·크기에 맞춰 삽입됩니다.</li>
+        <li><b>즐겨찾기</b> — 카드 우상단 북마크 버튼으로 등록·해제합니다.<br>서버에 저장되므로 PC를 바꿔도 유지됩니다.</li>
+        <li><b>화질</b> — 목록은 가벼운 썸네일로 표시하고, 삽입할 때는 원본 화질이 들어갑니다.</li>
+      </ul>
+      <div class="note note--warn">
+        <p class="note__t">Heads up · 첫 삽입</p>
+        <p>설치 직후 슬라이드를 한 번도 클릭하지 않은 상태에서는 삽입 지점이 없어 실패할 수 있습니다.<br>슬라이드를 한 번 클릭해 커서를 둔 뒤 다시 시도하세요.<br>브라우저에서 애드인을 열었을 때도 삽입은 동작하지 않습니다.</p>
+      </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="sec" id="categories">
+      <h2>카테고리와 주제</h2>
+      <p>검색어 없이 <b>카테고리 칩</b>만 눌러도 그 카테고리 전체가 보입니다.<br>칩마다 등록 수가 함께 표시돼 어디에 자료가 많은지 한눈에 보입니다.</p>
+      <p>카테고리를 고르면 아래에 <b>주제 칩</b>이 나타납니다.<br>아이콘·사진·일러스트·다이어그램은 태그 빈도를 실측해 만든 주제로, 로고는 기관 이름 기준(정부·지자체·진흥원 등)으로, 장표는 페이지 종류(표지·목차·간지·본문·Q&amp;A)로 나뉩니다.<br>결과가 0건인 주제는 아예 표시되지 않습니다.</p>
+
+      <div class="shot"><img src="shots/shot-illust.jpg" alt="일러스트 카테고리를 선택해 인물 일러스트가 나열된 작업창" loading="lazy"></div>
+      <p class="cap">일러스트 카테고리 — 인물·직장인, 회의·발표, 분석·차트 같은 장면 단위 주제로 나뉩니다.</p>
+
+      <div class="shot"><img src="shots/shot-logo-full.jpg" alt="로고 카테고리를 선택해 기관 성격별 로고가 나열된 작업창" loading="lazy"></div>
+      <p class="cap">로고 카테고리 — 정부 부처, 지자체, 공단·공사로 한 번 더 나눠 찾습니다.</p>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="sec" id="search">
+      <h2>검색</h2>
+      <p>검색창에 키워드를 입력하고 Enter 또는 돋보기를 누릅니다.<br>국문·영문 태그와 자산명을 함께 찾습니다.</p>
+
+      <h3>검색어를 고쳐서 찾습니다</h3>
+      <p>사람은 자산에 붙은 이름을 모르고 검색합니다.<br>powerPlus는 자산 쪽 태그를 늘리는 대신 <b>검색어 쪽을 고쳐</b> 그 간극을 메웁니다.<br>고쳐서 찾은 경우 결과 바에 “‘코드’로 고쳐서 찾았어요”처럼 알려 줍니다.</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>이렇게 쳐도</th><th>이렇게 찾습니다</th><th>동작</th></tr></thead>
+          <tbody>
+            <tr><td>코그 · 코ㅡㄷ</td><td><b>코드</b></td><td>자모 단위로 풀어 오타를 교정</td></tr>
+            <tr><td>아이큰 / 사징</td><td><b>아이콘 / 사진</b></td><td>자모 단위로 풀어 오타를 교정</td></tr>
+            <tr><td>디비 / DB</td><td><b>데이터베이스</b></td><td>동의어 · 한↔영 사전</td></tr>
+            <tr><td>사람들</td><td><b>사람</b> + 사람들</td><td>조사·어미를 벗겨 범위를 넓힘</td></tr>
+            <tr><td>데이터 베이스</td><td><b>데이터베이스</b></td><td>띄어 쓴 복합어를 붙여서 인식</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap">실제 등록된 태그와 대조해 고치므로 자산이 늘어나도 그대로 동작합니다.<br>이미 정확한 검색어는 건드리지 않습니다.</p>
+
+      <h3>알아 두면 좋은 것</h3>
+      <ul>
+        <li><b>색상 검색</b> — “파란 아이콘”처럼 색을 섞어 칠 수 있습니다.<br>자산마다 색상 태그가 자동으로 붙어 있습니다.</li>
+        <li><b>카테고리 안에서 검색</b> — 카테고리를 고른 뒤 검색하면 그 안에서만 찾습니다.</li>
+        <li><b>추천 검색어</b> — 입력하는 동안 실제 등록된 태그에서 후보를 보여 줍니다.<br>없는 말은 만들어 주지 않습니다.</li>
+        <li><b>결과가 없으면</b> — “‘키워드’ 자료 요청하기” 버튼이 나타나 <a href="#request">콘텐츠 요청</a>으로 바로 이어집니다.</li>
+        <li><b>되돌아오기</b> — 검색 버튼이 ✕로 바뀝니다.<br>Esc를 눌러도 해제됩니다.</li>
+      </ul>
+    </section>
+
+    <!-- SETS -->
+    <section class="sec" id="sets">
+      <h2>같은 스타일 세트</h2>
+      <p>자산 카드에 마우스를 올리면 오른쪽 아래에 <b>격자 버튼</b>이 나타납니다.<br>누르면 <b>같은 스타일로 함께 등록된 세트</b>가 한 화면에 모이고, 그 자리에서 바로 삽입할 수 있습니다.<br>내가 누른 자산은 주황 테두리로 표시됩니다.</p>
+      <p>세트는 등록 배치(같은 소스·같은 파이프라인)와 <b>색감·채도·밝기 실측 지문</b>을 함께 봐서 묶습니다.<br>그래서 같은 날 들어온 자산이어도 파란 톤 플랫과 사실적인 컬러 인물은 서로 다른 세트로 갈립니다.</p>
+      <div class="shot"><img src="shots/shot-set.jpg" alt="같은 스타일 세트를 열어 함께 등록된 장표가 격자로 보이는 화면" loading="lazy"></div>
+      <p class="cap">슬라이드 하나에 같은 톤의 자산을 여러 개 써야 할 때 가장 빠른 경로입니다.</p>
+    </section>
+
+    <!-- DECKS -->
+    <section class="sec" id="decks">
+      <h2>장표 삽입</h2>
+      <p>장표는 지난 제안서를 낱장으로 잘라 등록한 PPT 자산입니다.<br>주제 칩으로 <b>표지 · 목차 · 간지 · 본문 · Q&amp;A · 패키지</b>를 골라 볼 수 있고, 카드 좌상단에 종류 뱃지가 표시됩니다.</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>유형</th><th>클릭했을 때</th></tr></thead>
+          <tbody>
+            <tr><td><b>패키지</b></td><td>제안서 한 벌 전체가 현재 슬라이드 뒤에 삽입됩니다</td></tr>
+            <tr><td><b>단일</b></td><td>표지·목차·간지·본문 등 <b>1장만</b> 삽입됩니다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>삽입된 슬라이드는 글꼴·색·도형 등 원본 서식을 그대로 유지합니다.<br>내용만 고쳐 쓰면 됩니다.</p>
+    </section>
+
+    <!-- SAVED -->
+    <section class="sec" id="saved">
+      <h2>즐겨찾기 · 최근</h2>
+      <ul>
+        <li><b>즐겨찾기 탭</b> — 북마크한 자산만 모아 봅니다.<br>자주 쓰는 표지나 아이콘을 등록해 두면 매번 검색할 필요가 없습니다.</li>
+        <li><b>최근 탭</b> — 내가 최근에 삽입한 자산입니다.<br>“지난번에 썼던 그 사진”을 다시 찾을 때 가장 빠릅니다.</li>
+      </ul>
+      <p>두 목록 모두 서버에 저장되므로 다른 PC에서 로그인해도 그대로 유지됩니다.</p>
+    </section>
+
+    <!-- WEB -->
+    <section class="sec" id="web">
+      <h2>웹 이미지</h2>
+      <p>사내 라이브러리에 없는 이미지가 필요할 때, 작업창 안에서 외부 무료 이미지를 검색해 바로 삽입할 수 있습니다.</p>
+      <ul>
+        <li>검색 소스는 <b>Openverse</b> — 상업적 사용이 가능한 오픈 라이선스 이미지 위주입니다.</li>
+        <li>결과 격자에서 클릭하면 원본이 슬라이드에 삽입됩니다.</li>
+        <li>스크롤 끝까지 내리면 다음 페이지가 이어집니다.</li>
+        <li>검색어는 <b>영문 키워드</b>가 결과가 더 풍부합니다 — technology, business, meeting 등.</li>
+      </ul>
+    </section>
+
+    <!-- REQUEST -->
+    <section class="sec" id="request">
+      <h2>콘텐츠 요청</h2>
+      <p>필요한 자료가 라이브러리에 없으면 관리자에게 직접 요청할 수 있습니다.<br>검색 결과가 없을 때 뜨는 버튼이나 프로필 메뉴에서 열립니다.</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>항목</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><b>유형</b></td><td>아이콘 / 사진 / 일러스트 / 다이어그램 / 장표 / 로고 — 관리자 카테고리와 연동</td></tr>
+            <tr><td><b>제목 · 키워드</b></td><td>필수. 예: “친환경·ESG 관련 3D 아이콘”</td></tr>
+            <tr><td><b>상세 설명</b></td><td>원하는 스타일·색감·용도를 자유롭게</td></tr>
+            <tr><td><b>참고 링크</b></td><td>선택. 참고할 이미지나 사이트 주소</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>보낸 요청은 관리자 <a href="#notices">요청 관리</a> 화면에 접수되고, 검토 후 라이브러리에 추가됩니다.</p>
+    </section>
+
+    <!-- ADMIN -->
+    <section class="sec" id="admin">
+      <h2>관리자 대시보드</h2>
+      <p>관리자 주소로 접속해 관리자 계정으로 OTP 로그인합니다(애드인과 같은 방식). 좌측 내비게이션에서 <b>현황 · 콘텐츠 관리 · 사용자 소통</b> 그룹으로 이동합니다.</p>
+
+      <h3>핵심 지표</h3>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>지표</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr><td><b>DAU / WAU / MAU</b></td><td>오늘 · 최근 7일 · 최근 30일 고유 로그인 사용자</td></tr>
+            <tr><td><b>오늘 삽입</b></td><td>오늘 자산이 삽입된 횟수(전일 대비 증감 포함)</td></tr>
+            <tr><td><b>스티키니스</b></td><td>DAU ÷ MAU — 얼마나 꾸준히 쓰는지</td></tr>
+            <tr><td><b>콘텐츠 커버리지</b></td><td>전체 자산 중 실제로 한 번이라도 쓰인 자산 비율</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>차트와 순위</h3>
+      <ul>
+        <li><b>방문·사용 추이</b>와 <b>요일 × 시간대 히트맵</b> — 언제 많이 쓰는지</li>
+        <li><b>카테고리별 실사용</b> — 등록 수가 아니라 실제 삽입 기준</li>
+        <li><b>인기 자산 / 즐겨찾기 TOP</b>, <b>활발한 사용자 / 최근 삽입 내역</b></li>
+        <li><b>인기 검색어 / 무결과 검색어</b> — 무엇을 찾았고, 무엇을 <b>못 찾았는지</b></li>
+      </ul>
+      <div class="note">
+        <p class="note__t">Tip · 무결과 검색어가 가장 중요한 화면입니다</p>
+        <p>결과가 0건이었던 검색어 목록은 실패 기록이 아니라 다음에 무엇을 채워야 하는지 사용자가 직접 알려 준 목록입니다.<br>콘텐츠 요청과 함께 보면 자산 보강 우선순위가 그대로 나옵니다.<br>이 목록대로 채운 결과 무결과율이 17.4%에서 10.5%로 내려갔습니다.</p>
+      </div>
+    </section>
+
+    <!-- ASSETS -->
+    <section class="sec" id="assets">
+      <h2>자산 관리</h2>
+      <p>자산의 조회·등록·수정·삭제를 담당합니다.<br>카테고리 필터, 태그 검색, 정렬(최신·이름·즐겨찾기·인기), 썸네일 크기 슬라이더, 페이지당 개수를 툴바에서 조절합니다.<br>카드를 클릭하면 우측에 상세 패널이 열립니다.</p>
+
+      <h4>새 자산 등록</h4>
+      <ul>
+        <li><b>이미지 자산</b>(아이콘·사진·일러스트·다이어그램·로고) — PNG/JPG 업로드. 서버가 카테고리별 크기로 자동 리사이즈하고 썸네일을 만듭니다.</li>
+        <li><b>장표</b> — <code>.ppt</code> / <code>.pptx</code> 업로드(필수) + 썸네일(선택). 유형은 패키지(전체 삽입) 또는 단일(표지·목차·간지·본문·Q&amp;A·기타)을 고릅니다.</li>
+        <li><b>태그</b> — 국문·영문으로 넉넉하게. 동의어·용도·색상까지 넣어야 검색 적중률이 올라갑니다.</li>
+      </ul>
+      <div class="note">
+        <p class="note__t">Note · 대량 등록</p>
+        <p>수십~수백 개를 한 번에 올릴 때는 관리 화면 대신 드롭 폴더 파이프라인을 씁니다.<br>리사이즈 → 비전 태깅(국문 25·영문 25) → 색상 자동 태깅 → 서버 임포트가 한 줄기로 이어집니다.<br>자세한 절차는 저장소의 <code>server/bin/ASSET-IMPORT.md</code> 런북을 참고하세요.</p>
+      </div>
+    </section>
+
+    <!-- NOTICES -->
+    <section class="sec" id="notices">
+      <h2>공지 · 요청 관리</h2>
+      <h3>공지</h3>
+      <p>사용자 애드인의 <b>알림</b>에 표시되는 공지를 관리합니다.<br>새 공지를 등록하면 즉시 전체 사용자에게 배지가 뜹니다.<br>지우지 않고 내리려면 상태를 비활성으로 바꾸면 됩니다.</p>
+      <h3>요청</h3>
+      <p>사용자가 보낸 콘텐츠 요청이 접수되는 곳입니다.<br>목록에 유형·제목·요청자·상태·등록일이 표시되고, <b>신규 → 완료 / 거절</b>로 상태를 관리합니다.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="sec" id="faq">
+      <h2>문제 해결</h2>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>증상</th><th>원인과 해결</th></tr></thead>
+          <tbody>
+            <tr><td><b>애드인 메뉴가 안 보임</b></td><td>파워포인트를 다시 켜고 [삽입 → 추가 기능 → 개발자 추가 기능]에서 확인하세요.<br>그래도 없으면 설치 파일을 다시 실행합니다.</td></tr>
+            <tr><td><b>작업창이 백지로 나옴</b></td><td>Office 2016 이하입니다.<br>구형 웹 엔진이라 지원하지 않으며 안내 페이지가 대신 표시됩니다.<br>Office 2019 이상으로 올려 주세요.</td></tr>
+            <tr><td><b>설치 파일이 백신에 막힘</b></td><td>사내 백신이 서명 없는 설치 파일을 차단할 수 있습니다.<br>정보보호 담당자에게 예외 처리를 요청하세요.</td></tr>
+            <tr><td><b>인증 메일이 안 옴</b></td><td>스팸함·프로모션함을 확인하세요.<br>1분 뒤 재발송할 수 있습니다.</td></tr>
+            <tr><td><b>클릭해도 삽입이 안 됨</b></td><td>브라우저에서 열었을 때는 삽입되지 않습니다.<br>파워포인트 작업창 안에서만 동작합니다.<br>슬라이드를 한 번 클릭해 커서를 둔 뒤 다시 시도해 보세요.</td></tr>
+            <tr><td><b>삽입 위치가 이상함</b></td><td>도형이나 개체를 먼저 선택해 두면 그 위치·크기에 맞춰 삽입됩니다.</td></tr>
+            <tr><td><b>아이콘이 옛 디자인으로 보임</b></td><td>Office가 리본 아이콘을 캐시합니다.<br>설치 파일을 다시 실행하면 갱신됩니다.</td></tr>
+            <tr><td><b>새 기능이 안 보임</b></td><td>작업창을 닫았다 다시 여세요.<br>재설치는 필요 없습니다.</td></tr>
+            <tr><td><b>관리자 페이지 로그인 불가</b></td><td>관리자 권한 계정인지 확인하세요.<br>일반 사용자 계정은 입장할 수 없습니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section class="sec" id="stack">
+      <h2>기술 스택</h2>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>구성</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td><b>애드인</b></td><td>React 18 · TypeScript · Webpack 5 · Office.js</td></tr>
+            <tr><td><b>서버</b></td><td>PHP · MariaDB (PDO prepared statement) · REST/JSON</td></tr>
+            <tr><td><b>관리자</b></td><td>단일 페이지 웹 대시보드 — 자산·카테고리·공지·요청·통계</td></tr>
+            <tr><td><b>인증</b></td><td>이메일 OTP 6자리 + 회사 도메인 제한</td></tr>
+            <tr><td><b>설치</b></td><td>WebView2 기반 설치 마법사 — 사용자 폴더 설치, 관리자 권한 불필요</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>구축형으로 고객사 서버에 올릴 경우 서버 한 대에 PHP와 MySQL이면 동작합니다.<br>자세한 구성은 <a href="pricing.html#selfhost">구축형 문의</a>로 상담해 주세요.</p>
+    </section>
+
+    <!-- CHANGELOG -->
+    <section class="sec" id="changelog">
+      <h2>릴리스 노트</h2>
+      <p>작업창을 닫았다 다시 열면 최신 기능이 반영됩니다.<br>재설치는 필요 없습니다.</p>
+
+      <div class="rel">
+        <div class="rel__i">
+          <div class="rel__d">2026-09-11</div>
+          <div class="rel__b">
+            <b>대문자 태그 검색 수정 · 검색 사전 보강</b>
+            <p>DNA·IT·3D·API 같은 대문자 태그가 검색에 잡히지 않던 문제를 고쳤습니다(DNA 3건 → 36건, 3D 0건 → 844건). 무결과 검색어 실측을 근거로 동의어 사전 29그룹을 보강하고, 태그가 얇은 아이콘 634개를 재태깅했습니다.</p>
+          </div>
+        </div>
+        <div class="rel__i">
+          <div class="rel__d">2026-08-25</div>
+          <div class="rel__b">
+            <b>그리드 열 자동 확장</b>
+            <p>작업창 폭에 맞춰 자산 그리드 열 수가 3열에서 최대 7열까지 자동으로 늘어납니다.<br>넓은 화면에서 한 번에 더 많은 자산을 볼 수 있습니다.</p>
+          </div>
+        </div>
+        <div class="rel__i">
+          <div class="rel__d">2026-08-13</div>
+          <div class="rel__b">
+            <b>주제 칩 · 추천 검색어 · 한 글자 검색</b>
+            <p>카테고리 안에서 주제로 한 번 더 좁힐 수 있습니다.<br>입력하는 동안 실제 등록된 태그에서 추천 검색어를 보여 주고, 한 글자 검색도 정확 태그 우선으로 허용합니다.</p>
+          </div>
+        </div>
+        <div class="rel__i">
+          <div class="rel__d">2026-08-13</div>
+          <div class="rel__b">
+            <b>오타 교정 검색 · 같은 스타일 세트 · 카테고리 칩 상단 이동</b>
+            <p>자음·모음이 밀리거나 바뀌어도 알아서 고쳐 찾습니다.<br>카드 호버 시 나타나는 격자 버튼으로 같은 스타일 세트를 모아 볼 수 있고, 카테고리를 상단 칩으로 옮기면서 등록 수를 함께 표시합니다.</p>
+          </div>
+        </div>
+        <div class="rel__i">
+          <div class="rel__d">2026-08-11</div>
+          <div class="rel__b">
+            <b>검색 관련도 개선 · 이미지 삽입 오류 수정</b>
+            <p>이름이 없는 자산이 검색 결과에서 항상 뒤로 밀리던 문제를 고쳤습니다.<br>설치 직후 삽입 지점이 없을 때 이미지가 삽입되지 않던 오류에 3단 폴백을 넣었습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="next">
+        <a href="pricing.html"><span>Pricing</span><b>요금제 보기 →</b></a>
+        <a href="mailto:solideosai15@solideos.com?subject=powerPlus%20%EB%AC%B8%EC%9D%98"><span>Support</span><b>문의하기 →</b></a>
+      </div>
+    </section>
+  </main>
+
+  <aside class="toc">
+    <h4>On this page</h4>
+    <nav id="toc"></nav>
+  </aside>
+</div>
+
+<footer class="foot"><div class="foot__in"><div class="fgrid"><div class="fcol"><h4>Product</h4><a href="features.html#library">자산 라이브러리</a><a href="features.html#search">한국어 검색</a><a href="features.html#decks">장표 삽입</a></div><div class="fcol"><h4>Use cases</h4><a href="usecases.html">제안서</a><a href="usecases.html">사내 보고</a><a href="usecases.html">교육 자료</a></div><div class="fcol"><h4>Resources</h4><a href="docs.html#install">설치 안내</a><a href="docs.html#changelog">릴리스 노트</a><a href="docs.html#faq">문제 해결</a></div><div class="fcol"><h4>Company</h4><a href="index.html">powerPlus 소개</a><a href="mailto:solideosai15@solideos.com?subject=powerPlus%20%EB%AC%B8%EC%9D%98">문의</a></div><div class="fcol"><h4>Pricing</h4><a href="pricing.html">요금제</a><a href="pricing.html#selfhost">구축형</a></div></div><div class="fbar"><a class="brand" href="index.html"><span class="brand__m" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></span><span class="brand__t">powerPlus</span></a><p>화면과 수치는 운영 중인 라이브러리의 실제 데이터입니다.<br>· Updated 2026-09-12</p></div></div></footer>
+
+<script>
+(function(){
+  // sidebar filter
+  var filter = document.getElementById('filter');
+  var empty = document.getElementById('empty');
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.sgroup'));
+  filter.addEventListener('input', function(){
+    var q = filter.value.trim().toLowerCase();
+    var hits = 0;
+    groups.forEach(function(g){
+      var links = Array.prototype.slice.call(g.querySelectorAll('a'));
+      var shown = 0;
+      links.forEach(function(a){
+        var match = !q || a.textContent.toLowerCase().indexOf(q) > -1;
+        a.style.display = match ? '' : 'none';
+        if (match) shown++;
+      });
+      g.style.display = shown ? '' : 'none';
+      hits += shown;
+    });
+    empty.style.display = hits ? 'none' : 'block';
+  });
+
+  // mobile menu
+  var side = document.getElementById('side');
+  var menu = document.getElementById('menu');
+  if (menu) menu.addEventListener('click', function(){
+    var open = side.classList.toggle('open');
+    menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  side.addEventListener('click', function(e){
+    if (e.target.tagName === 'A' && window.innerWidth <= 1000) {
+      side.classList.remove('open');
+      if (menu) menu.setAttribute('aria-expanded','false');
+    }
+  });
+
+  // build "on this page"
+  var toc = document.getElementById('toc');
+  var heads = Array.prototype.slice.call(document.querySelectorAll('.doc .sec > h2, .doc .sec h3'));
+  heads.forEach(function(h){
+    if (!h.id) {
+      h.id = (h.closest('.sec').id || 'h') + '-' + h.textContent.trim().replace(/[^\w가-힣]+/g,'-').slice(0,24);
+    }
+    var a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.textContent.trim();
+    if (h.tagName === 'H3') a.className = 'sub';
+    toc.appendChild(a);
+  });
+
+  // scroll spy
+  var sideLinks = Array.prototype.slice.call(document.querySelectorAll('.sgroup a'));
+  var tocLinks = Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var targets = Array.prototype.slice.call(document.querySelectorAll('.doc .sec, .doc .sec h3'));
+  function spy(){
+    var best = null, bestTop = -Infinity;
+    targets.forEach(function(t){
+      var top = t.getBoundingClientRect().top - 90;
+      if (top <= 0 && top > bestTop) { bestTop = top; best = t; }
+    });
+    if (!best) best = targets[0];
+    var secId = best.classList.contains('sec') ? best.id : best.closest('.sec').id;
+    var headId = best.id;
+    sideLinks.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href') === '#' + secId); });
+    tocLinks.forEach(function(a){
+      var href = a.getAttribute('href').slice(1);
+      a.classList.toggle('on', href === headId || (best.classList.contains('sec') && href === secId + '-' + secId));
+    });
+    if (!tocLinks.some(function(a){ return a.classList.contains('on'); })) {
+      var first = tocLinks.filter(function(a){ return document.getElementById(a.getAttribute('href').slice(1)).closest('.sec').id === secId; })[0];
+      if (first) first.classList.add('on');
+    }
+  }
+  spy();
+  var tick = false;
+  window.addEventListener('scroll', function(){
+    if (tick) return;
+    tick = true;
+    window.requestAnimationFrame(function(){ spy(); tick = false; });
+  }, { passive: true });
+})();
+</script>
+
+<button class="totop" type="button" aria-label="맨 위로"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M8 3L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* 1. 맨 위로 */
+  var top = document.querySelector(".totop");
+  if (top) {
+    var toggleTop = function(){ top.classList.toggle("is-on", window.scrollY > 420); };
+    toggleTop();
+    window.addEventListener("scroll", toggleTop, {passive:true});
+    top.addEventListener("click", function(){
+      window.scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+    });
+  }
+
+  /* 2. 모바일 메뉴 */
+  var nav = document.querySelector(".nav");
+  var burger = nav && nav.querySelector(".burger");
+  if (nav && burger) {
+    var close = function(){ nav.classList.remove("is-open"); burger.setAttribute("aria-expanded","false"); };
+    burger.addEventListener("click", function(){
+      var open = !nav.classList.contains("is-open");
+      nav.classList.toggle("is-open", open);
+      burger.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    nav.querySelectorAll(".nav__l a").forEach(function(a){ a.addEventListener("click", close); });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
+    document.addEventListener("click", function(e){ if (!nav.contains(e.target)) close(); });
+    window.addEventListener("resize", function(){ if (window.innerWidth > 1000) close(); });
+  }
+
+  /* 3. FAQ 아코디언 — 스크립트가 없으면 그냥 다 펼쳐진 문서로 읽힌다 */
+  document.querySelectorAll(".faq .fi").forEach(function(item, i){
+    var q = item.querySelector(".fq"), a = item.querySelector(".fa");
+    if (!q || !a) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "fq-btn";
+    btn.setAttribute("aria-expanded", "false");
+    q.parentNode.insertBefore(btn, q);
+    btn.appendChild(q);
+    var mark = document.createElement("span");
+    mark.className = "fq-mark";
+    mark.setAttribute("aria-hidden", "true");
+    btn.appendChild(mark);
+
+    var wrap = document.createElement("div");
+    wrap.className = "fa-wrap";
+    var innerId = "fa-" + (i + 1);
+    var inner = document.createElement("div");
+    a.parentNode.insertBefore(wrap, a);
+    inner.appendChild(a);
+    wrap.appendChild(inner);
+    wrap.id = innerId;
+    btn.setAttribute("aria-controls", innerId);
+
+    btn.addEventListener("click", function(){
+      var open = !item.classList.contains("is-open");
+      item.classList.toggle("is-open", open);
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  });
+
+  /* 4. 같은 페이지 앵커 — 부드럽게, 그리고 주소창에도 남게 */
+  var here = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll('a[href*="#"]').forEach(function(a){
+    a.addEventListener("click", function(e){
+      var href = a.getAttribute("href") || "";
+      if (/^(https?:|mailto:|tel:)/.test(href)) return;
+      var parts = href.split("#");
+      if (parts[0] && parts[0] !== here) return;   /* 다른 페이지면 평소대로 이동 */
+      var id = parts[1];
+      var el = id && document.getElementById(id);
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+      history.replaceState(null, "", "#" + id);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
