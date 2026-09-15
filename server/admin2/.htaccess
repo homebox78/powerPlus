@@ -1,0 +1,6 @@
+# 관리자 화면(HTML)은 항상 재검증 — 배포 후 옛 화면 캐시로 카운트/기능이 옛날처럼 보이는 문제 방지
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
