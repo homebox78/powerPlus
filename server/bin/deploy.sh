@@ -34,17 +34,14 @@ echo "→ 애드인 빌드"
 echo "→ 원격 폴더 준비"
 # uploads 는 웹서버(www-data)가 써야 하므로 그룹 소유 + 2775(setgid: 새 파일도 그룹 상속).
 # 그룹 변경 권한이 없으면 기존 권한을 그대로 두어 업로드가 깨지지 않게 한다(777 로 되돌리지 않음).
-ssh $SSHOPT -p 22 "$R" "mkdir -p '$RP/src' '$RP/admin' '$RP/admin/vendor' '$RP/admin2' '$RP/admin2/vendor' '$RP/lib/PHPMailer' '$RP/sql' '$RP/bin' '$RP/app/assets' '$RP/uploads' '$RP/config' '$RP/logs' && { chgrp www-data '$RP/uploads' 2>/dev/null && chmod 2775 '$RP/uploads'; } || echo '  (uploads 권한 유지 — 그룹 변경 권한 없음)'"
+ssh $SSHOPT -p 22 "$R" "mkdir -p '$RP/src' '$RP/admin' '$RP/admin/vendor' '$RP/lib/PHPMailer' '$RP/sql' '$RP/bin' '$RP/app/assets' '$RP/uploads' '$RP/config' '$RP/logs' && { chgrp www-data '$RP/uploads' 2>/dev/null && chmod 2775 '$RP/uploads'; } || echo '  (uploads 권한 유지 — 그룹 변경 권한 없음)'"
 
 echo "→ 서버 코드 업로드"
 scp $SSHOPT -P 22 index.php .htaccess README.md "$R:$RP/"
 scp $SSHOPT -P 22 src/*.php                      "$R:$RP/src/"
 scp $SSHOPT -P 22 admin/index.html              "$R:$RP/admin/"
 scp $SSHOPT -P 22 admin/vendor/*.js             "$R:$RP/admin/vendor/"
-scp $SSHOPT -P 22 admin2/index.html             "$R:$RP/admin2/"
-scp $SSHOPT -P 22 admin2/vendor/*.js            "$R:$RP/admin2/vendor/"
 [ -f admin/.htaccess ]  && scp $SSHOPT -P 22 admin/.htaccess  "$R:$RP/admin/"
-[ -f admin2/.htaccess ] && scp $SSHOPT -P 22 admin2/.htaccess "$R:$RP/admin2/"
 scp $SSHOPT -P 22 lib/PHPMailer/*.php           "$R:$RP/lib/PHPMailer/"
 scp $SSHOPT -P 22 sql/*.sql                     "$R:$RP/sql/"
 scp $SSHOPT -P 22 bin/*.php                      "$R:$RP/bin/"
