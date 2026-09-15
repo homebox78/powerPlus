@@ -516,8 +516,8 @@
           <span id="an-updated" class="an-updated"></span>
           <button id="an-refresh" class="an-refresh" title="새로고침">↻</button>
           <span class="trend-tabs an-period">
-            <button class="trend-tab trend-tab--active" data-ap="day">일별</button>
-            <button class="trend-tab" data-ap="month">월별</button>
+            <button class="trend-tab" data-ap="day">일별</button>
+            <button class="trend-tab trend-tab--active" data-ap="month">월별</button>
             <button class="trend-tab" data-ap="year">년별</button>
           </span>
         </span>
@@ -934,7 +934,7 @@
     // (구 SVG 추세 차트 loadTrend 제거 — Chart.js 기반 loadAnalytics가 대체)
 
     /* ── 통계 탭(상세 분석) ── */
-    let _anPeriod = "day";
+    let _anPeriod = "month";
     const DOW_LABELS = ["일","월","화","수","목","금","토"];
     document.querySelectorAll(".an-period .trend-tab").forEach((b) => b.onclick = () => loadAnalytics(b.dataset.ap));
     $("an-refresh").onclick = () => loadAnalytics();
