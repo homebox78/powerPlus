@@ -1045,13 +1045,6 @@
       // 최초 로딩엔 스켈레톤, 새로고침 중엔 버튼 스핀
       if (!$("an-kpi").children.length) {
         $("an-hero").innerHTML = Array(3).fill('<div class="an-skel" style="height:86px"><i></i><i></i></div>').join("");
-        // ── 핵심 3지표 — 누적 삽입 / 최근 30일 / 상위 3명 비중 ──
-        const hc = (v, u, l, sub, c) => `<div class="an-hero__c"><div class="an-hero__l"><i style="background:${c}"></i>${l}</div><div class="an-hero__v">${v}<em>${u}</em></div><div class="an-hero__s">${sub}</div></div>`;
-        $("an-hero").innerHTML =
-          hc(nfmt(k.insTotal), "건", "누적 삽입", nfmt(k.usersTotal) + "명이 사용", "#3a6ea5") +
-          hc(nfmt(k.ins30), "건", "최근 30일 삽입", nfmt(k.users30) + "명", "#e0701f") +
-          hc(k.top3Pct || 0, "%", "상위 3명 비중", nfmt(k.top3) + "건 / 전체 " + nfmt(k.insTotal) + "건", "#1a9c5b");
-
         $("an-kpi").innerHTML = Array(6).fill('<div class="an-skel"><i></i><i></i></div>').join("");
       }
       const rfBtn = $("an-refresh"); if (rfBtn) rfBtn.classList.add("spin");
@@ -1060,6 +1053,13 @@
         // ── KPI (라벨 도트 색 = 추이 차트 시리즈 색과 통일) ──
         const k = r.kpi || {}, delta = pctDelta(k.insToday, k.insYesterday);
         const kc = (v, l, sub, dl, c) => `<div class="an-stat"><div class="an-stat__l"><i style="background:${c || "var(--accent)"}"></i>${l}</div><div class="an-stat__v">${v}${dl ? `<span class="an-delta an-delta--${dl.c}">${dl.t}</span>` : ""}</div>${sub ? `<div class="an-stat__sub">${sub}</div>` : ""}</div>`;
+        // ── 핵심 3지표 — 누적 삽입 / 최근 30일 / 상위 3명 비중 ──
+        const hc = (v, u, l, sub, c) => `<div class="an-hero__c"><div class="an-hero__l"><i style="background:${c}"></i>${l}</div><div class="an-hero__v">${v}<em>${u}</em></div><div class="an-hero__s">${sub}</div></div>`;
+        $("an-hero").innerHTML =
+          hc(nfmt(k.insTotal), "건", "누적 삽입", nfmt(k.usersTotal) + "명이 사용", "#3a6ea5") +
+          hc(nfmt(k.ins30), "건", "최근 30일 삽입", nfmt(k.users30) + "명", "#e0701f") +
+          hc(k.top3Pct || 0, "%", "상위 3명 비중", nfmt(k.top3) + "건 / 전체 " + nfmt(k.insTotal) + "건", "#1a9c5b");
+
         $("an-kpi").innerHTML =
           kc(nfmt(k.dau), "오늘 방문자 (DAU)", "고유 로그인", null, "#e0701f") +
           kc(nfmt(k.wau), "주간 방문자 (WAU)", "최근 7일", null, "#f0894c") +
