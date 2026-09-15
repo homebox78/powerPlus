@@ -340,6 +340,18 @@
     .an-title { font:700 19.4px Pretendard; color:var(--s900); margin:0; letter-spacing:-.015em; }
     .an-sub { font:500 12.1px Pretendard; color:var(--s500); margin-top:2px; }
     .an-period .trend-tab { font-size:11.6px; padding:4px 11px; }
+    /* 첫 화면 핵심 3지표 — 보고·발표에서 먼저 읽히는 숫자 */
+    .an-hero { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
+    @media (max-width:900px){ .an-hero { grid-template-columns:1fr; } }
+    .an-hero__c { position:relative; background:#fff; border:1px solid var(--s200); border-radius:var(--r);
+      padding:15px 18px 14px; transition:border-color .15s, box-shadow .15s; }
+    .an-hero__c:hover { border-color:var(--s300); box-shadow:0 2px 10px rgba(15,23,42,.05); }
+    .an-hero__l { display:flex; align-items:center; gap:7px; font:600 12.4px Pretendard; color:var(--s500); }
+    .an-hero__l i { width:8px; height:8px; border-radius:50%; flex:none; }
+    .an-hero__v { font:700 36px Pretendard; color:var(--s900); letter-spacing:-.03em; line-height:1.15; margin-top:5px; }
+    .an-hero__v em { font-style:normal; font-size:16px; font-weight:600; color:var(--s400); margin-left:3px; }
+    .an-hero__s { font:500 11.4px Pretendard; color:var(--s400); margin-top:3px; }
+    .an-sub-h { font:600 11.5px Pretendard; color:var(--s400); margin:2px 0 7px; }
     .an-kpi { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:14px; }
     @media (max-width:1100px){ .an-kpi { grid-template-columns:repeat(3,1fr); } }
     @media (max-width:640px){ .an-kpi { grid-template-columns:repeat(2,1fr); } }
@@ -522,6 +534,8 @@
           </span>
         </span>
       </div>
+      <div id="an-hero" class="an-hero"></div>
+      <div class="an-sub-h">운영 지표</div>
       <div id="an-kpi" class="an-kpi"></div>
       <div class="dash-grid2a">
         <div class="dash-card">
@@ -1029,8 +1043,17 @@
       document.querySelectorAll(".an-period .trend-tab").forEach((b) => b.classList.toggle("trend-tab--active", b.dataset.ap === tp));
       if (window.Chart) { Chart.defaults.font.family = "Pretendard, sans-serif"; Chart.defaults.font.size = 11; Chart.defaults.color = "#666"; }
       // 최초 로딩엔 스켈레톤, 새로고침 중엔 버튼 스핀
-      if (!$("an-kpi").children.length)
+      if (!$("an-kpi").children.length) {
+        $("an-hero").innerHTML = Array(3).fill('<div class="an-skel" style="height:86px"><i></i><i></i></div>').join("");
+        // ── 핵심 3지표 — 누적 삽입 / 최근 30일 / 상위 3명 비중 ──
+        const hc = (v, u, l, sub, c) => `<div class="an-hero__c"><div class="an-hero__l"><i style="background:${c}"></i>${l}</div><div class="an-hero__v">${v}<em>${u}</em></div><div class="an-hero__s">${sub}</div></div>`;
+        $("an-hero").innerHTML =
+          hc(nfmt(k.insTotal), "건", "누적 삽입", nfmt(k.usersTotal) + "명이 사용", "#3a6ea5") +
+          hc(nfmt(k.ins30), "건", "최근 30일 삽입", nfmt(k.users30) + "명", "#e0701f") +
+          hc(k.top3Pct || 0, "%", "상위 3명 비중", nfmt(k.top3) + "건 / 전체 " + nfmt(k.insTotal) + "건", "#1a9c5b");
+
         $("an-kpi").innerHTML = Array(6).fill('<div class="an-skel"><i></i><i></i></div>').join("");
+      }
       const rfBtn = $("an-refresh"); if (rfBtn) rfBtn.classList.add("spin");
       try {
         const r = await api("/admin/stats/analytics?period=" + tp);
@@ -1112,7 +1135,7 @@
         // ── 업데이트 시각 ──
         const now = new Date();
         $("an-updated").textContent = "업데이트 " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
-      } catch (e) { $("an-kpi").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
+      } catch (e) { $("an-hero").innerHTML = ""; $("an-kpi").innerHTML = `<div class="msg--err">${esc(e.message)}</div>`; }
       finally { if (rfBtn) rfBtn.classList.remove("spin"); }
     }
     /* 순위 탭 / 최근삽입 페이지네이션 / 추이·히트맵 탭 */

@@ -225,7 +225,18 @@ final class UsageService
         $ins7prev = $q("SELECT COUNT(*) FROM usage_log WHERE used_at >= CURDATE() - INTERVAL 13 DAY AND used_at < CURDATE() - INTERVAL 6 DAY");
         $usedAssets  = $q("SELECT COUNT(DISTINCT u.asset_id) FROM usage_log u JOIN assets a ON a.id = u.asset_id");
         $totalAssets = $q("SELECT COUNT(*) FROM assets");
+        // ── 보고·발표용 핵심 3지표: 누적 삽입 · 최근 30일 · 상위 3명 비중 ──
+        //    운영 지표(DAU·스티키니스)보다 이 세 개가 먼저 읽혀야 한다.
+        $ins30   = $q("SELECT COUNT(*) FROM usage_log WHERE used_at >= CURDATE() - INTERVAL 29 DAY");
+        $users30 = $q("SELECT COUNT(DISTINCT email) FROM usage_log WHERE email IS NOT NULL AND email<>'' AND used_at >= CURDATE() - INTERVAL 29 DAY");
+        $top3    = $q("SELECT COALESCE(SUM(c),0) FROM (SELECT COUNT(*) c FROM usage_log WHERE email IS NOT NULL AND email<>'' GROUP BY email ORDER BY c DESC LIMIT 3) t");
         $kpi = [
+            'insTotal'   => $totals['inserts'],
+            'usersTotal' => $totals['activeUsers'],
+            'ins30'      => $ins30,
+            'users30'    => $users30,
+            'top3'       => $top3,
+            'top3Pct'    => $totals['inserts'] > 0 ? (int) round($top3 / $totals['inserts'] * 100) : 0,
             'dau' => $dau, 'wau' => $wau, 'mau' => $mau,
             'insToday' => $insToday, 'insYesterday' => $insYday,
             'ins7d' => $ins7, 'ins7dPrev' => $ins7prev,
