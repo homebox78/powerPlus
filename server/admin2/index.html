@@ -312,6 +312,9 @@
     /* 세그먼트 토글 */
     .rank-tabs { display:inline-flex; gap:2px; background:var(--s100); border-radius:var(--r-sm);
       padding:2px; margin:12px 16px 0; }
+    .tabbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 16px 0 0; }
+    .tabbar .rank-tabs { margin-right:0; }
+    .tabbar .an-note { margin-left:auto; }
     .rank-tab { border:none; background:none; border-radius:5px; padding:6px 13px;
       font:500 12.1px Pretendard; color:var(--s500); cursor:pointer; transition:.12s; }
     .rank-tab:hover { color:var(--s900); }
@@ -543,29 +546,28 @@
       </div>
       <div class="dash-grid2">
         <div class="dash-card dash-card--pad0">
-          <div class="rank-tabs" id="rk-tabs">
-            <button class="rank-tab rank-tab--active" data-rk="assets">인기 자산</button>
-            <button class="rank-tab" data-rk="favs">즐겨찾기</button>
+          <div class="tabbar">
+            <div class="rank-tabs" id="sq-tabs">
+              <button class="rank-tab rank-tab--active" data-sq="top">인기 검색어</button>
+              <button class="rank-tab" data-sq="zero">무결과 검색어</button>
+            </div>
+            <span class="an-note" id="an-zerorate">(최근 30일)</span>
           </div>
-          <div id="an-rank"></div>
+          <div id="sq-top"><div id="an-searchtop"></div></div>
+          <div id="sq-zero" class="hidden"><div id="an-searchzero"></div></div>
         </div>
         <div class="dash-card dash-card--pad0">
-          <div class="rank-tabs" id="ut-tabs">
-            <button class="rank-tab rank-tab--active" data-ut="users">활발한 사용자</button>
-            <button class="rank-tab" data-ut="recent">최근 삽입 내역</button>
+          <div class="tabbar">
+            <div class="rank-tabs" id="rk-tabs">
+              <button class="rank-tab rank-tab--active" data-rk="assets">인기 자산</button>
+              <button class="rank-tab" data-rk="favs">즐겨찾기</button>
+              <button class="rank-tab" data-rk="users">활발한 사용자</button>
+              <button class="rank-tab" data-rk="recent">최근 삽입 내역</button>
+            </div>
           </div>
-          <div id="ut-users"><div id="an-topusers"></div></div>
-          <div id="ut-recent" class="hidden"><div id="an-recent"></div><div id="an-recent-pager" class="pager" style="padding:10px 16px 6px"></div></div>
-        </div>
-      </div>
-      <div class="dash-grid2">
-        <div class="dash-card">
-          <div class="dash-h">인기 검색어 <span class="an-note">(최근 30일)</span></div>
-          <div id="an-searchtop"></div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-h">무결과 검색어 <span class="an-note" id="an-zerorate">(최근 30일)</span></div>
-          <div id="an-searchzero"></div>
+          <div id="rk-assets"><div id="an-rank"></div></div>
+          <div id="rk-users" class="hidden"><div id="an-topusers"></div></div>
+          <div id="rk-recent" class="hidden"><div id="an-recent"></div><div id="an-recent-pager" class="pager" style="padding:10px 16px 6px"></div></div>
         </div>
       </div>
     </section>
@@ -1121,16 +1123,20 @@
     /* 순위 탭 / 최근삽입 페이지네이션 / 추이·히트맵 탭 */
     let _anRankTab = "assets", _anRankAssets = [], _anRankFavs = [];
     function renderRankTab() {
-      document.querySelectorAll("#rk-tabs .rank-tab").forEach((x) => x.classList.toggle("rank-tab--active", x.dataset.rk === _anRankTab));
-      $("an-rank").innerHTML = renderTopAssets(_anRankTab === "favs" ? _anRankFavs : _anRankAssets);
+      const t = _anRankTab;
+      document.querySelectorAll("#rk-tabs .rank-tab").forEach((x) => x.classList.toggle("rank-tab--active", x.dataset.rk === t));
+      $("rk-assets").classList.toggle("hidden", t !== "assets" && t !== "favs");
+      $("rk-users").classList.toggle("hidden", t !== "users");
+      $("rk-recent").classList.toggle("hidden", t !== "recent");
+      if (t === "assets" || t === "favs") $("an-rank").innerHTML = renderTopAssets(t === "favs" ? _anRankFavs : _anRankAssets);
     }
     document.querySelectorAll("#rk-tabs .rank-tab").forEach((b) => b.onclick = () => { _anRankTab = b.dataset.rk; renderRankTab(); });
-    // 활발한 사용자 ↔ 최근 삽입 내역 탭
-    document.querySelectorAll("#ut-tabs .rank-tab").forEach((b) => b.onclick = () => {
-      const v = b.dataset.ut;
-      document.querySelectorAll("#ut-tabs .rank-tab").forEach((x) => x.classList.toggle("rank-tab--active", x.dataset.ut === v));
-      $("ut-users").classList.toggle("hidden", v !== "users");
-      $("ut-recent").classList.toggle("hidden", v !== "recent");
+    // 인기 검색어 ↔ 무결과 검색어 탭
+    document.querySelectorAll("#sq-tabs .rank-tab").forEach((b) => b.onclick = () => {
+      const v = b.dataset.sq;
+      document.querySelectorAll("#sq-tabs .rank-tab").forEach((x) => x.classList.toggle("rank-tab--active", x.dataset.sq === v));
+      $("sq-top").classList.toggle("hidden", v !== "top");
+      $("sq-zero").classList.toggle("hidden", v !== "zero");
     });
     let _anRecent = [], _anRecentPage = 1; const RECENT_PP = 10;
     function renderRecentPage() {
