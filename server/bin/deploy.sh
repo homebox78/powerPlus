@@ -42,6 +42,12 @@ scp $SSHOPT -P 22 src/*.php                      "$R:$RP/src/"
 scp $SSHOPT -P 22 admin/index.html              "$R:$RP/admin/"
 scp $SSHOPT -P 22 admin/vendor/*.js             "$R:$RP/admin/vendor/"
 [ -f admin/.htaccess ]  && scp $SSHOPT -P 22 admin/.htaccess  "$R:$RP/admin/"
+
+# 소개 사이트(website/) — 있을 때만, tar 한 방
+if [ -d ../website ]; then
+  echo "  소개 사이트 → $RP/site"
+  ( cd ../website && tar -cf - *.html img shots *.woff2 )     | ssh $SSHOPT -p 22 "$R" "mkdir -p '$RP/site' && tar -xf - -C '$RP/site'"
+fi
 scp $SSHOPT -P 22 lib/PHPMailer/*.php           "$R:$RP/lib/PHPMailer/"
 scp $SSHOPT -P 22 sql/*.sql                     "$R:$RP/sql/"
 scp $SSHOPT -P 22 bin/*.php                      "$R:$RP/bin/"
