@@ -31,3 +31,10 @@ thumbs.db
 
 # 화면 캡처 원본(개인정보 미마스킹 — 마스킹본은 docs/manual/에 커밋)
 /_capture/
+
+# 소개 사이트 빌드 중간물 — publish.py 가 상위 폴더에 쓴 것만 추적한다
+/website/_src/*.html
+/website/_src/__pycache__/
+/website/_src/*.bak
+# 글꼴 원본을 만들 때 받는 임시 파일(전체 OTF 12MB×3)
+/website/_src/fonts/_full/

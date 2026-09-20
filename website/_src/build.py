@@ -32,28 +32,31 @@ CSS = r"""
   }
 :root{
     --paper:#FFFFFF;
-    --panel:#F4F5F8;
+    --panel:#F1F1F0;    /* 덱 캔버스 - 중성 라이트 그레이 */
     --ink:#1A1A1C;
     --ink-2:#63666B;
     --ink-3:#9A9DA3;
     --hair:#E8E9EB;
     --line:#DCDEE1;
-    --accent:#0A7CDA;
+    --accent:#C43E1C;   /* 강조 - 텍스트/보더. 흰 배경 대비 5.18:1 (AA) */
+    --accent-b:#DD4F1E; /* 그래픽 전용 밝은 오렌지 - 진행 바/막대/글로우 */
     --brand:#E0701F;
     --page:1240px;      /* 헤어라인 폭 — 안쪽 콘텐츠가 nextsaas 와 같은 1140 이 되게 */
     --prose:720px;      /* 가운데 정렬 본문 */
     --pad:50px;
     --ink-t:#1A1A1C;    /* 제목색 */
     --ink-d:#55585E;    /* 설명글색 */
+    --rule:#1A1A1C;     /* 덱 헤더 괘선 */
     --tint:#FBEEE4;     /* 라벨 pill 배경 — 브랜드 소프트 */
-    --dark:#1A1A1C;     /* 다크 패널 */
+    --dark:#1D2026;     /* 덱 마무리 장 - 근검정 */
     --f:"Spoqa Han Sans Neo","Spoqa Han Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box;}
   body{background:var(--paper);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.75;
     -webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word;}
-  h1,h2,h3,h4{margin:0;font-weight:500;letter-spacing:-.02em;line-height:1.1;color:var(--ink-t);
+  h1,h2,h3,h4{margin:0;font-weight:400;letter-spacing:-.02em;line-height:1.1;color:var(--ink-t);
     text-wrap:balance;}
+  h1 b,h2 b{font-weight:700;letter-spacing:-.028em;}
   p{margin:0;}
   ul{margin:0;padding:0;list-style:none;}
   a{color:inherit;}
@@ -63,8 +66,9 @@ CSS = r"""
   /* ── 프레임: 풀블리드 밴드 + 세로 헤어라인 컨테이너 ────────── */
   /* 섹션 구분 — i-bricks .line-top: 양 끝이 투명해지는 2px 그라데이션 */
   .band{position:relative;}
-  .band::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;pointer-events:none;
-    background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(102,102,102,.2) 25%,rgba(102,102,102,.2) 70%,rgba(255,255,255,0) 100%);}
+  /* 덱은 페이드 없이 끝까지 가는 곧은 괘선으로 장을 나눈다 */
+  .band::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;
+    background:rgba(26,26,28,.16);}
   .band--plain::before{content:none;}
   /* nextsaas 처럼 섹션 배경을 흰색 ↔ 연회색으로 번갈아 */
   main > .band:nth-of-type(even):not(.band--plain){background:var(--panel);}
@@ -89,9 +93,11 @@ CSS = r"""
     text-decoration:none;letter-spacing:.01em;}
   .eyebrow:hover{text-decoration:underline;text-underline-offset:3px;}
   /* nextsaas 섹션 라벨 — 14px/500, radius full, padding 6px 20px, 연한 틴트 */
-  .kicker{display:inline-flex;align-items:center;height:33px;padding:0 20px;border-radius:999px;
-    background:var(--tint);color:var(--ink);font-size:14px;font-weight:500;line-height:1;
-    letter-spacing:normal;text-transform:none;}
+  /* 덱 eyebrow - 오렌지 1px 보더 / 투명 배경 / 대문자 / 넓은 자간 */
+  .kicker{display:inline-flex;align-items:center;height:31px;padding:0 15px;border-radius:3px;
+    background:transparent;border:1px solid var(--accent);color:var(--accent);
+    font-size:12px;font-weight:500;line-height:1;
+    letter-spacing:.14em;text-transform:uppercase;}
 
   /* ── 내비 ─ 하늘 위에서는 투명, 스크롤하면 흰 바 ─────────── */
   /* 서브페이지 — aside 와 같이 상단 고정 + 흰 배경 */
@@ -115,19 +121,22 @@ CSS = r"""
   .skywrap{padding:16px 16px 0;}
   /* nextsaas 히어로처럼 부드러운 메시 그라데이션 — 이미지 0바이트, 저작권 문제 없음.
      레퍼런스는 특정 색이 튀지 않고 넓게 번지는 파스텔 워시라 알파를 낮게 잡는다. */
-  .skycard{position:relative;overflow:hidden;border-radius:32px;
+  /* 덱 표지 - 중성 라이트 그레이 캔버스에 오렌지 워시 한 겹 */
+  .skycard{position:relative;overflow:hidden;border-radius:14px;
     background:
-      radial-gradient(58% 52% at 12% 6%,  rgba(255,201,152,.55) 0%, rgba(255,201,152,0) 66%),
-      radial-gradient(54% 50% at 88% 4%,  rgba(192,184,255,.50) 0%, rgba(192,184,255,0) 64%),
-      radial-gradient(48% 44% at 94% 46%, rgba(255,176,158,.38) 0%, rgba(255,176,158,0) 66%),
-      radial-gradient(44% 40% at 4% 54%,  rgba(160,226,238,.34) 0%, rgba(160,226,238,0) 66%),
-      radial-gradient(64% 46% at 50% 16%, rgba(255,255,255,.60) 0%, rgba(255,255,255,0) 72%),
-      linear-gradient(180deg,#FFFBF7 0%,#FEFEFF 54%,#FFFFFF 100%);
-    box-shadow:0 20px 25px -5px rgba(0,0,0,.06),0 8px 10px -6px rgba(0,0,0,.06);}
+      radial-gradient(70% 58% at 8% 0%,  rgba(221,79,30,.10) 0%, rgba(221,79,30,0) 62%),
+      radial-gradient(60% 50% at 96% 8%, rgba(221,79,30,.06) 0%, rgba(221,79,30,0) 60%),
+      linear-gradient(180deg,#F4F3F1 0%,#F7F7F6 46%,#FFFFFF 100%);
+    box-shadow:0 1px 0 rgba(26,26,28,.10),0 24px 46px -30px rgba(26,26,28,.30);}
+  /* 덱 최상단 오렌지 진행 바 */
+  .skycard::before{content:"";position:absolute;left:0;top:0;height:4px;width:34%;z-index:40;
+    background:linear-gradient(90deg,var(--accent),var(--accent-b));}
+  /* 덱 헤더 괘선 - 내비 아래 검정 실선 */
+  .skycard .nav{border-bottom:1px solid var(--rule);margin:0 16px;}
 
   .hero{text-align:center;padding:64px 16px;position:relative;z-index:1;}
   /* gcar .text-block .title — 5.2rem / 800 / lh150% */
-  .hero h1{font-size:34px;font-weight:500;line-height:1.1;margin:0;}
+  .hero h1{font-size:34px;font-weight:400;line-height:1.1;margin:0;}
   /* gcar .title + .desc — margin-top 3.2rem, desc 2rem / 400 / lh150% */
   .hero .sub{margin:22px auto 0;max-width:50ch;font-size:16px;line-height:1.6;
     color:var(--ink-d);font-weight:400;letter-spacing:-.01em;}
@@ -139,18 +148,19 @@ CSS = r"""
   /* 스크린샷 — aside 브라우저 프레임과 같은 폭(1320)·여백(60)·음수 마진(-128) */
   .shotwrap{position:relative;z-index:1;width:100%;margin-bottom:-128px;}
   .hero__shot{max-width:1320px;margin:0 auto;padding:0 60px;}
-  .hero__shot img{width:100%;height:auto;border-radius:20px;
+  .hero__shot img{width:100%;height:auto;border-radius:12px;
     box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);}
   .after-hero{padding-top:96px;}
 
   /* 서브페이지 히어로 — aside 는 pt-16 pb-8 에 흰 배경 */
   .hero--plain{padding:64px var(--pad) 32px;}
 
-  .pill{display:inline-flex;align-items:center;gap:7px;height:33px;padding:0 18px;
-    border:0;border-radius:999px;font-size:13.5px;font-weight:500;
-    color:var(--ink);background:rgba(255,255,255,.72);letter-spacing:normal;margin-bottom:26px;
-    box-shadow:0 1px 2px rgba(26,26,28,.06);}
-  .pill i{width:5px;height:5px;border-radius:50%;background:var(--brand);}
+  /* 덱 eyebrow 와 같은 문법 — 오렌지 보더 / 대문자 / 넓은 자간 */
+  .pill{display:inline-flex;align-items:center;gap:8px;height:31px;padding:0 15px;
+    border:1px solid var(--accent);border-radius:3px;font-size:12px;font-weight:500;
+    color:var(--accent);background:transparent;letter-spacing:.14em;text-transform:uppercase;
+    margin-bottom:26px;}
+  .pill i{width:5px;height:5px;border-radius:50%;background:var(--accent);}
 
   @media (min-width:768px){
     .hero h1{font-size:50px;}
@@ -167,13 +177,17 @@ CSS = r"""
   /* ── 섹션 공통 ─────────────────────────────────────────── */
   .head{max-width:var(--prose);margin:0 auto;text-align:center;}
 
-  .head h2{font-size:32px;font-weight:500;line-height:1.1;margin-top:20px;}
+  .head h2{font-size:32px;font-weight:400;line-height:1.1;margin-top:20px;}
   @media (min-width:768px){ .head h2{font-size:46px;} }
   @media (min-width:1200px){ .head h2{font-size:60px;} }
-  .head h2 b{font-weight:500;color:var(--brand);}   /* 강조는 굵기가 아니라 색으로 */
+  /* 덱 헤드라인 - 첫 줄은 보통, 둘째 줄이 검정 볼드. 오렌지는 눈썹/수치에만 쓴다 */
+  .head h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
   .head p:not(.kicker){margin-top:22px;font-size:16px;line-height:1.6;color:var(--ink-d);
     font-weight:400;letter-spacing:-.01em;}
   @media (min-width:1200px){ .head p:not(.kicker){margin-top:26px;font-size:18px;} }
+  /* 덱은 헤드라인 바로 아래 오렌지 볼드 한 줄로 핵심을 박는다.
+     .head p:not(.kicker) 가 (0,2,1) 이라 p.punch 로 특이도를 맞추고 뒤에 둔다. */
+  .head p.punch{color:var(--accent);font-weight:700;}
   .head--left{text-align:left;max-width:920px;}
   .frame--panel{background:var(--panel);}
   .lede{max-width:60ch;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
@@ -203,26 +217,48 @@ CSS = r"""
 
   /* ── 카드 3열 — 원본 비율 유지(잘리거나 찌그러지지 않게) ──── */
   .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;align-items:start;}
-  .tri__c img{width:100%;height:auto;border-radius:20px;border:1px solid var(--hair);
+  .tri__c img{width:100%;height:auto;border-radius:12px;border:1px solid var(--hair);
     background:var(--panel);}
   .tri__c p{margin-top:15px;font-size:14px;line-height:1.75;color:var(--ink-2);font-weight:400;}
   .tri__c b{color:var(--ink);font-weight:500;}
 
   /* ── 활용 사례 그라데이션 카드 ──────────────────────────── */
+  /* 덱 카드 - 흰 바탕 / radius 12 / 상단 오렌지 엣지 / 작은 오렌지 라벨 + 검정 볼드 제목.
+     강조할 한 장만 오렌지로 채운다(덱 1/9/16장의 문법). */
   .cases{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;}
-  .case__g{aspect-ratio:16/9;border-radius:20px;padding:32px;display:flex;flex-direction:column;
-    justify-content:space-between;overflow:hidden;}
-  .case__g span{font-size:clamp(17px,1.7vw,23px);font-weight:700;letter-spacing:-.02em;line-height:1.15;
-    color:rgba(10,10,10,.82);}
-  .case__g span:last-child{align-self:flex-end;text-align:right;}
-  .g1{background:linear-gradient(135deg,#CFE0FF 0%,#E7D6FF 52%,#FBD9EE 100%);}
-  .g2{background:linear-gradient(135deg,#FFE3B0 0%,#FFD2C2 55%,#FFC9DC 100%);}
-  .g3{background:linear-gradient(135deg,#C7F0DC 0%,#D6F2C0 50%,#EFF3B4 100%);}
-  .g4{background:linear-gradient(135deg,#BFE7F7 0%,#CFE2FF 55%,#DED9FF 100%);}
-  .g5{background:linear-gradient(135deg,#FAD9E6 0%,#E7D8FA 55%,#D4E3FF 100%);}
-  .g6{background:linear-gradient(135deg,#E6E9EE 0%,#D9DEE6 55%,#C9D1DC 100%);}
-  .case p{margin-top:15px;font-size:14px;line-height:1.75;color:var(--ink-2);font-weight:400;}
-  .case b{display:block;color:var(--ink);font-weight:500;margin-bottom:2px;}
+  .case{background:#fff;border-radius:12px;padding:26px 24px 24px;
+    box-shadow:0 1px 2px rgba(26,26,28,.05),0 10px 24px -18px rgba(26,26,28,.35);
+    border-top:3px solid var(--accent);}
+  .case__g{display:flex;flex-direction:column;gap:5px;}
+  .case__g span{font-size:11.5px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--accent);line-height:1;}
+  .case__g span:last-child{font-size:21px;font-weight:700;letter-spacing:-.025em;line-height:1.2;
+    color:var(--ink-t);text-transform:none;margin-top:3px;}
+  .case p{margin-top:13px;font-size:14px;line-height:1.75;color:var(--ink-2);font-weight:400;}
+  .case p b{color:var(--ink-t);font-weight:700;}
+  /* 카드 첫머리 라벨(예: '수주 제안서')만 줄을 차지한다. 문장 중간 강조는 인라인. */
+  .case p > b:first-child{display:block;color:var(--ink);font-weight:500;margin-bottom:2px;}
+  /* 강조 카드 - 흰 글자 대비 5.18:1 이 나오는 딥 오렌지를 바탕으로 */
+  .case--hi{background:linear-gradient(140deg,var(--accent-b) 0%,var(--accent) 58%);
+    border-top-color:rgba(255,255,255,.55);}
+  .case--hi .case__g span{color:rgba(255,255,255,.88);}
+  .case--hi .case__g span:last-child,.case--hi b,.case--hi p b{color:#fff;}
+  .case--hi p{color:rgba(255,255,255,.92);}
+
+  /* ── 효과 카드 — 덱 14장의 기존/현재 막대 비교 ─────────── */
+  .effect{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:52px;}
+  .effect__c{background:#fff;border-radius:12px;padding:28px 26px 24px;
+    border-top:3px solid var(--accent);
+    box-shadow:0 1px 2px rgba(26,26,28,.05),0 10px 24px -18px rgba(26,26,28,.35);}
+  .effect__l{font-size:11.5px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--accent);line-height:1;}
+  .effect__v{margin-top:11px;font-size:27px;font-weight:400;letter-spacing:-.03em;
+    color:var(--ink-3);line-height:1.2;}
+  .effect__v b{font-weight:700;color:var(--ink-t);}
+  .effect .bench{margin-top:19px;gap:9px;max-width:none;}
+  .effect .brow{grid-template-columns:78px 1fr 112px;gap:12px;}
+  .effect__n{margin-top:15px;font-size:13px;line-height:1.7;color:var(--ink-2);font-weight:400;}
+  .effect__n b{color:var(--ink-t);font-weight:700;}
 
   /* ── 벤치마크 바 ───────────────────────────────────────── */
   .bench{margin-top:44px;display:grid;gap:14px;max-width:880px;}
@@ -231,12 +267,12 @@ CSS = r"""
   .brow__n span{display:block;font-size:11.5px;color:var(--ink-3);}
   .brow__t{height:24px;border-radius:6px;background:#EDEFF1;overflow:hidden;}
   .brow__t i{display:block;height:100%;border-radius:6px;background:#D5D8DC;}
-  .brow--hi .brow__t i{background:var(--accent);}
+  .brow--hi .brow__t i{background:linear-gradient(90deg,var(--accent-b),var(--accent));}
   .brow__v{font-size:14px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2);}
   .brow--hi .brow__v{color:var(--ink);}
 
   /* ── 검색 교정 박스 ────────────────────────────────────── */
-  .qb{border:1px solid var(--hair);border-radius:20px;overflow:hidden;background:#fff;max-width:880px;
+  .qb{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:#fff;max-width:880px;
     margin:44px auto 0;}
   .qb__h{padding:13px 20px;border-bottom:1px solid var(--hair);font-size:11.5px;color:var(--ink-3);
     letter-spacing:.07em;text-transform:uppercase;}
@@ -261,10 +297,10 @@ CSS = r"""
   .split{display:grid;grid-template-columns:1fr 1.15fr;gap:72px;align-items:center;}
   .split--f .split__v{order:-1;}
   .split h2{font-size:clamp(25px,3vw,36px);line-height:1.2;margin-top:14px;}
-  .split h2 b{font-weight:500;color:var(--accent);}
+  .split h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
   .split > div > p{margin-top:16px;font-size:16px;line-height:1.8;color:var(--ink-2);font-weight:400;
     max-width:42ch;}
-  .split__v img{width:100%;border-radius:20px;border:1px solid var(--hair);
+  .split__v img{width:100%;border-radius:12px;border:1px solid var(--hair);
     box-shadow:0 2px 8px rgba(10,10,10,.05),0 34px 70px -46px rgba(10,10,10,.4);}
   .list{margin-top:26px;display:grid;gap:13px;}
   .list li{display:flex;gap:11px;font-size:15px;line-height:1.75;color:var(--ink-2);font-weight:400;}
@@ -433,7 +469,7 @@ CSS = r"""
     .shotwrap{margin-bottom:-56px;}
     .after-hero{padding-top:56px;}
     .duo{grid-template-columns:1fr;gap:18px;}
-    .tri,.cases{grid-template-columns:1fr;gap:26px;}
+    .tri,.cases,.effect{grid-template-columns:1fr;gap:26px;}
     .split{grid-template-columns:1fr;gap:34px;} .split--f .split__v{order:0;}
     .plans{grid-template-columns:1fr;gap:52px;}
     .stats{grid-template-columns:repeat(3,1fr);}
@@ -508,7 +544,7 @@ FOOTER = ('<footer class="foot"><div class="foot__in"><div class="fgrid">'
           '<a href="{{PRICING}}">요금제</a>'
           '<a href="{{PRICING}}#selfhost">구축형</a></div>'
           '</div><div class="fbar"><a class="brand" href="{{HOME}}">%s</a>'
-          '<p>화면과 수치는 운영 중인 라이브러리의 실제 데이터입니다. · Updated 2026-09-12</p>'
+          '<p>화면과 수치는 운영 중인 라이브러리의 실제 데이터입니다. · Updated 2026-09-20</p>'
           '</div></div></footer>' % (MAIL, LOGO))
 
 
@@ -533,7 +569,7 @@ HOME = """
     __NAV__
     <header class="hero">
       <span class="pill rise"><i aria-hidden="true"></i>PowerPoint Add-in</span>
-      <h1 class="rise r2">한 번 쓰고 버려지던 자료가,<br>회사의 자산으로 쌓입니다.</h1>
+      <h1 class="rise r2">한 번 쓰고 버려지던 자료가,<br><b>회사의 자산으로 쌓입니다.</b></h1>
       <p class="sub rise r2">개인 PC에 흩어져 사라지던 아이콘·사진·장표를 전사가 함께 쓰는 라이브러리에 모읍니다. 같은 곳에서 꺼내 쓰니 누가 맡아도 제안서의 톤이 흔들리지 않습니다.</p>
       <div class="hero__cta rise r3">
         <a class="btn btn--lg btn--d" href="__MAIL__">무료로 시작</a>
@@ -556,8 +592,26 @@ HOME = """
     <div class="duo__b">
       <p><b>제안서 하나가 끝나면 그때 모은 자료도 같이 끝납니다.</b> 골라 둔 아이콘과 배경 사진, 공들여 만든 표지는 담당자 PC 폴더에 남고, 다음 제안서를 맡은 사람은 같은 자료를 처음부터 다시 찾습니다.</p>
       <p>여럿이 나눠 만들다 보면 각자 다른 곳에서 자료를 가져옵니다. <b>같은 회사가 낸 제안서인데 장마다 톤이 다릅니다.</b> 출처도 권한도 제각각이라 나중에 다시 쓰기도 어렵습니다.</p>
+      <p><b>제일 오래 걸리는 건 글쓰기가 아니라 자료 찾기입니다.</b> 아이콘 하나 찾자고 지난 제안서 폴더를 뒤지고, 없으면 인터넷에서 새로 받습니다. 그렇게 받은 자료는 또 그 사람 PC 에만 남습니다.</p>
       <p>powerPlus는 그 자료를 버리지 않고 <b>전사가 함께 쓰는 라이브러리</b>에 쌓습니다. 그리고 그 검색창을 파워포인트 안으로 옮겨, 다음 사람이 같은 자산을 꺼내 쓰게 만듭니다.</p>
     </div>
+  </div>
+</div></section>
+
+<section class="band"><div class="frame">
+  <div class="head">
+    <p class="kicker">What we tried</p>
+    <h2>모아 두는 것과<br><b>꺼내 쓰는 것은 다릅니다.</b></h2>
+    <p class="punch">아무리 잘 정리해 두어도, 가져다 쓰기 불편하면 쓰지 않습니다.</p>
+    <p>공유 폴더도 만들어 봤고, 장표를 한 파일에 모아도 봤습니다. 둘 다 오래가지 않았습니다. 찾으려면 결국 폴더를 열고 눈으로 훑어야 했기 때문입니다.</p>
+  </div>
+  <div class="cases">
+    <div class="case"><div class="case__g"><span>Attempt 01</span><span>공유 폴더</span></div>
+      <p>폴더를 열고 눈으로 훑어야 찾습니다. 이름을 모르면 있는 줄도 모르고, 결국 각자 PC 에 사본을 따로 둡니다.</p></div>
+    <div class="case"><div class="case__g"><span>Attempt 02</span><span>정리용 파워포인트</span></div>
+      <p>지난 장표에서 콘텐츠만 모아 <b>540장</b>짜리 한 파일로 만들었습니다. 그래도 쓰려면 그 파일을 열고 장을 하나하나 넘겨 봐야 했습니다.</p></div>
+    <div class="case case--hi"><div class="case__g"><span>Now</span><span>powerPlus</span></div>
+      <p>파워포인트를 닫지 않고, 작업창 안에서 한국어로 검색해 지금 슬라이드에 바로 넣습니다. 찾는 자리와 쓰는 자리가 같습니다.</p></div>
   </div>
 </div></section>
 
@@ -621,22 +675,75 @@ HOME = """
 
 <section class="band"><div class="frame">
   <div class="head">
+    <p class="kicker">Effect</p>
+    <h2>찾는 시간이 줄면<br><b>만드는 장수가 늘어납니다.</b></h2>
+    <p class="punch">아래는 디자이너 업무 기준 체감 추정치입니다. 정확한 통계가 아닙니다.</p>
+    <p>사내 시범 운영에서 같은 인원이 하루에 만드는 장표가 늘었고, 톤을 맞추는 단순 작업에 드는 시간이 줄었습니다. 계속 측정하며 실제 수치로 바꿔 가고 있습니다.</p>
+  </div>
+  <div class="effect">
+    <div class="effect__c">
+      <p class="effect__l">01 · 장표 제작량 — 1인 · 하루</p>
+      <p class="effect__v">약 4장 → <b>약 8장</b></p>
+      <div class="bench">
+        <div class="brow"><div class="brow__n">기존</div>
+          <div class="brow__t"><i style="width:50%"></i></div>
+          <div class="brow__v">4장 정도</div></div>
+        <div class="brow brow--hi"><div class="brow__n">현재</div>
+          <div class="brow__t"><i style="width:100%"></i></div>
+          <div class="brow__v">8장 정도</div></div>
+      </div>
+      <p class="effect__n"><b>약 2배.</b> 소스 사이트와 지난 제안서를 뒤지던 시간이 줄었습니다.</p>
+    </div>
+    <div class="effect__c">
+      <p class="effect__l">02 · 톤 정리 · 폰트 변경 등 단순 작업</p>
+      <p class="effect__v">3명 · 하루 종일 → <b>3시간</b></p>
+      <div class="bench">
+        <div class="brow"><div class="brow__n">기존</div>
+          <div class="brow__t"><i style="width:100%"></i></div>
+          <div class="brow__v">3명이 하루 종일</div></div>
+        <div class="brow brow--hi"><div class="brow__n">이번 테스트</div>
+          <div class="brow__t"><i style="width:38%"></i></div>
+          <div class="brow__v">처음이라 3시간</div></div>
+      </div>
+      <p class="effect__n"><b>하루 → 3시간.</b> 처음 해 본 테스트 결과라, 반복할수록 더 줄어들 것으로 봅니다.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="band"><div class="frame">
+  <div class="head">
     <p class="kicker">Use cases</p>
     <h2>쌓인 자산은 이렇게 쓰입니다.</h2>
   </div>
   <div class="cases">
-    <div class="case"><div class="case__g g1"><span>POWERPLUS FOR</span><span>제안서</span></div>
+    <div class="case case--hi"><div class="case__g"><span>POWERPLUS FOR</span><span>제안서</span></div>
       <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼내 쓰고, 기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
-    <div class="case"><div class="case__g g2"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
       <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세우고 같은 서식으로 반복합니다.</p></div>
-    <div class="case"><div class="case__g g3"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
       <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙이고, 배경 사진으로 표지를 만듭니다.</p></div>
-    <div class="case"><div class="case__g g4"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
       <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 두고 현장에서 바로 꺼내 씁니다.</p></div>
-    <div class="case"><div class="case__g g5"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
       <p><b>디자인 일관성</b> 같은 스타일 세트로 한 장 안의 아이콘 톤을 맞춥니다.</p></div>
-    <div class="case"><div class="case__g g6"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
       <p><b>관리자</b> 무엇이 쓰이고 무엇을 못 찾았는지 보고 다음에 채울 자산을 정합니다.</p></div>
+  </div>
+</div></section>
+
+<section class="band"><div class="frame">
+  <div class="head">
+    <p class="kicker">Roadmap</p>
+    <h2>지금은 사람이 찾아 넣고,<br><b>다음은 시스템이 넣습니다.</b></h2>
+    <p>자산이 쌓이고 무엇이 쓰이는지가 남으면, 다음은 그 자리에 맞는 자산을 시스템이 고르는 단계입니다. 같은 인원으로 더 많이, 품질은 일정하게 만드는 것이 목표입니다.</p>
+  </div>
+  <div class="cases">
+    <div class="case"><div class="case__g"><span>Stage 01 · 운영 중</span><span>사람이 찾아 넣는다</span></div>
+      <p>작업창에서 한국어로 검색하고 눌러서 넣습니다. 지금 회사에서 쓰고 있는 방식입니다.</p></div>
+    <div class="case"><div class="case__g"><span>Stage 02 · 시험 중</span><span>AI 가 1차 가공</span></div>
+      <p>장표 초안을 읽고 자리에 맞는 자산을 골라 넣으면서 아이콘과 톤, 폰트를 맞춥니다. 사람은 부족한 데만 손봅니다.</p></div>
+    <div class="case case--hi"><div class="case__g"><span>Stage 03 · 목표</span><span>완전 자동화</span></div>
+      <p>초안만 넣으면 완성 장표까지. 디자이너는 만드는 사람이 아니라 확인하고 다듬는 사람이 됩니다.</p></div>
   </div>
 </div></section>
 """
@@ -645,7 +752,7 @@ HOME = """
 # ══════════════════════════════════════════════════════════ FEATURES
 FEATURES = """
 <section class="hero hero--plain">
-  <h1>흩어진 자료를 쌓고,<br>하나의 톤으로 꺼내 씁니다.</h1>
+  <h1>흩어진 자료를 쌓고,<br><b>하나의 톤으로 꺼내 씁니다.</b></h1>
   <p class="sub">자산을 모으는 라이브러리, 쌓인 것을 찾아내는 한국어 검색, 서식째 넣는 장표 삽입. 세 가지가 파워포인트 작업창 안에서 한 번에 돌아갑니다.</p>
   <div class="hero__cta">
     <a class="btn btn--d" href="__MAIL__">무료로 시작</a>
@@ -691,22 +798,22 @@ FEATURES = """
 
   <div class="head head--left" style="margin-top:120px;">
     <p class="kicker">Zero-result rate</p>
-    <h2>검색 실패율이 <b>절반으로</b> 줄었습니다.</h2>
-    <p>결과가 하나도 안 나온 검색어 318건은 실패 기록이 아니라, 다음에 무엇을 만들어야 하는지 직원들이 직접 알려 준 목록입니다. 그 목록대로 채웠습니다.</p>
+    <h2>못 찾은 검색어가<br><b>다음에 채울 목록이 됩니다.</b></h2>
+    <p>결과가 하나도 안 나온 검색어는 실패 기록이 아니라, 다음에 무엇을 만들어야 하는지 직원들이 직접 알려 준 목록입니다. 지금까지 모인 <b>213개</b>를 우선순위로 삼아 자산을 채우고 있습니다.</p>
   </div>
   <div class="bench" style="max-width:920px;margin-inline:auto;">
-    <div class="brow brow--hi">
-      <div class="brow__n">지금<span>After query correction</span></div>
-      <div class="brow__t"><i style="width:10.5%"></i></div>
-      <div class="brow__v">10.5%</div>
-    </div>
     <div class="brow">
-      <div class="brow__n">도입 초기<span>Keywords only</span></div>
-      <div class="brow__t"><i style="width:17.4%"></i></div>
-      <div class="brow__v">17.4%</div>
+      <div class="brow__n">8월<span>검색 1,685건</span></div>
+      <div class="brow__t"><i style="width:18.2%"></i></div>
+      <div class="brow__v">18.2%</div>
+    </div>
+    <div class="brow brow--hi">
+      <div class="brow__n">9월<span>검색 131건</span></div>
+      <div class="brow__t"><i style="width:9.9%"></i></div>
+      <div class="brow__v">9.9%</div>
     </div>
   </div>
-  <p style="max-width:920px;margin:18px auto 0;font-size:13px;color:var(--ink-3);font-weight:400;">막대는 검색 중 결과가 0건이었던 비율입니다. 낮을수록 좋습니다.</p>
+  <p style="max-width:920px;margin:18px auto 0;font-size:13px;color:var(--ink-3);font-weight:400;">막대는 검색 중 결과가 0건이었던 비율입니다. 낮을수록 좋습니다. 9월은 표본이 131건으로 작아 아직 추세로 보기는 이릅니다. 관리자 화면의 무결과율 카드는 최근 30일 기준이라 이 월별 값과 다르게 나옵니다.</p>
 </div></section>
 
 <section class="band" id="decks"><div class="frame">
@@ -780,17 +887,17 @@ USECASES = """
 
 <section class="band"><div class="frame">
   <div class="cases" style="margin-top:0;">
-    <div class="case"><div class="case__g g1"><span>POWERPLUS FOR</span><span>제안서</span></div>
+    <div class="case case--hi"><div class="case__g"><span>POWERPLUS FOR</span><span>제안서</span></div>
       <p><b>수주 제안서</b> 표지·목차·간지를 지난 제안서에서 꺼내 쓰고, 발주 기관 로고와 업무 아이콘으로 톤을 맞춥니다. 서식이 그대로 따라와 내용만 고쳐 쓰면 됩니다.</p></div>
-    <div class="case"><div class="case__g g2"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
       <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세웁니다. 즐겨찾기에 둔 서식으로 매주 같은 모양을 반복합니다.</p></div>
-    <div class="case"><div class="case__g g3"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
       <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙이고 배경 사진으로 표지를 만듭니다. 인물 일러스트 378종에서 상황에 맞는 것을 고릅니다.</p></div>
-    <div class="case"><div class="case__g g4"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
       <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 두고 현장에서 바로 꺼냅니다. 최근 탭에 지난번에 쓴 자산이 그대로 남습니다.</p></div>
-    <div class="case"><div class="case__g g5"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
       <p><b>디자인 일관성</b> 같은 스타일 세트로 한 장 안의 아이콘 톤을 맞춥니다. 색감·채도·밝기를 실측해 묶어 둔 세트라 섞이지 않습니다.</p></div>
-    <div class="case"><div class="case__g g6"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
+    <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
       <p><b>관리자</b> 무엇이 쓰였고 무엇을 못 찾았는지 대시보드에서 봅니다. 무결과 검색어가 다음에 채울 자산의 우선순위가 됩니다.</p></div>
   </div>
 </div></section>
@@ -799,15 +906,15 @@ USECASES = """
   <div class="head">
     <p class="kicker">In production</p>
     <h2>시범 운영에서 나온 숫자.</h2>
-    <p>사내 ~300명 조직에서 실제로 측정한 값입니다. 도입 효과를 가늠하는 기준으로 보시면 됩니다.</p>
+    <p>사내 ~300명 조직에서 실제로 측정한 값입니다. <b>2026년 9월 중순 기준</b>이며, 도입 효과를 가늠하는 기준으로 보시면 됩니다.</p>
   </div>
   <div class="stats" style="margin-top:56px;border-bottom:1px solid var(--hair);">
     <div><b>3,734</b><span>등록 자산</span></div>
-    <div><b>730</b><span>누적 삽입</span></div>
+    <div><b>746</b><span>누적 삽입</span></div>
     <div><b>1,823</b><span>누적 검색</span></div>
-    <div><b>10.5%</b><span>무결과율</span></div>
+    <div><b>9.9%</b><span>무결과율 · 9월</span></div>
     <div><b>78%</b><span>상위 3명 비중</span></div>
-    <div><b>318</b><span>요청 대기 키워드</span></div>
+    <div><b>213</b><span>못 찾은 검색어</span></div>
   </div>
   <p class="lede">가장 중요한 숫자는 <b>78%</b>입니다. 상위 3명이 전체 삽입의 78%를 차지했습니다. 한 번 손에 익은 사람은 계속 쓴다는 뜻이라, 도입 초기에는 자주 쓰는 사람이 찾는 자산부터 채우는 편이 효과가 큽니다.</p>
 </div></section>
@@ -817,7 +924,7 @@ USECASES = """
 # ══════════════════════════════════════════════════════════ PRICING
 PRICING = """
 <section class="hero hero--plain">
-  <h1>무료로 시작하고,<br>필요할 때 올리세요.</h1>
+  <h1>무료로 시작하고,<br><b>필요할 때 올리세요.</b></h1>
   <p class="sub">모든 플랜에 라이브러리 전체와 파워포인트 추가 기능이 들어갑니다.</p>
   <div class="toggle" role="group" aria-label="결제 주기">
     <button type="button" data-cycle="m" class="on" aria-pressed="true">월 결제</button>
@@ -886,6 +993,7 @@ PRICING = """
     <h2>도입 전에 가장 많이 듣는 것들.</h2>
   </div>
   <div class="faq">
+    <div class="fi"><p class="fq">직원들에게 어떻게 배포하나요?</p><p class="fa">두 가지입니다. 지금은 <b>설치 파일을 받아 실행</b>하는 방식이라, 회사에 따라 백신 예외 처리가 한 번 필요하고 구버전 Office 를 쓰는 PC 가 걸러집니다. <b>Office Store 로 전사 배포</b>하면 직원은 파워포인트 안에서 내려받기만 하면 되고, 백신과 설치 부담이 함께 없어집니다. 업데이트도 심사를 거친 버전으로 자동 반영됩니다.</p></div>
     <div class="fi"><p class="fq">맥에서도 되나요?</p><p class="fa">됩니다. 추가 기능 본체를 웹 표준으로 만들어서 맥 파워포인트에서도 같은 작업창이 열립니다. Office Store를 통해 배포하면 윈도우와 맥 구분 없이 파워포인트 안에서 내려받습니다.</p></div>
     <div class="fi"><p class="fq">오래된 Office를 쓰는 직원이 있습니다.</p><p class="fa">Office 2019 이상이 필요합니다. 2016 이하는 내부 엔진이 달라 작업창이 열리지 않고, 설치 단계에서 미리 감지해 안내합니다. 도입 전에 라이선스 현황을 함께 확인해 드립니다.</p></div>
     <div class="fi"><p class="fq">기존에 쓰던 자료를 옮길 수 있나요?</p><p class="fa">폴더째 넘겨 주시면 일괄로 등록합니다. 이미지는 크기를 맞추고 키워드를 붙이며, 지난 제안서는 표지·목차·간지·본문 낱장으로 잘라 등록합니다. 옮기는 작업은 도입 과정에 포함됩니다.</p></div>

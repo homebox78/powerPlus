@@ -31,7 +31,7 @@
     --ink-3:#9A9DA3;
     --line:#DCDEE1;
     --hair:#E8E9EB;
-    --accent:#0A7CDA;
+    --accent:#C43E1C;
     --brand:#E0701F;
     --page:1240px;
     --tint:#FBEEE4;
@@ -341,7 +341,7 @@
     <p class="lede">파워포인트 작업창에서 회사 자산을 검색해 클릭 한 번으로 슬라이드에 넣는 추가 기능입니다.<br>설치부터 관리자 화면까지 이 문서 한 장에 담았습니다.</p>
     <div class="meta">
       <span class="tag"><b>Version</b> 1.0.4</span>
-      <span class="tag"><b>Updated</b> 2026-09-12</span>
+      <span class="tag"><b>Updated</b> 2026-09-20</span>
       <span class="tag"><b>Assets</b> 3,734</span>
       <span class="tag"><b>Platform</b> Windows · macOS</span>
     </div>
@@ -369,7 +369,7 @@
           </tbody>
         </table>
       </div>
-      <p class="cap">2026-09-12 기준 라이브 데이터 · 자산 하나에 국문 25개, 영문 25개 키워드가 붙어 있습니다.</p>
+      <p class="cap">2026-09-20 기준 라이브 데이터 · 자산 하나에 국문 25개, 영문 25개 키워드가 붙어 있습니다.</p>
     </section>
 
     <!-- REQUIREMENTS -->
@@ -443,7 +443,7 @@
           <tbody>
             <tr><td><b>헤더</b></td><td>상단</td><td>로고 · 알림(관리자 공지, 새 공지가 있으면 배지) · 프로필</td></tr>
             <tr><td><b>탭</b></td><td>헤더 아래</td><td>전체 / 즐겨찾기 / 최근 / 웹 이미지</td></tr>
-            <tr><td><b>검색창</b></td><td>탭 아래</td><td>키워드 입력 + 돋보기. 검색 후에는 같은 버튼이 해제(✕)로 바뀝니다</td></tr>
+            <tr><td><b>검색창</b></td><td>탭 아래</td><td>키워드 입력 + 돋보기. 검색 후에는 같은 버튼이 해제(×)로 바뀝니다</td></tr>
             <tr><td><b>카테고리 칩</b></td><td>검색창 아래</td><td>전체·아이콘·사진·일러스트·다이어그램·장표·로고, 각 칩에 등록 수 표시</td></tr>
             <tr><td><b>주제 칩</b></td><td>카테고리 아래</td><td>선택한 카테고리 안에서 주제를 한 번 더 좁힙니다</td></tr>
             <tr><td><b>자산 그리드</b></td><td>중앙</td><td>카드 목록. 스크롤하면 계속 로드됩니다</td></tr>
@@ -511,7 +511,7 @@
         <li><b>카테고리 안에서 검색</b> — 카테고리를 고른 뒤 검색하면 그 안에서만 찾습니다.</li>
         <li><b>추천 검색어</b> — 입력하는 동안 실제 등록된 태그에서 후보를 보여 줍니다.<br>없는 말은 만들어 주지 않습니다.</li>
         <li><b>결과가 없으면</b> — “‘키워드’ 자료 요청하기” 버튼이 나타나 <a href="#request">콘텐츠 요청</a>으로 바로 이어집니다.</li>
-        <li><b>되돌아오기</b> — 검색 버튼이 ✕로 바뀝니다.<br>Esc를 눌러도 해제됩니다.</li>
+        <li><b>되돌아오기</b> — 검색 버튼이 ×로 바뀝니다.<br>Esc를 눌러도 해제됩니다.</li>
       </ul>
     </section>
 
@@ -607,7 +607,7 @@
       </ul>
       <div class="note">
         <p class="note__t">Tip · 무결과 검색어가 가장 중요한 화면입니다</p>
-        <p>결과가 0건이었던 검색어 목록은 실패 기록이 아니라 다음에 무엇을 채워야 하는지 사용자가 직접 알려 준 목록입니다.<br>콘텐츠 요청과 함께 보면 자산 보강 우선순위가 그대로 나옵니다.<br>이 목록대로 채운 결과 무결과율이 17.4%에서 10.5%로 내려갔습니다.</p>
+        <p>결과가 0건이었던 검색어 목록은 실패 기록이 아니라 다음에 무엇을 채워야 하는지 사용자가 직접 알려 준 목록입니다.<br>콘텐츠 요청과 함께 보면 자산 보강 우선순위가 그대로 나옵니다.<br>이 목록대로 채운 결과 무결과율이 8월 18.2%(검색 1,685건)에서 9월 9.9%(검색 131건)로 내려갔습니다. 9월은 표본이 작아 아직 추세로 보기는 이릅니다.</p>
       </div>
     </section>
 
@@ -732,7 +732,7 @@
   </aside>
 </div>
 
-<footer class="foot"><div class="foot__in"><div class="fgrid"><div class="fcol"><h4>Product</h4><a href="features.html#library">자산 라이브러리</a><a href="features.html#search">한국어 검색</a><a href="features.html#decks">장표 삽입</a></div><div class="fcol"><h4>Use cases</h4><a href="usecases.html">제안서</a><a href="usecases.html">사내 보고</a><a href="usecases.html">교육 자료</a></div><div class="fcol"><h4>Resources</h4><a href="docs.html#install">설치 안내</a><a href="docs.html#changelog">릴리스 노트</a><a href="docs.html#faq">문제 해결</a></div><div class="fcol"><h4>Company</h4><a href="index.html">powerPlus 소개</a><a href="mailto:solideosai15@solideos.com?subject=powerPlus%20%EB%AC%B8%EC%9D%98">문의</a></div><div class="fcol"><h4>Pricing</h4><a href="pricing.html">요금제</a><a href="pricing.html#selfhost">구축형</a></div></div><div class="fbar"><a class="brand" href="index.html"><span class="brand__m" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></span><span class="brand__t">powerPlus</span></a><p>화면과 수치는 운영 중인 라이브러리의 실제 데이터입니다.<br>· Updated 2026-09-12</p></div></div></footer>
+<footer class="foot"><div class="foot__in"><div class="fgrid"><div class="fcol"><h4>Product</h4><a href="features.html#library">자산 라이브러리</a><a href="features.html#search">한국어 검색</a><a href="features.html#decks">장표 삽입</a></div><div class="fcol"><h4>Use cases</h4><a href="usecases.html">제안서</a><a href="usecases.html">사내 보고</a><a href="usecases.html">교육 자료</a></div><div class="fcol"><h4>Resources</h4><a href="docs.html#install">설치 안내</a><a href="docs.html#changelog">릴리스 노트</a><a href="docs.html#faq">문제 해결</a></div><div class="fcol"><h4>Company</h4><a href="index.html">powerPlus 소개</a><a href="mailto:solideosai15@solideos.com?subject=powerPlus%20%EB%AC%B8%EC%9D%98">문의</a></div><div class="fcol"><h4>Pricing</h4><a href="pricing.html">요금제</a><a href="pricing.html#selfhost">구축형</a></div></div><div class="fbar"><a class="brand" href="index.html"><span class="brand__m" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg></span><span class="brand__t">powerPlus</span></a><p>화면과 수치는 운영 중인 라이브러리의 실제 데이터입니다.<br>· Updated 2026-09-20</p></div></div></footer>
 
 <script>
 (function(){
