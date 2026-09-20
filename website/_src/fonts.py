@@ -9,11 +9,11 @@
     그래서 빌드 마지막에 이 스크립트를 돌려 **그때 쓰인 글자로** 서브셋을 다시 만든다.
 
 쓰는 법
-    py fonts.py            # ../ 의 html 5장을 훑어 ../spoqa-{400,500,700}.woff2 생성
+    py fonts.py            # ../ 의 html 5장을 훑어 ../asta-{400,500,700}.woff2 생성
 
 원본 글꼴
-    fonts/SpoqaHanSansNeo-{Regular,Medium,Bold}.woff2 (한글 2,574자)
-    Spoqa Han Sans Neo — 상업적 이용 가능. 저장소에 함께 두어 빌드에 네트워크가 필요 없다.
+    fonts/AstaSans-{400,500,700}.woff2 (한글 2,574자)
+    Asta Sans (Google Fonts, OFL). 저장소에 함께 두어 빌드에 네트워크가 필요 없다.
 """
 import io
 import os
@@ -29,13 +29,13 @@ SITE = os.path.dirname(HERE)
 SRC = os.path.join(HERE, 'fonts')
 
 PAGES = ['index.html', 'features.html', 'usecases.html', 'pricing.html', 'docs.html']
-WEIGHTS = [('400', 'Regular'), ('500', 'Medium'), ('700', 'Bold')]
+WEIGHTS = ['400', '500', '700']
 
 # 스크립트가 나중에 만들어 넣는 글자까지 놓치지 않게 항상 넣어 둔다.
 # 여기에 없는 기호를 본문에 쓰면 fonts.py 가 "원본에 없는 글자" 로 알려 준다.
 ALWAYS = (
     ''.join(chr(c) for c in range(0x20, 0x7F))      # 기본 라틴 + 숫자 + 문장부호
-    + '·…—–−‘’“”×→←↑↓✓₩°'                           # 사이트가 실제로 쓰는 기호
+    + '·…—–−‘’“”×→←↑↓₩°'                            # 사이트가 실제로 쓰는 기호
 )
 
 
@@ -59,8 +59,8 @@ def used_chars():
 def build(chars):
     text = ''.join(sorted(chars))
     total = 0
-    for weight, name in WEIGHTS:
-        src = os.path.join(SRC, 'SpoqaHanSansNeo-%s.woff2' % name)
+    for weight in WEIGHTS:
+        src = os.path.join(SRC, 'AstaSans-%s.woff2' % weight)
         if not os.path.exists(src):
             sys.exit('원본 글꼴이 없습니다: %s' % src)
 
@@ -79,11 +79,11 @@ def build(chars):
         sub.subset(font)
         font.flavor = 'woff2'
 
-        out = os.path.join(SITE, 'spoqa-%s.woff2' % weight)
+        out = os.path.join(SITE, 'asta-%s.woff2' % weight)
         font.save(out)
         size = os.path.getsize(out)
         total += size
-        print('  spoqa-%s.woff2  %6.1f KB' % (weight, size / 1024))
+        print('  asta-%s.woff2  %6.1f KB' % (weight, size / 1024))
     return total
 
 

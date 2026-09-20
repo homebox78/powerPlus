@@ -16,23 +16,23 @@ CROSS = ('<svg class="cx" width="13" height="13" viewBox="0 0 14 14" fill="none"
 
 CSS = r"""
   @font-face{
-    font-family:"Spoqa Han Sans Neo";
-    src:url("spoqa-400.woff2") format("woff2");
+    font-family:"Asta Sans";
+    src:url("asta-400.woff2") format("woff2");
     font-weight:400; font-style:normal; font-display:swap;
   }
   @font-face{
-    font-family:"Spoqa Han Sans Neo";
-    src:url("spoqa-500.woff2") format("woff2");
+    font-family:"Asta Sans";
+    src:url("asta-500.woff2") format("woff2");
     font-weight:500; font-style:normal; font-display:swap;
   }
   @font-face{
-    font-family:"Spoqa Han Sans Neo";
-    src:url("spoqa-700.woff2") format("woff2");
+    font-family:"Asta Sans";
+    src:url("asta-700.woff2") format("woff2");
     font-weight:700; font-style:normal; font-display:swap;
   }
 :root{
     --paper:#FFFFFF;
-    --panel:#F1F1F0;    /* 덱 캔버스 - 중성 라이트 그레이 */
+    --panel:#F7F7F6;    /* 섹션 사이 구분용 연한 회색 - 기본은 흰색 */
     --ink:#1A1A1C;
     --ink-2:#63666B;
     --ink-3:#9A9DA3;
@@ -49,7 +49,7 @@ CSS = r"""
     --rule:#1A1A1C;     /* 덱 헤더 괘선 */
     --tint:#FBEEE4;     /* 라벨 pill 배경 — 브랜드 소프트 */
     --dark:#1D2026;     /* 덱 마무리 장 - 근검정 */
-    --f:"Spoqa Han Sans Neo","Spoqa Han Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
+    --f:"Asta Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box;}
   body{background:var(--paper);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.75;
@@ -72,8 +72,7 @@ CSS = r"""
   .band--plain::before{content:none;}
   /* nextsaas 처럼 섹션 배경을 흰색 ↔ 연회색으로 번갈아 */
   main > .band:nth-of-type(even):not(.band--plain){background:var(--panel);}
-  .frame{max-width:var(--page);margin:0 auto;padding:110px var(--pad);
-    border-left:1px solid var(--hair);border-right:1px solid var(--hair);}
+  .frame{max-width:var(--page);margin:0 auto;padding:110px var(--pad);}
   .frame--tight{padding-top:64px;padding-bottom:64px;}
   .frame--flush{padding-left:0;padding-right:0;}
   .inner{padding-inline:var(--pad);}
@@ -138,7 +137,7 @@ CSS = r"""
   /* gcar .text-block .title — 5.2rem / 800 / lh150% */
   .hero h1{font-size:34px;font-weight:400;line-height:1.1;margin:0;}
   /* gcar .title + .desc — margin-top 3.2rem, desc 2rem / 400 / lh150% */
-  .hero .sub{margin:22px auto 0;max-width:50ch;font-size:16px;line-height:1.6;
+  .hero .sub{margin:22px auto 0;max-width:760px;font-size:16px;line-height:1.6;
     color:var(--ink-d);font-weight:400;letter-spacing:-.01em;}
   .hero--plain .sub{margin:24px auto 0;color:var(--ink-d);}
   .hero__cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:32px;}
@@ -175,7 +174,9 @@ CSS = r"""
   @keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:none;}}
 
   /* ── 섹션 공통 ─────────────────────────────────────────── */
-  .head{max-width:var(--prose);margin:0 auto;text-align:center;}
+  /* 장표처럼 한 문장이 한 줄에 들어가게 넓게 쓴다. 제목만 따로 좁힌다. */
+  .head{max-width:1140px;margin:0 auto;text-align:center;}
+  .head h2{max-width:980px;margin-inline:auto;}
 
   .head h2{font-size:32px;font-weight:400;line-height:1.1;margin-top:20px;}
   @media (min-width:768px){ .head h2{font-size:46px;} }
@@ -183,19 +184,18 @@ CSS = r"""
   /* 덱 헤드라인 - 첫 줄은 보통, 둘째 줄이 검정 볼드. 오렌지는 눈썹/수치에만 쓴다 */
   .head h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
   .head p:not(.kicker){margin-top:22px;font-size:16px;line-height:1.6;color:var(--ink-d);
-    font-weight:400;letter-spacing:-.01em;}
+    font-weight:400;letter-spacing:-.01em;max-width:1100px;margin-inline:auto;}
   @media (min-width:1200px){ .head p:not(.kicker){margin-top:26px;font-size:18px;} }
   /* 덱은 헤드라인 바로 아래 오렌지 볼드 한 줄로 핵심을 박는다.
      .head p:not(.kicker) 가 (0,2,1) 이라 p.punch 로 특이도를 맞추고 뒤에 둔다. */
   .head p.punch{color:var(--accent);font-weight:700;}
   .head--left{text-align:left;max-width:920px;}
-  .frame--panel{background:var(--panel);}
-  .lede{max-width:60ch;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
+  .lede{max-width:1100px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
     font-weight:400;text-align:center;}
   .lede b{color:var(--ink-t);font-weight:700;}
 
   /* 라벨 좌 / 본문 우 */
-  .duo{display:grid;grid-template-columns:200px 1fr;gap:56px;max-width:1000px;margin:0 auto;}
+  .duo{display:grid;grid-template-columns:180px 1fr;gap:44px;max-width:1140px;margin:0 auto;}
   .duo__b{font-size:17px;line-height:1.8;color:var(--ink-d);font-weight:400;}
   .duo__b b{color:var(--ink-t);font-weight:700;}
   .duo__b p + p{margin-top:18px;}
@@ -276,19 +276,25 @@ CSS = r"""
     margin:44px auto 0;}
   .qb__h{padding:13px 20px;border-bottom:1px solid var(--hair);font-size:11.5px;color:var(--ink-3);
     letter-spacing:.07em;text-transform:uppercase;}
-  .qr{padding:16px 20px;border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:14px;
-    flex-wrap:wrap;}
+  /* 입력 → 교정 → 결과량을 한 줄에서 눈으로 따라가게 만든다 */
+  .qr{padding:15px 20px;border-bottom:1px solid var(--hair);display:grid;
+    grid-template-columns:104px 16px 164px 1fr 72px;gap:14px;align-items:center;}
   .qr:last-child{border-bottom:0;}
-  .qi{display:inline-flex;align-items:center;height:33px;padding:0 15px;border-radius:999px;
-    background:var(--panel);font-size:14px;}
-  .qo{font-size:14px;color:var(--ink-2);font-weight:400;}
-  .qo b{color:var(--ink);font-weight:500;}
-  .qo em{font-style:normal;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .qi{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 12px;
+    border-radius:6px;background:#EEEFF1;color:var(--ink-2);font-size:14px;font-weight:400;}
+  .qarw{color:#C6C9CE;font-size:15px;text-align:center;line-height:1;}
+  .qf{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 12px;
+    border-radius:6px;background:var(--accent);color:#fff;font-size:14px;font-weight:500;
+    white-space:nowrap;}
+  .qbar{height:8px;border-radius:999px;background:#EDEFF1;overflow:hidden;}
+  .qbar i{display:block;height:100%;min-width:4px;border-radius:999px;
+    background:linear-gradient(90deg,var(--accent-b),var(--accent));}
+  .qn{font-size:14px;font-weight:500;color:var(--accent);text-align:right;
+    font-variant-numeric:tabular-nums;}
 
   /* ── 통계 스트립 ───────────────────────────────────────── */
   .stats{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--hair);}
-  .stats > div{padding:26px 10px;text-align:center;border-right:1px solid var(--hair);}
-  .stats > div:last-child{border-right:0;}
+  .stats > div{padding:26px 10px;text-align:center;}
   .stats b{display:block;font-size:25px;font-weight:500;letter-spacing:-.035em;
     font-variant-numeric:tabular-nums;}
   .stats span{display:block;font-size:12.5px;color:var(--ink-2);margin-top:3px;}
@@ -298,8 +304,7 @@ CSS = r"""
   .split--f .split__v{order:-1;}
   .split h2{font-size:clamp(25px,3vw,36px);line-height:1.2;margin-top:14px;}
   .split h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
-  .split > div > p{margin-top:16px;font-size:16px;line-height:1.8;color:var(--ink-2);font-weight:400;
-    max-width:42ch;}
+  .split > div > p{margin-top:16px;font-size:16px;line-height:1.8;color:var(--ink-2);font-weight:400;}
   .split__v img{width:100%;border-radius:12px;border:1px solid var(--hair);
     box-shadow:0 2px 8px rgba(10,10,10,.05),0 34px 70px -46px rgba(10,10,10,.4);}
   .list{margin-top:26px;display:grid;gap:13px;}
@@ -309,13 +314,27 @@ CSS = r"""
     margin-top:11px;}
 
   /* ── 비교표 ────────────────────────────────────────────── */
-  .cmp{margin-top:48px;max-width:1000px;margin-inline:auto;}
-  .cmp table{border-collapse:collapse;width:100%;font-size:14.5px;}
-  .cmp th{font-weight:400;font-size:12.5px;color:var(--ink-2);padding:0 0 16px;text-align:center;}
+  /* 되는 것과 안 되는 것이 한눈에 갈리도록 동그란 배지로 키우고,
+     powerPlus 열만 옅은 오렌지로 깔아 시선이 먼저 가게 한다. */
+  .cmp{margin-top:48px;max-width:1040px;margin-inline:auto;}
+  .cmp table{border-collapse:collapse;width:100%;font-size:15.5px;}
+  .cmp th{font-weight:400;font-size:13px;color:var(--ink-3);padding:14px 0 14px;text-align:center;}
   .cmp th:first-child{text-align:left;}
-  .cmp th b{display:block;color:var(--ink);font-size:14px;font-weight:500;}
-  .cmp td{padding:16px 0;border-top:1px solid var(--hair);text-align:center;width:130px;}
-  .cmp td:first-child{text-align:left;width:auto;color:var(--ink-2);font-weight:400;}
+  .cmp th b{display:block;color:var(--ink-t);font-size:16.5px;font-weight:700;
+    letter-spacing:-.02em;margin-bottom:2px;}
+  .cmp td{padding:15px 0;border-top:1px solid var(--hair);text-align:center;width:142px;}
+  .cmp td:first-child{text-align:left;width:auto;color:var(--ink-t);font-weight:400;
+    padding-right:24px;}
+  /* powerPlus 열 강조 */
+  .cmp th:nth-child(2),.cmp td:nth-child(2){background:rgba(196,62,28,.055);}
+  .cmp th:nth-child(2) b{color:var(--accent);}
+  .cmp th:nth-child(2){border-radius:10px 10px 0 0;}
+  .cmp tbody tr:last-child td:nth-child(2){border-radius:0 0 10px 10px;}
+  /* 지원 = 오렌지 채움 · 미지원 = 연회색 */
+  .cmp td svg{width:15px;height:15px;padding:6px;border-radius:50%;vertical-align:middle;
+    box-sizing:content-box;}
+  .cmp td .ck{background:var(--accent);color:#fff;}
+  .cmp td .cx{background:#ECEEF1;color:#B6BAC1;}
   .ck{color:#1F9254;} .cx{color:#C8CBD0;}
 
   /* ── 요금제 ────────────────────────────────────────────── */
@@ -342,11 +361,26 @@ CSS = r"""
   .pl li b{color:var(--ink);font-weight:500;}
   .pl li svg{flex-shrink:0;margin-top:5px;color:#1F9254;}
   .pl .btn{width:100%;margin-top:auto;}   /* 카드 높이가 달라도 버튼은 바닥에 정렬 */
-  .ent{border:1px solid var(--hair);border-radius:20px;padding:40px;margin-top:24px;}
+  .ent{border:1px solid var(--hair);border-radius:12px;padding:40px;margin-top:24px;
+    display:grid;grid-template-columns:1.3fr .9fr;gap:52px;align-items:center;}
+  /* 자산이 사내 망 밖으로 안 나간다는 걸 글이 아니라 그림으로 */
+  .ent__net{border:1.5px dashed var(--accent);border-radius:12px;padding:26px 22px 22px;
+    position:relative;background:rgba(196,62,28,.035);}
+  .ent__tag{position:absolute;top:-10px;left:18px;padding:0 9px;background:#fff;
+    color:var(--accent);font-size:11.5px;font-weight:500;letter-spacing:.12em;
+    text-transform:uppercase;line-height:20px;}
+  .ent__box{background:#fff;border:1px solid var(--hair);border-radius:9px;padding:14px 16px;}
+  .ent__box + .ent__box{margin-top:10px;}
+  .ent__box b{display:block;font-size:15px;font-weight:700;color:var(--ink-t);}
+  .ent__box span{display:block;margin-top:3px;font-size:12.5px;color:var(--ink-2);}
+  .ent__out{margin-top:14px;display:flex;align-items:center;gap:9px;font-size:12.5px;
+    color:var(--ink-3);}
+  .ent__out i{flex:1;height:1px;background:repeating-linear-gradient(90deg,
+    #D6D9DE 0 6px,transparent 6px 12px);}
   .ent h3{font-size:24px;font-weight:500;margin-top:10px;}
-  .ent > p{margin-top:12px;font-size:15.5px;color:var(--ink-2);font-weight:400;max-width:56ch;line-height:1.8;}
+  .ent__t > p{margin-top:12px;font-size:15.5px;color:var(--ink-2);font-weight:400;line-height:1.8;}
   .ent ul{margin-top:32px;display:grid;gap:12px;font-size:14.5px;color:var(--ink-2);font-weight:400;
-    max-width:74ch;}
+    max-width:none;}
   .ent li{display:flex;gap:10px;line-height:1.6;}
   .ent li svg{flex-shrink:0;margin-top:5px;color:#1F9254;}
 
@@ -379,8 +413,7 @@ CSS = r"""
 
   /* ── 푸터 ─────────────────────────────────────────────── */
   .foot{border-top:1px solid var(--hair);}
-  .foot__in{max-width:var(--page);margin:0 auto;padding:64px var(--pad) 0;
-    border-left:1px solid var(--hair);border-right:1px solid var(--hair);}
+  .foot__in{max-width:var(--page);margin:0 auto;padding:64px var(--pad) 0;}
   .fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:28px;}
   .fcol h4{font-size:11.5px;color:var(--ink-3);font-weight:400;margin:0 0 14px;letter-spacing:.08em;
     text-transform:uppercase;}
@@ -473,15 +506,17 @@ CSS = r"""
     .split{grid-template-columns:1fr;gap:34px;} .split--f .split__v{order:0;}
     .plans{grid-template-columns:1fr;gap:52px;}
     .stats{grid-template-columns:repeat(3,1fr);}
-    .stats > div:nth-child(3n){border-right:0;}
     .stats > div:nth-child(-n+3){border-bottom:1px solid var(--hair);}
     .brow{grid-template-columns:1fr;gap:7px;} .brow__v{text-align:left;}
+    .qr{grid-template-columns:auto 16px 1fr;row-gap:10px;}
+    .qbar{grid-column:1 / -1;} .qn{grid-column:1 / -1;text-align:left;}
     .fgrid{grid-template-columns:repeat(2,1fr);gap:32px;}
     .wall{height:230px;}
-    .ent{padding:30px;}
+    .ent{padding:30px;grid-template-columns:1fr;gap:32px;}
     .cta{padding:80px 24px 86px;}
     :root{--pad:24px;}
-    .cmp td{width:74px;}
+    .cmp table{font-size:14px;} .cmp td{width:78px;} .cmp th b{font-size:14px;}
+    .cmp td svg{width:13px;height:13px;padding:5px;}
   }
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;}
@@ -607,11 +642,11 @@ HOME = """
   </div>
   <div class="cases">
     <div class="case"><div class="case__g"><span>Attempt 01</span><span>공유 폴더</span></div>
-      <p>폴더를 열고 눈으로 훑어야 찾습니다. 이름을 모르면 있는 줄도 모르고, 결국 각자 PC 에 사본을 따로 둡니다.</p></div>
+      <p>폴더를 열고 눈으로 훑어야 찾습니다. 이름을 모르면 있는 줄도 모른 채 지나갑니다.</p></div>
     <div class="case"><div class="case__g"><span>Attempt 02</span><span>정리용 파워포인트</span></div>
-      <p>지난 장표에서 콘텐츠만 모아 <b>540장</b>짜리 한 파일로 만들었습니다. 그래도 쓰려면 그 파일을 열고 장을 하나하나 넘겨 봐야 했습니다.</p></div>
+      <p>지난 장표를 모아 <b>540장</b>짜리 한 파일로 만들었습니다. 그래도 열어서 하나하나 넘겨 봐야 했습니다.</p></div>
     <div class="case case--hi"><div class="case__g"><span>Now</span><span>powerPlus</span></div>
-      <p>파워포인트를 닫지 않고, 작업창 안에서 한국어로 검색해 지금 슬라이드에 바로 넣습니다. 찾는 자리와 쓰는 자리가 같습니다.</p></div>
+      <p>파워포인트 안에서 검색해 지금 슬라이드에 넣습니다. 찾는 자리와 쓰는 자리가 같습니다.</p></div>
   </div>
 </div></section>
 
@@ -645,15 +680,15 @@ HOME = """
   <div class="tri">
     <div class="tri__c">
       <img src="shots/shot-set.jpg" alt="같은 스타일 세트를 열어 함께 등록된 장표가 격자로 보이는 화면" loading="lazy">
-      <p><b>Style sets</b> 색감·채도·밝기를 실측해 같은 결의 자산만 묶었습니다. 한 장 안에 여러 개를 써도 톤이 어긋나지 않습니다.</p>
+      <p><b>Style sets</b> 색감·채도·밝기를 실측해 같은 결끼리 묶었습니다. 한 장에 여러 개를 써도 톤이 어긋나지 않습니다.</p>
     </div>
     <div class="tri__c">
       <img src="shots/shot-logo-full.jpg" alt="로고 카테고리를 선택해 기관 성격별 로고가 나열된 작업창" loading="lazy">
-      <p><b>Logos</b> 정부 부처·지자체·공단으로 나눠 둡니다. 담당자마다 다른 로고 파일을 쓰던 일이 없어집니다.</p>
+      <p><b>Logos</b> 정부 부처·지자체·공단·진흥원으로 나눠 뒀습니다. 담당자마다 다른 파일을 쓰던 일이 없어집니다.</p>
     </div>
     <div class="tri__c">
       <img src="shots/shot-illust.jpg" alt="일러스트 카테고리를 선택해 인물 일러스트가 나열된 작업창" loading="lazy">
-      <p><b>Illustrations</b> 회의·발표·분석처럼 쓰이는 장면으로 나눠 뒀습니다. 같은 화풍 안에서 고르게 됩니다.</p>
+      <p><b>Illustrations</b> 회의·발표·분석처럼 쓰이는 장면으로 나눴습니다. 같은 화풍 안에서 골라 쓸 수 있습니다.</p>
     </div>
   </div>
 </div></section>
@@ -666,10 +701,10 @@ HOME = """
   </div>
   <div class="qb">
     <div class="qb__h">Query correction — live behavior</div>
-    <div class="qr"><span class="qi">코그</span><span class="qo"><b>‘코드’</b>로 고쳐서 찾았어요 · <em>38개</em></span></div>
-    <div class="qr"><span class="qi">디비</span><span class="qo"><b>데이터베이스</b>와 같은 결과 · <em>124개</em></span></div>
-    <div class="qr"><span class="qi">사람들</span><span class="qo">어간까지 넓혀서 · <em>243개</em></span></div>
-    <div class="qr"><span class="qi">성장 전략</span><span class="qo">상승·로드맵·목표까지 · <em>86개</em></span></div>
+    <div class="qr"><span class="qi">코그</span><span class="qarw" aria-hidden="true">→</span><span class="qf">코드</span><span class="qbar" aria-hidden="true"><i style="width:16%"></i></span><span class="qn">38개</span></div>
+    <div class="qr"><span class="qi">디비</span><span class="qarw" aria-hidden="true">→</span><span class="qf">데이터베이스</span><span class="qbar" aria-hidden="true"><i style="width:51%"></i></span><span class="qn">124개</span></div>
+    <div class="qr"><span class="qi">사람들</span><span class="qarw" aria-hidden="true">→</span><span class="qf">사람</span><span class="qbar" aria-hidden="true"><i style="width:100%"></i></span><span class="qn">243개</span></div>
+    <div class="qr"><span class="qi">성장 전략</span><span class="qarw" aria-hidden="true">→</span><span class="qf">상승·로드맵·목표</span><span class="qbar" aria-hidden="true"><i style="width:35%"></i></span><span class="qn">86개</span></div>
   </div>
 </div></section>
 
@@ -717,17 +752,17 @@ HOME = """
   </div>
   <div class="cases">
     <div class="case case--hi"><div class="case__g"><span>POWERPLUS FOR</span><span>제안서</span></div>
-      <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼내 쓰고, 기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
+      <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼내 씁니다. 기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
-      <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세우고 같은 서식으로 반복합니다.</p></div>
+      <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세웁니다. 같은 서식으로 매주 반복합니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
-      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙이고, 배경 사진으로 표지를 만듭니다.</p></div>
+      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙입니다. 배경 사진으로 표지를 만듭니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
-      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 두고 현장에서 바로 꺼내 씁니다.</p></div>
+      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 둡니다. 현장에서 바로 꺼내 씁니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
-      <p><b>디자인 일관성</b> 같은 스타일 세트로 한 장 안의 아이콘 톤을 맞춥니다.</p></div>
+      <p><b>디자인 일관성</b> 같은 스타일 세트로 아이콘 톤을 맞춥니다. 한 장 안에서 결이 섞이지 않습니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
-      <p><b>관리자</b> 무엇이 쓰이고 무엇을 못 찾았는지 보고 다음에 채울 자산을 정합니다.</p></div>
+      <p><b>관리자</b> 무엇이 쓰이고 못 찾았는지 대시보드에서 봅니다. 다음에 채울 자산을 그 목록으로 정합니다.</p></div>
   </div>
 </div></section>
 
@@ -741,9 +776,9 @@ HOME = """
     <div class="case"><div class="case__g"><span>Stage 01 · 운영 중</span><span>사람이 찾아 넣는다</span></div>
       <p>작업창에서 한국어로 검색하고 눌러서 넣습니다. 지금 회사에서 쓰고 있는 방식입니다.</p></div>
     <div class="case"><div class="case__g"><span>Stage 02 · 시험 중</span><span>AI 가 1차 가공</span></div>
-      <p>장표 초안을 읽고 자리에 맞는 자산을 골라 넣으면서 아이콘과 톤, 폰트를 맞춥니다. 사람은 부족한 데만 손봅니다.</p></div>
+      <p>초안을 읽고 자리에 맞는 자산을 골라 넣습니다. 아이콘과 톤, 폰트까지 맞춰 둡니다.</p></div>
     <div class="case case--hi"><div class="case__g"><span>Stage 03 · 목표</span><span>완전 자동화</span></div>
-      <p>초안만 넣으면 완성 장표까지. 디자이너는 만드는 사람이 아니라 확인하고 다듬는 사람이 됩니다.</p></div>
+      <p>초안만 넣으면 완성 장표까지 나옵니다. 디자이너는 확인하고 다듬는 사람이 됩니다.</p></div>
   </div>
 </div></section>
 """
@@ -769,15 +804,15 @@ FEATURES = """
   <div class="tri">
     <div class="tri__c">
       <img src="shots/shot-illust.jpg" alt="일러스트 카테고리 화면" loading="lazy">
-      <p><b>장면 단위 분류</b> 인물·회의·발표·분석처럼 실제로 쓰이는 장면으로 나눠 두어 카테고리만 눌러도 찾힙니다.</p>
+      <p><b>장면 단위 분류</b> 인물·회의·발표처럼 쓰이는 장면으로 나눴습니다. 카테고리만 눌러도 바로 찾습니다.</p>
     </div>
     <div class="tri__c">
       <img src="shots/shot-logo-full.jpg" alt="로고 카테고리 화면" loading="lazy">
-      <p><b>기관 성격별 로고</b> 정부 부처·지자체·공단·진흥원으로 한 번 더 좁혀 제안서에 맞는 로고를 바로 꺼냅니다.</p>
+      <p><b>기관 성격별 로고</b> 정부 부처·지자체·공단·진흥원으로 나눴습니다. 제안서에 맞는 로고를 바로 꺼냅니다.</p>
     </div>
     <div class="tri__c">
       <img src="shots/shot-set.jpg" alt="같은 스타일 세트 화면" loading="lazy">
-      <p><b>같은 스타일 세트</b> 색감·채도·밝기를 실측해 같은 결의 자산만 모읍니다. 한 장 안의 톤이 어긋나지 않습니다.</p>
+      <p><b>같은 스타일 세트</b> 색감·채도·밝기를 실측해 같은 결끼리 모읍니다. 한 장 안의 톤이 어긋나지 않습니다.</p>
     </div>
   </div>
 </div></section>
@@ -790,10 +825,10 @@ FEATURES = """
   </div>
   <div class="qb">
     <div class="qb__h">Query correction — live behavior</div>
-    <div class="qr"><span class="qi">코그</span><span class="qo"><b>‘코드’</b>로 고쳐서 찾았어요 · <em>38개</em></span></div>
-    <div class="qr"><span class="qi">아이큰</span><span class="qo"><b>아이콘</b>으로 교정 · <em>1,586개</em></span></div>
-    <div class="qr"><span class="qi">디비</span><span class="qo"><b>데이터베이스</b>와 같은 결과 · <em>124개</em></span></div>
-    <div class="qr"><span class="qi">사람들</span><span class="qo">어간까지 넓혀서 · <em>243개</em></span></div>
+    <div class="qr"><span class="qi">코그</span><span class="qarw" aria-hidden="true">→</span><span class="qf">코드</span><span class="qbar" aria-hidden="true"><i style="width:2.4%"></i></span><span class="qn">38개</span></div>
+    <div class="qr"><span class="qi">아이큰</span><span class="qarw" aria-hidden="true">→</span><span class="qf">아이콘</span><span class="qbar" aria-hidden="true"><i style="width:100%"></i></span><span class="qn">1,586개</span></div>
+    <div class="qr"><span class="qi">디비</span><span class="qarw" aria-hidden="true">→</span><span class="qf">데이터베이스</span><span class="qbar" aria-hidden="true"><i style="width:7.8%"></i></span><span class="qn">124개</span></div>
+    <div class="qr"><span class="qi">사람들</span><span class="qarw" aria-hidden="true">→</span><span class="qf">사람</span><span class="qbar" aria-hidden="true"><i style="width:15.3%"></i></span><span class="qn">243개</span></div>
   </div>
 
   <div class="head head--left" style="margin-top:120px;">
@@ -888,17 +923,17 @@ USECASES = """
 <section class="band"><div class="frame">
   <div class="cases" style="margin-top:0;">
     <div class="case case--hi"><div class="case__g"><span>POWERPLUS FOR</span><span>제안서</span></div>
-      <p><b>수주 제안서</b> 표지·목차·간지를 지난 제안서에서 꺼내 쓰고, 발주 기관 로고와 업무 아이콘으로 톤을 맞춥니다. 서식이 그대로 따라와 내용만 고쳐 쓰면 됩니다.</p></div>
+      <p><b>수주 제안서</b> 표지·목차·간지를 지난 제안서에서 꺼내 씁니다. 서식이 따라와 내용만 고쳐 쓰면 됩니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
-      <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세웁니다. 즐겨찾기에 둔 서식으로 매주 같은 모양을 반복합니다.</p></div>
+      <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세웁니다. 즐겨찾기 서식으로 매주 같은 모양을 냅니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
-      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙이고 배경 사진으로 표지를 만듭니다. 인물 일러스트 378종에서 상황에 맞는 것을 고릅니다.</p></div>
+      <p><b>사내 교육·온보딩</b> 장면 일러스트를 붙이고 사진으로 표지를 만듭니다. 일러스트 378종에서 상황에 맞게 고릅니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
-      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 두고 현장에서 바로 꺼냅니다. 최근 탭에 지난번에 쓴 자산이 그대로 남습니다.</p></div>
+      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 두고 바로 꺼냅니다. 최근 탭에 지난번에 쓴 자산이 남습니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
-      <p><b>디자인 일관성</b> 같은 스타일 세트로 한 장 안의 아이콘 톤을 맞춥니다. 색감·채도·밝기를 실측해 묶어 둔 세트라 섞이지 않습니다.</p></div>
+      <p><b>디자인 일관성</b> 같은 스타일 세트로 한 장의 아이콘 톤을 맞춥니다. 실측해 묶어 둔 세트라 결이 섞이지 않습니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
-      <p><b>관리자</b> 무엇이 쓰였고 무엇을 못 찾았는지 대시보드에서 봅니다. 무결과 검색어가 다음에 채울 자산의 우선순위가 됩니다.</p></div>
+      <p><b>관리자</b> 무엇이 쓰였고 못 찾았는지 대시보드에서 봅니다. 무결과 검색어가 다음에 채울 우선순위가 됩니다.</p></div>
   </div>
 </div></section>
 
@@ -974,16 +1009,26 @@ PRICING = """
 
 <section class="band" id="selfhost"><div class="frame frame--tight">
   <div class="ent">
-    <p class="kicker">Self-hosted</p>
-    <h3>서버를 직접 두셔야 한다면.</h3>
-    <p>자산이 외부로 나가면 안 되는 조직을 위한 방식입니다. 서버 한 대에 PHP와 MySQL이면 동작하므로 고객사 인프라에 그대로 올릴 수 있습니다.</p>
-    <a class="btn btn--d" style="margin-top:26px;" href="__MAIL__">구축형 문의</a>
-    <ul>
-      <li>__CK__<span>고객사 서버에 설치하고 자산은 사내 망 안에만 둡니다.</span></li>
-      <li>__CK__<span>구성은 보안 검토 결과에 따라 조정합니다.</span></li>
-      <li>__CK__<span>설치, 초기 자산 이관, 관리자 교육까지 포함해 산정합니다.</span></li>
-      <li>__CK__<span>전사 배포와 Office Store 등록을 함께 진행합니다.</span></li>
-    </ul>
+    <div class="ent__t">
+      <p class="kicker">Self-hosted</p>
+      <h3>서버를 직접 두셔야 한다면.</h3>
+      <p>자산이 외부로 나가면 안 되는 조직을 위한 방식입니다. 서버 한 대에 PHP와 MySQL이면 고객사 인프라에 그대로 올릴 수 있습니다.</p>
+      <a class="btn btn--d" style="margin-top:26px;" href="__MAIL__">구축형 문의</a>
+      <ul>
+        <li>__CK__<span>고객사 서버에 설치하고 자산은 사내 망 안에만 둡니다.</span></li>
+        <li>__CK__<span>구성은 보안 검토 결과에 따라 조정합니다.</span></li>
+        <li>__CK__<span>설치, 초기 자산 이관, 관리자 교육까지 포함해 산정합니다.</span></li>
+        <li>__CK__<span>전사 배포와 Office Store 등록을 함께 진행합니다.</span></li>
+      </ul>
+    </div>
+    <div class="ent__viz">
+      <div class="ent__net">
+        <span class="ent__tag">고객사 사내 망</span>
+        <div class="ent__box"><b>서버 1대</b><span>PHP · MySQL</span></div>
+        <div class="ent__box"><b>자산 · 검색 기록</b><span>사내에만 저장</span></div>
+      </div>
+      <p class="ent__out"><i aria-hidden="true"></i>외부 반출 없음<i aria-hidden="true"></i></p>
+    </div>
   </div>
 </div></section>
 
