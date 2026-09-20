@@ -33,7 +33,7 @@
     --accent:#C43E1C;   /* 강조 - 텍스트/보더. 흰 배경 대비 5.18:1 (AA) */
     --accent-b:#DD4F1E; /* 그래픽 전용 밝은 오렌지 - 진행 바/막대/글로우 */
     --brand:#E0701F;
-    --page:1240px;      /* 헤어라인 폭 — 안쪽 콘텐츠가 nextsaas 와 같은 1140 이 되게 */
+    --page:1300px;      /* 컨테이너 — 안쪽 콘텐츠 1200px */
     --prose:720px;      /* 가운데 정렬 본문 */
     --pad:50px;
     --ink-t:#1A1A1C;    /* 제목색 */
@@ -167,7 +167,7 @@
 
   /* ── 섹션 공통 ─────────────────────────────────────────── */
   /* 장표처럼 한 문장이 한 줄에 들어가게 넓게 쓴다. 제목만 따로 좁힌다. */
-  .head{max-width:1140px;margin:0 auto;text-align:center;}
+  .head{max-width:1200px;margin:0 auto;text-align:center;}
   .head h2{max-width:980px;margin-inline:auto;}
 
   .head h2{font-size:32px;font-weight:400;line-height:1.1;margin-top:20px;}
@@ -176,13 +176,13 @@
   /* 덱 헤드라인 - 첫 줄은 보통, 둘째 줄이 검정 볼드. 오렌지는 눈썹/수치에만 쓴다 */
   .head h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
   .head p:not(.kicker){margin-top:22px;font-size:16px;line-height:1.6;color:var(--ink-d);
-    font-weight:400;letter-spacing:-.01em;max-width:1100px;margin-inline:auto;}
+    font-weight:400;letter-spacing:-.01em;max-width:1160px;margin-inline:auto;}
   @media (min-width:1200px){ .head p:not(.kicker){margin-top:26px;font-size:18px;} }
   /* 덱은 헤드라인 바로 아래 오렌지 볼드 한 줄로 핵심을 박는다.
      .head p:not(.kicker) 가 (0,2,1) 이라 p.punch 로 특이도를 맞추고 뒤에 둔다. */
   .head p.punch{color:var(--accent);font-weight:700;}
   .head--left{text-align:left;max-width:920px;}
-  .lede{max-width:1100px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
+  .lede{max-width:1160px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
     font-weight:400;text-align:center;}
   .lede b{color:var(--ink-t);font-weight:700;}
 
@@ -533,7 +533,7 @@
   <div class="head">
     <p class="kicker">Library</p>
     <h2>제안서가 끝나도<br><b>자산은 남습니다.</b></h2>
-    <p>나간 제안서를 낱장으로 잘라 등록하고 아이콘·사진·일러스트·로고를 카테고리와 주제로 나눠 담습니다.<br>자산 하나에 국문 25개·영문 25개 키워드를 붙여 다음 사람이 찾을 수 있게 합니다.</p>
+    <p>나간 제안서를 낱장으로 잘라 등록하고 아이콘·사진·로고를 주제별로 나눠 담습니다.<br>자산마다 국문·영문 키워드를 25개씩 붙여 다음 사람이 찾게 합니다.</p>
   </div>
   <div class="tri">
     <div class="tri__c">
@@ -555,7 +555,7 @@
   <div class="head">
     <p class="kicker">Korean search</p>
     <h2>오타를 써도,<br>이름을 몰라도 <b>찾아냅니다.</b></h2>
-    <p>자산 쪽 태그를 늘리는 대신 검색어 쪽을 고칩니다.<br>자모 단위로 풀어 오타를 교정하고, 동의어·한↔영 사전과 조사·어미까지 함께 봅니다.</p>
+    <p>쌓아 둔 자산의 태그를 늘리는 대신 검색어 쪽을 고칩니다.<br>자모 단위로 풀어 오타를 교정하고, 동의어·한↔영 사전과 조사·어미까지 함께 봅니다.</p>
   </div>
   <div class="qb">
     <div class="qb__h">Query correction — live behavior</div>
@@ -608,9 +608,9 @@
       <h2>무엇이 쓰이는지<br><b>남습니다.</b></h2>
       <p>회사 메일로 인증한 계정만 들어오고, 권한 밖 자산은 목록에도 뜨지 않습니다.<br>무엇이 언제 쓰였는지가 남아 다음에 채울 자산이 정해집니다.</p>
       <ul class="list">
-        <li><i aria-hidden="true"></i><span><b>재사용 78%</b> — 상위 3명이 전체 삽입의 78%. 한 번 쓴 사람은 계속 씁니다.</span></li>
-        <li><i aria-hidden="true"></i><span><b>관리자 대시보드</b> — 인기 자산과 무결과 검색어를 한 화면에서.</span></li>
-        <li><i aria-hidden="true"></i><span><b>요청 루프</b> — 없는 자료는 그 자리에서 요청으로 넘어갑니다.</span></li>
+        <li><i aria-hidden="true"></i><span><b>재사용 78%</b> — 상위 3명이 전체 삽입의 78%를 차지했습니다.</span></li>
+        <li><i aria-hidden="true"></i><span><b>관리자 대시보드</b> — 인기 자산과 무결과 검색어를 한 화면에서 봅니다.</span></li>
+        <li><i aria-hidden="true"></i><span><b>요청 루프</b> — 없는 자료는 그 자리에서 요청으로 이어집니다.</span></li>
       </ul>
     </div>
     <div class="split__v"><img src="shots/shot-logo-full.jpg" alt="powerPlus 로고 카테고리 화면" loading="lazy"></div>

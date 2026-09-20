@@ -41,7 +41,7 @@ CSS = r"""
     --accent:#C43E1C;   /* 강조 - 텍스트/보더. 흰 배경 대비 5.18:1 (AA) */
     --accent-b:#DD4F1E; /* 그래픽 전용 밝은 오렌지 - 진행 바/막대/글로우 */
     --brand:#E0701F;
-    --page:1240px;      /* 헤어라인 폭 — 안쪽 콘텐츠가 nextsaas 와 같은 1140 이 되게 */
+    --page:1300px;      /* 컨테이너 — 안쪽 콘텐츠 1200px */
     --prose:720px;      /* 가운데 정렬 본문 */
     --pad:50px;
     --ink-t:#1A1A1C;    /* 제목색 */
@@ -175,7 +175,7 @@ CSS = r"""
 
   /* ── 섹션 공통 ─────────────────────────────────────────── */
   /* 장표처럼 한 문장이 한 줄에 들어가게 넓게 쓴다. 제목만 따로 좁힌다. */
-  .head{max-width:1140px;margin:0 auto;text-align:center;}
+  .head{max-width:1200px;margin:0 auto;text-align:center;}
   .head h2{max-width:980px;margin-inline:auto;}
 
   .head h2{font-size:32px;font-weight:400;line-height:1.1;margin-top:20px;}
@@ -184,13 +184,13 @@ CSS = r"""
   /* 덱 헤드라인 - 첫 줄은 보통, 둘째 줄이 검정 볼드. 오렌지는 눈썹/수치에만 쓴다 */
   .head h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
   .head p:not(.kicker){margin-top:22px;font-size:16px;line-height:1.6;color:var(--ink-d);
-    font-weight:400;letter-spacing:-.01em;max-width:1100px;margin-inline:auto;}
+    font-weight:400;letter-spacing:-.01em;max-width:1160px;margin-inline:auto;}
   @media (min-width:1200px){ .head p:not(.kicker){margin-top:26px;font-size:18px;} }
   /* 덱은 헤드라인 바로 아래 오렌지 볼드 한 줄로 핵심을 박는다.
      .head p:not(.kicker) 가 (0,2,1) 이라 p.punch 로 특이도를 맞추고 뒤에 둔다. */
   .head p.punch{color:var(--accent);font-weight:700;}
   .head--left{text-align:left;max-width:920px;}
-  .lede{max-width:1100px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
+  .lede{max-width:1160px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
     font-weight:400;text-align:center;}
   .lede b{color:var(--ink-t);font-weight:700;}
 
@@ -642,9 +642,9 @@ HOME = """
   </div>
   <div class="cases">
     <div class="case"><div class="case__g"><span>Attempt 01</span><span>공유 폴더</span></div>
-      <p>폴더를 열고 눈으로 훑어야 찾습니다. 이름을 모르면 있는 줄도 모른 채 지나갑니다.</p></div>
+      <p>폴더를 열고 눈으로 훑어야 찾습니다. 이름을 모르면 있는 줄도 모른 채 그냥 지나갑니다.</p></div>
     <div class="case"><div class="case__g"><span>Attempt 02</span><span>정리용 파워포인트</span></div>
-      <p>지난 장표를 모아 <b>540장</b>짜리 한 파일로 만들었습니다. 그래도 열어서 하나하나 넘겨 봐야 했습니다.</p></div>
+      <p>지난 장표를 모아 <b>540장</b>짜리 파일로 만들었습니다. 그래도 열어서 하나하나 넘겨 봐야 했습니다.</p></div>
     <div class="case case--hi"><div class="case__g"><span>Now</span><span>powerPlus</span></div>
       <p>파워포인트 안에서 검색해 지금 슬라이드에 넣습니다. 찾는 자리와 쓰는 자리가 같습니다.</p></div>
   </div>
@@ -675,7 +675,7 @@ HOME = """
   <div class="head">
     <p class="kicker">One library</p>
     <h2>누가 맡아도<br><b>같은 톤으로 나옵니다.</b></h2>
-    <p>여럿이 나눠 만들어도 자산을 한곳에서 꺼내 쓰면 제안서의 결이 흔들리지 않습니다. 장마다 다른 아이콘, 다른 색을 쓰던 일이 없어집니다.</p>
+    <p>여럿이 나눠 만들어도 자산을 한곳에서 꺼내 쓰면 제안서의 결이 흔들리지 않습니다. 장마다 다른 아이콘과 색을 쓰던 일이 저절로 없어집니다.</p>
   </div>
   <div class="tri">
     <div class="tri__c">
@@ -713,7 +713,7 @@ HOME = """
     <p class="kicker">Effect</p>
     <h2>찾는 시간이 줄면<br><b>만드는 장수가 늘어납니다.</b></h2>
     <p class="punch">아래는 디자이너 업무 기준 체감 추정치입니다. 정확한 통계가 아닙니다.</p>
-    <p>사내 시범 운영에서 같은 인원이 하루에 만드는 장표가 늘었고, 톤을 맞추는 단순 작업에 드는 시간이 줄었습니다. 계속 측정하며 실제 수치로 바꿔 가고 있습니다.</p>
+    <p>사내 시범 운영에서 같은 인원이 만드는 장표가 늘었고, 톤을 맞추는 단순 작업 시간이 줄었습니다. 계속 재면서 실제 수치로 바꿔 가고 있습니다.</p>
   </div>
   <div class="effect">
     <div class="effect__c">
@@ -727,7 +727,7 @@ HOME = """
           <div class="brow__t"><i style="width:100%"></i></div>
           <div class="brow__v">8장 정도</div></div>
       </div>
-      <p class="effect__n"><b>약 2배.</b> 소스 사이트와 지난 제안서를 뒤지던 시간이 줄었습니다.</p>
+      <p class="effect__n"><b>약 2배.</b> 소스 사이트와 지난 제안서를 뒤지던 시간이 그만큼 줄었습니다.</p>
     </div>
     <div class="effect__c">
       <p class="effect__l">02 · 톤 정리 · 폰트 변경 등 단순 작업</p>
@@ -740,7 +740,7 @@ HOME = """
           <div class="brow__t"><i style="width:38%"></i></div>
           <div class="brow__v">처음이라 3시간</div></div>
       </div>
-      <p class="effect__n"><b>하루 → 3시간.</b> 처음 해 본 테스트 결과라, 반복할수록 더 줄어들 것으로 봅니다.</p>
+      <p class="effect__n"><b>하루 → 3시간.</b> 처음 해 본 테스트라 반복할수록 더 줄어들 것으로 봅니다.</p>
     </div>
   </div>
 </div></section>
@@ -752,13 +752,13 @@ HOME = """
   </div>
   <div class="cases">
     <div class="case case--hi"><div class="case__g"><span>POWERPLUS FOR</span><span>제안서</span></div>
-      <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼내 씁니다. 기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
+      <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼냅니다. 기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
       <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세웁니다. 같은 서식으로 매주 반복합니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
-      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙입니다. 배경 사진으로 표지를 만듭니다.</p></div>
+      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙입니다. 배경 사진으로 표지까지 만듭니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
-      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 둡니다. 현장에서 바로 꺼내 씁니다.</p></div>
+      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 모아 둡니다. 현장에서 바로 꺼내 씁니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
       <p><b>디자인 일관성</b> 같은 스타일 세트로 아이콘 톤을 맞춥니다. 한 장 안에서 결이 섞이지 않습니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
@@ -770,7 +770,7 @@ HOME = """
   <div class="head">
     <p class="kicker">Roadmap</p>
     <h2>지금은 사람이 찾아 넣고,<br><b>다음은 시스템이 넣습니다.</b></h2>
-    <p>자산이 쌓이고 무엇이 쓰이는지가 남으면, 다음은 그 자리에 맞는 자산을 시스템이 고르는 단계입니다. 같은 인원으로 더 많이, 품질은 일정하게 만드는 것이 목표입니다.</p>
+    <p>무엇이 쓰이는지가 쌓이면 다음은 자리에 맞는 자산을 시스템이 고르는 단계입니다. 같은 인원으로 더 많이, 품질은 일정하게 만드는 것이 목표입니다.</p>
   </div>
   <div class="cases">
     <div class="case"><div class="case__g"><span>Stage 01 · 운영 중</span><span>사람이 찾아 넣는다</span></div>
@@ -799,7 +799,7 @@ FEATURES = """
   <div class="head">
     <p class="kicker">Library</p>
     <h2>제안서가 끝나도<br><b>자산은 남습니다.</b></h2>
-    <p>나간 제안서를 낱장으로 잘라 등록하고 아이콘·사진·일러스트·로고를 카테고리와 주제로 나눠 담습니다. 자산 하나에 국문 25개·영문 25개 키워드를 붙여 다음 사람이 찾을 수 있게 합니다.</p>
+    <p>나간 제안서를 낱장으로 잘라 등록하고 아이콘·사진·로고를 주제별로 나눠 담습니다. 자산마다 국문·영문 키워드를 25개씩 붙여 다음 사람이 찾게 합니다.</p>
   </div>
   <div class="tri">
     <div class="tri__c">
@@ -821,7 +821,7 @@ FEATURES = """
   <div class="head">
     <p class="kicker">Korean search</p>
     <h2>오타를 써도,<br>이름을 몰라도 <b>찾아냅니다.</b></h2>
-    <p>자산 쪽 태그를 늘리는 대신 검색어 쪽을 고칩니다. 자모 단위로 풀어 오타를 교정하고, 동의어·한↔영 사전과 조사·어미까지 함께 봅니다.</p>
+    <p>쌓아 둔 자산의 태그를 늘리는 대신 검색어 쪽을 고칩니다. 자모 단위로 풀어 오타를 교정하고, 동의어·한↔영 사전과 조사·어미까지 함께 봅니다.</p>
   </div>
   <div class="qb">
     <div class="qb__h">Query correction — live behavior</div>
@@ -874,9 +874,9 @@ FEATURES = """
       <h2>무엇이 쓰이는지<br><b>남습니다.</b></h2>
       <p>회사 메일로 인증한 계정만 들어오고, 권한 밖 자산은 목록에도 뜨지 않습니다. 무엇이 언제 쓰였는지가 남아 다음에 채울 자산이 정해집니다.</p>
       <ul class="list">
-        <li><i aria-hidden="true"></i><span><b>재사용 78%</b> — 상위 3명이 전체 삽입의 78%. 한 번 쓴 사람은 계속 씁니다.</span></li>
-        <li><i aria-hidden="true"></i><span><b>관리자 대시보드</b> — 인기 자산과 무결과 검색어를 한 화면에서.</span></li>
-        <li><i aria-hidden="true"></i><span><b>요청 루프</b> — 없는 자료는 그 자리에서 요청으로 넘어갑니다.</span></li>
+        <li><i aria-hidden="true"></i><span><b>재사용 78%</b> — 상위 3명이 전체 삽입의 78%를 차지했습니다.</span></li>
+        <li><i aria-hidden="true"></i><span><b>관리자 대시보드</b> — 인기 자산과 무결과 검색어를 한 화면에서 봅니다.</span></li>
+        <li><i aria-hidden="true"></i><span><b>요청 루프</b> — 없는 자료는 그 자리에서 요청으로 이어집니다.</span></li>
       </ul>
     </div>
     <div class="split__v"><img src="shots/shot-logo-full.jpg" alt="powerPlus 로고 카테고리 화면" loading="lazy"></div>
@@ -941,7 +941,7 @@ USECASES = """
   <div class="head">
     <p class="kicker">In production</p>
     <h2>시범 운영에서 나온 숫자.</h2>
-    <p>사내 ~300명 조직에서 실제로 측정한 값입니다. <b>2026년 9월 중순 기준</b>이며, 도입 효과를 가늠하는 기준으로 보시면 됩니다.</p>
+    <p>사내 ~300명 조직에서 실제로 측정한 값으로 <b>2026년 9월 중순 기준</b>입니다. 도입 효과가 어느 정도일지 가늠하는 기준으로 보시면 됩니다.</p>
   </div>
   <div class="stats" style="margin-top:56px;border-bottom:1px solid var(--hair);">
     <div><b>3,734</b><span>등록 자산</span></div>
@@ -977,7 +977,7 @@ PRICING = """
         <li>__CK__<span>기본 라이브러리 <b>전체 이용</b></span></li>
         <li>__CK__<span>자체 자산 업로드 500개</span></li>
         <li>__CK__<span>즐겨찾기 · 최근 사용 동기화</span></li>
-        <li>__CK__<span>이메일 지원</span></li>
+        <li>__CK__<span>이메일로 도입 지원</span></li>
       </ul>
       <a class="btn btn--s" href="__MAIL__">14일 무료로 시작</a>
     </div>
@@ -985,11 +985,11 @@ PRICING = """
       <p class="pl__n">Business <span>· 전사에 배포하는 기업</span></p>
       <p class="pl__p"><b data-m="19,000" data-y="15,200">19,000</b><span data-m="원 / 사용자·월" data-y="원 / 사용자·월 · 연 결제">원 / 사용자·월</span></p>
       <ul>
-        <li>__CK__<span>Team의 모든 기능</span></li>
+        <li>__CK__<span>Team 플랜의 모든 기능</span></li>
         <li>__CK__<span>자체 자산 <b>무제한</b> · 대량 등록</span></li>
         <li>__CK__<span><b>관리자 대시보드</b> · 무결과 검색어</span></li>
         <li>__CK__<span>도메인 인증 · 부서별 권한</span></li>
-        <li>__CK__<span>Office Store 전사 배포 지원</span></li>
+        <li>__CK__<span>Office Store 전사 배포</span></li>
       </ul>
       <a class="btn btn--d" href="__MAIL__">14일 무료로 시작</a>
     </div>
@@ -997,10 +997,10 @@ PRICING = """
       <p class="pl__n">Studio <span>· 자산을 제작해 납품하는 조직</span></p>
       <p class="pl__p"><b data-m="문의" data-y="문의">문의</b><span data-m="· 규모별 산정" data-y="· 규모별 산정">· 규모별 산정</span></p>
       <ul>
-        <li>__CK__<span>Business의 모든 기능</span></li>
-        <li>__CK__<span><b>자산 제작 대행</b> — 무결과 목록 기반</span></li>
+        <li>__CK__<span>Business 플랜의 모든 기능</span></li>
+        <li>__CK__<span><b>자산 제작 대행</b> · 무결과 기반</span></li>
         <li>__CK__<span>브랜드 가이드 반영 세트 구성</span></li>
-        <li>__CK__<span>전담 담당자 배정</span></li>
+        <li>__CK__<span>전담 담당자 상시 배정</span></li>
       </ul>
       <a class="btn btn--s" href="__MAIL__">상담 요청</a>
     </div>
@@ -1016,8 +1016,8 @@ PRICING = """
       <a class="btn btn--d" style="margin-top:26px;" href="__MAIL__">구축형 문의</a>
       <ul>
         <li>__CK__<span>고객사 서버에 설치하고 자산은 사내 망 안에만 둡니다.</span></li>
-        <li>__CK__<span>구성은 보안 검토 결과에 따라 조정합니다.</span></li>
-        <li>__CK__<span>설치, 초기 자산 이관, 관리자 교육까지 포함해 산정합니다.</span></li>
+        <li>__CK__<span>구성은 고객사 보안 검토 결과에 맞춰 조정합니다.</span></li>
+        <li>__CK__<span>설치와 초기 자산 이관, 관리자 교육까지 포함합니다.</span></li>
         <li>__CK__<span>전사 배포와 Office Store 등록을 함께 진행합니다.</span></li>
       </ul>
     </div>
@@ -1038,13 +1038,13 @@ PRICING = """
     <h2>도입 전에 가장 많이 듣는 것들.</h2>
   </div>
   <div class="faq">
-    <div class="fi"><p class="fq">직원들에게 어떻게 배포하나요?</p><p class="fa">두 가지입니다. 지금은 <b>설치 파일을 받아 실행</b>하는 방식이라, 회사에 따라 백신 예외 처리가 한 번 필요하고 구버전 Office 를 쓰는 PC 가 걸러집니다. <b>Office Store 로 전사 배포</b>하면 직원은 파워포인트 안에서 내려받기만 하면 되고, 백신과 설치 부담이 함께 없어집니다. 업데이트도 심사를 거친 버전으로 자동 반영됩니다.</p></div>
+    <div class="fi"><p class="fq">직원들에게 어떻게 배포하나요?</p><p class="fa">지금은 <b>설치 파일을 받아 실행</b>하는 방식이라 백신 예외 처리가 필요합니다. <b>Office Store 로 전사 배포</b>하면 파워포인트 안에서 내려받기만 하면 되고, 백신과 설치 부담이 없어집니다.</p></div>
     <div class="fi"><p class="fq">맥에서도 되나요?</p><p class="fa">됩니다. 추가 기능 본체를 웹 표준으로 만들어서 맥 파워포인트에서도 같은 작업창이 열립니다. Office Store를 통해 배포하면 윈도우와 맥 구분 없이 파워포인트 안에서 내려받습니다.</p></div>
     <div class="fi"><p class="fq">오래된 Office를 쓰는 직원이 있습니다.</p><p class="fa">Office 2019 이상이 필요합니다. 2016 이하는 내부 엔진이 달라 작업창이 열리지 않고, 설치 단계에서 미리 감지해 안내합니다. 도입 전에 라이선스 현황을 함께 확인해 드립니다.</p></div>
     <div class="fi"><p class="fq">기존에 쓰던 자료를 옮길 수 있나요?</p><p class="fa">폴더째 넘겨 주시면 일괄로 등록합니다. 이미지는 크기를 맞추고 키워드를 붙이며, 지난 제안서는 표지·목차·간지·본문 낱장으로 잘라 등록합니다. 옮기는 작업은 도입 과정에 포함됩니다.</p></div>
-    <div class="fi"><p class="fq">자료가 외부 서버에 올라가는 게 걱정됩니다.</p><p class="fa">구독형은 회사 도메인 인증을 거친 계정만 접근하고 권한 밖 자산은 목록에도 뜨지 않습니다. 그래도 외부에 둘 수 없다면 구축형으로 고객사 서버에 설치합니다.</p></div>
-    <div class="fi"><p class="fq">자산 저작권은 어떻게 되나요?</p><p class="fa">기본 라이브러리는 라이선스를 확인한 자산으로만 구성합니다. 고객사가 별도로 계약한 콘텐츠를 올리는 경우, 그 이용 범위는 계약 내용을 함께 확인한 뒤 반영합니다.</p></div>
-    <div class="fi"><p class="fq">직원들이 실제로 쓸까요?</p><p class="fa">쓰는 사람이 쓰는 도구입니다. 사내 시범 운영에서는 상위 3명이 전체 삽입의 78%를 차지했습니다. 한 번 손에 익으면 계속 쓰기 때문에, 처음 한 달은 자주 쓰는 자산을 채우는 데 집중하는 편이 효과가 큽니다.</p></div>
+    <div class="fi"><p class="fq">자료가 외부 서버에 올라가는 게 걱정됩니다.</p><p class="fa">구독형은 회사 도메인 인증을 거친 계정만 접근하고, 권한 밖 자산은 목록에도 뜨지 않습니다. 그래도 외부에 둘 수 없다면 구축형으로 고객사 서버 안에 설치해 드립니다.</p></div>
+    <div class="fi"><p class="fq">자산 저작권은 어떻게 되나요?</p><p class="fa">기본 라이브러리는 이용 범위를 확인한 자산으로만 구성합니다. 고객사가 별도로 계약하신 콘텐츠를 올리실 때는 그 계약서의 이용 범위를 함께 확인한 뒤에 반영해 드립니다.</p></div>
+    <div class="fi"><p class="fq">직원들이 실제로 쓸까요?</p><p class="fa">사내 시범 운영에서는 상위 3명이 전체 삽입의 78%를 차지했습니다. 한 번 손에 익으면 계속 쓰기 때문에, 처음 한 달은 자주 쓰는 자산을 채우는 데 집중하는 편이 효과가 큽니다.</p></div>
   </div>
 </div></section>
 

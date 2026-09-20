@@ -33,7 +33,7 @@
     --accent:#C43E1C;   /* 강조 - 텍스트/보더. 흰 배경 대비 5.18:1 (AA) */
     --accent-b:#DD4F1E; /* 그래픽 전용 밝은 오렌지 - 진행 바/막대/글로우 */
     --brand:#E0701F;
-    --page:1240px;      /* 헤어라인 폭 — 안쪽 콘텐츠가 nextsaas 와 같은 1140 이 되게 */
+    --page:1300px;      /* 컨테이너 — 안쪽 콘텐츠 1200px */
     --prose:720px;      /* 가운데 정렬 본문 */
     --pad:50px;
     --ink-t:#1A1A1C;    /* 제목색 */
@@ -167,7 +167,7 @@
 
   /* ── 섹션 공통 ─────────────────────────────────────────── */
   /* 장표처럼 한 문장이 한 줄에 들어가게 넓게 쓴다. 제목만 따로 좁힌다. */
-  .head{max-width:1140px;margin:0 auto;text-align:center;}
+  .head{max-width:1200px;margin:0 auto;text-align:center;}
   .head h2{max-width:980px;margin-inline:auto;}
 
   .head h2{font-size:32px;font-weight:400;line-height:1.1;margin-top:20px;}
@@ -176,13 +176,13 @@
   /* 덱 헤드라인 - 첫 줄은 보통, 둘째 줄이 검정 볼드. 오렌지는 눈썹/수치에만 쓴다 */
   .head h2 b{font-weight:700;color:var(--ink-t);letter-spacing:-.028em;}
   .head p:not(.kicker){margin-top:22px;font-size:16px;line-height:1.6;color:var(--ink-d);
-    font-weight:400;letter-spacing:-.01em;max-width:1100px;margin-inline:auto;}
+    font-weight:400;letter-spacing:-.01em;max-width:1160px;margin-inline:auto;}
   @media (min-width:1200px){ .head p:not(.kicker){margin-top:26px;font-size:18px;} }
   /* 덱은 헤드라인 바로 아래 오렌지 볼드 한 줄로 핵심을 박는다.
      .head p:not(.kicker) 가 (0,2,1) 이라 p.punch 로 특이도를 맞추고 뒤에 둔다. */
   .head p.punch{color:var(--accent);font-weight:700;}
   .head--left{text-align:left;max-width:920px;}
-  .lede{max-width:1100px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
+  .lede{max-width:1160px;margin:36px auto 0;font-size:17px;line-height:1.8;color:var(--ink-d);
     font-weight:400;text-align:center;}
   .lede b{color:var(--ink-t);font-weight:700;}
 
@@ -563,9 +563,9 @@
   </div>
   <div class="cases">
     <div class="case"><div class="case__g"><span>Attempt 01</span><span>공유 폴더</span></div>
-      <p>폴더를 열고 눈으로 훑어야 찾습니다.<br>이름을 모르면 있는 줄도 모른 채 지나갑니다.</p></div>
+      <p>폴더를 열고 눈으로 훑어야 찾습니다.<br>이름을 모르면 있는 줄도 모른 채 그냥 지나갑니다.</p></div>
     <div class="case"><div class="case__g"><span>Attempt 02</span><span>정리용 파워포인트</span></div>
-      <p>지난 장표를 모아 <b>540장</b>짜리 한 파일로 만들었습니다.<br>그래도 열어서 하나하나 넘겨 봐야 했습니다.</p></div>
+      <p>지난 장표를 모아 <b>540장</b>짜리 파일로 만들었습니다.<br>그래도 열어서 하나하나 넘겨 봐야 했습니다.</p></div>
     <div class="case case--hi"><div class="case__g"><span>Now</span><span>powerPlus</span></div>
       <p>파워포인트 안에서 검색해 지금 슬라이드에 넣습니다.<br>찾는 자리와 쓰는 자리가 같습니다.</p></div>
   </div>
@@ -596,7 +596,7 @@
   <div class="head">
     <p class="kicker">One library</p>
     <h2>누가 맡아도<br><b>같은 톤으로 나옵니다.</b></h2>
-    <p>여럿이 나눠 만들어도 자산을 한곳에서 꺼내 쓰면 제안서의 결이 흔들리지 않습니다.<br>장마다 다른 아이콘, 다른 색을 쓰던 일이 없어집니다.</p>
+    <p>여럿이 나눠 만들어도 자산을 한곳에서 꺼내 쓰면 제안서의 결이 흔들리지 않습니다.<br>장마다 다른 아이콘과 색을 쓰던 일이 저절로 없어집니다.</p>
   </div>
   <div class="tri">
     <div class="tri__c">
@@ -634,7 +634,7 @@
     <p class="kicker">Effect</p>
     <h2>찾는 시간이 줄면<br><b>만드는 장수가 늘어납니다.</b></h2>
     <p class="punch">아래는 디자이너 업무 기준 체감 추정치입니다.<br>정확한 통계가 아닙니다.</p>
-    <p>사내 시범 운영에서 같은 인원이 하루에 만드는 장표가 늘었고, 톤을 맞추는 단순 작업에 드는 시간이 줄었습니다.<br>계속 측정하며 실제 수치로 바꿔 가고 있습니다.</p>
+    <p>사내 시범 운영에서 같은 인원이 만드는 장표가 늘었고, 톤을 맞추는 단순 작업 시간이 줄었습니다.<br>계속 재면서 실제 수치로 바꿔 가고 있습니다.</p>
   </div>
   <div class="effect">
     <div class="effect__c">
@@ -648,7 +648,7 @@
           <div class="brow__t"><i style="width:100%"></i></div>
           <div class="brow__v">8장 정도</div></div>
       </div>
-      <p class="effect__n"><b>약 2배.</b> 소스 사이트와 지난 제안서를 뒤지던 시간이 줄었습니다.</p>
+      <p class="effect__n"><b>약 2배.</b> 소스 사이트와 지난 제안서를 뒤지던 시간이 그만큼 줄었습니다.</p>
     </div>
     <div class="effect__c">
       <p class="effect__l">02 · 톤 정리 · 폰트 변경 등 단순 작업</p>
@@ -661,7 +661,7 @@
           <div class="brow__t"><i style="width:38%"></i></div>
           <div class="brow__v">처음이라 3시간</div></div>
       </div>
-      <p class="effect__n"><b>하루 → 3시간.</b> 처음 해 본 테스트 결과라, 반복할수록 더 줄어들 것으로 봅니다.</p>
+      <p class="effect__n"><b>하루 → 3시간.</b> 처음 해 본 테스트라 반복할수록 더 줄어들 것으로 봅니다.</p>
     </div>
   </div>
 </div></section>
@@ -673,13 +673,13 @@
   </div>
   <div class="cases">
     <div class="case case--hi"><div class="case__g"><span>POWERPLUS FOR</span><span>제안서</span></div>
-      <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼내 씁니다.<br>기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
+      <p><b>수주 제안서</b> 표지·간지·본문을 지난 제안서에서 꺼냅니다.<br>기관 로고와 아이콘으로 톤을 맞춥니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>사내 보고</span></div>
       <p><b>주간·월간 보고</b> 다이어그램과 차트 아이콘으로 구조를 세웁니다.<br>같은 서식으로 매주 반복합니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>교육 자료</span></div>
-      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙입니다.<br>배경 사진으로 표지를 만듭니다.</p></div>
+      <p><b>사내 교육·온보딩</b> 장면 일러스트로 설명을 붙입니다.<br>배경 사진으로 표지까지 만듭니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>영업 자료</span></div>
-      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 둡니다.<br>현장에서 바로 꺼내 씁니다.</p></div>
+      <p><b>고객 미팅</b> 자주 쓰는 장표를 즐겨찾기에 모아 둡니다.<br>현장에서 바로 꺼내 씁니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>브랜드 통일</span></div>
       <p><b>디자인 일관성</b> 같은 스타일 세트로 아이콘 톤을 맞춥니다.<br>한 장 안에서 결이 섞이지 않습니다.</p></div>
     <div class="case"><div class="case__g"><span>POWERPLUS FOR</span><span>자산 운영</span></div>
@@ -691,7 +691,7 @@
   <div class="head">
     <p class="kicker">Roadmap</p>
     <h2>지금은 사람이 찾아 넣고,<br><b>다음은 시스템이 넣습니다.</b></h2>
-    <p>자산이 쌓이고 무엇이 쓰이는지가 남으면, 다음은 그 자리에 맞는 자산을 시스템이 고르는 단계입니다.<br>같은 인원으로 더 많이, 품질은 일정하게 만드는 것이 목표입니다.</p>
+    <p>무엇이 쓰이는지가 쌓이면 다음은 자리에 맞는 자산을 시스템이 고르는 단계입니다.<br>같은 인원으로 더 많이, 품질은 일정하게 만드는 것이 목표입니다.</p>
   </div>
   <div class="cases">
     <div class="case"><div class="case__g"><span>Stage 01 · 운영 중</span><span>사람이 찾아 넣는다</span></div>
