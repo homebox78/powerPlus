@@ -23,6 +23,17 @@ def walk(shapes):
             yield s
 
 
+def drop_img_layer(blip):
+    """예술 효과 원본 레이어(a14:imgProps → hdphoto) 제거. 남겨 두면 PowerPoint 가 저장할 때
+       그 원본으로 그림을 다시 만들어 교체한 그림이 옛 그림으로 되돌아간다."""
+    ext = blip.find(A + "extLst")
+    if ext is None:
+        return
+    for e in list(ext):
+        if any(c.tag.endswith("}imgProps") for c in e):
+            ext.remove(e)
+
+
 def ink(im):
     return im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
 
@@ -67,6 +78,7 @@ for sno, name, img, nth in jobs:
     for ch in list(blip):                      # 다시 칠하기·밝기 효과 제거(extLst 는 유지)
         if ch.tag != A + "extLst":
             blip.remove(ch)
+    drop_img_layer(blip)
     done += 1
 p.save(dst)
 print("교체", done, "/", len(jobs))
