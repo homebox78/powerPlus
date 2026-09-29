@@ -67,14 +67,41 @@ for sno in range(1, pres.Slides.Count + 1):
             l0, h0 = state(tf)
             tf.MarginLeft = tf.MarginRight = M
             l1, h1 = state(tf)
-            if l1 != l0 or (h1 > s.Height + 0.5 and h1 > h0 + 0.5):
+            ok = lambda l, h: l == l0 and not (h > s.Height + 0.5 and h > h0 + 0.5)
+            if ok(l1, h1):
+                done.append((sno, s.Name)); continue
+            # 2순위: 글자 0.25pt 씩 최대 0.5pt 줄여 줄 수 유지(7pt 미만 금지)
+            sizes = [tr.Runs(k).Font.Size for k in range(1, tr.Runs().Count + 1)]
+            fixed = False
+            for step in (0.25, 0.5):
+                if min(sizes) - step < 7:
+                    break
+                for k, z in enumerate(sizes, 1):
+                    tr.Runs(k).Font.Size = z - step
+                if ok(*state(tf)):
+                    fixed = True; done.append((sno, s.Name, f"-{step}pt")); break
+            if fixed:
+                continue
+            for k, z in enumerate(sizes, 1):
+                tr.Runs(k).Font.Size = z
+            # 3순위: 줄 수가 안 늘어나는 가장 큰 여백
+            best = None
+            for m in (M * 0.85, M * 0.7, M * 0.55):
+                if m <= max(ml, mr):
+                    break
+                tf.MarginLeft = tf.MarginRight = m
+                if ok(*state(tf)):
+                    best = m; break
+            if best:
+                done.append((sno, s.Name, f"여백 {best / 72:.3f}in"))
+            else:
                 tf.MarginLeft, tf.MarginRight = ml, mr
                 kept.append((sno, s.Name, tr.Text.strip()[:24]))
-            else:
-                done.append((sno, s.Name))
         except Exception:
             continue
 pres.SaveAs(dst); pres.Close()
+for x in done:
+    if len(x) > 2: print("  조정", x)
 print("여백 맞춤", len(done), "· 줄 수가 늘어 보류", len(kept))
 for x in kept:
     print("  보류", x)
