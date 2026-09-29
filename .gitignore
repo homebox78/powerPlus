@@ -38,3 +38,6 @@ thumbs.db
 /website/_src/*.bak
 # 글꼴 원본을 만들 때 받는 임시 파일(전체 OTF 12MB×3)
 /website/_src/fonts/_full/
+
+# 제안서 원본/작업본 pptx — 용량 커서 git 제외(가이드·스크립트만 추적)
+/제안서/*.pptx
