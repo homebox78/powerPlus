@@ -15,7 +15,18 @@ MAP = {4: 1, 6: 2, 7: 3, 8: 4, 10: 5, 11: 6, 12: 7, 13: 8, 14: 9, 16: 10, 17: 11
 LOCK = os.path.join(os.environ.get("TEMP", "C:/Temp"), "pp_render.lock")
 
 
+# 2차(v0.66~): 시안이 없던 쪽은 GPT Image 로 만든 시안(design_ppt2/sNN.png)을 쓰고 v0.65 위에서 작업한다
+SRC2 = ROOT + "/청주시_발표자료(제안요약서)_v0.65_가이드.pptx"
+NEW = [5, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 37, 38, 39]
+
+
+def src_for(idx):
+    return SRC2 if idx in NEW else SRC
+
+
 def design_path(idx):
+    if idx in NEW:
+        return ROOT + "/design_ppt2/s%02d.png" % idx
     return sorted(glob.glob(ROOT + "/design_ppt/*.png"))[MAP[idx] - 1]
 
 
@@ -61,7 +72,7 @@ def main():
     elif cmd == "test":
         idx, out = int(sys.argv[2]), sys.argv[3]
         os.makedirs(out, exist_ok=True)
-        prs = Presentation(SRC)
+        prs = Presentation(src_for(idx))
         apply(prs, idx, os.path.join(out, "crops"))
         one = os.path.join(out, "test_s%02d.pptx" % idx); prs.save(one)
         png = os.path.join(out, "render_s%02d.png" % idx); render(one, idx, png)
@@ -74,7 +85,7 @@ def main():
         print("ok", png)
     elif cmd == "dump":
         idx, out = int(sys.argv[2]), sys.argv[3]
-        prs = Presentation(SRC); s = prs.slides[idx - 1]
+        prs = Presentation(src_for(idx)); s = prs.slides[idx - 1]
         f = open(out, "w", encoding="utf-8")
 
         def walk(sh, d=0):
