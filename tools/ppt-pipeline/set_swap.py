@@ -67,7 +67,7 @@ for sno, name, img, nth in jobs:
         new = new.crop(nb)
     k = min(tw / new.width, th / new.height)
     # 캔버스 해상도가 낮으면 캔버스를 키워 선명도 확보
-    up = max(1.0, 400 / max(ow, oh))
+    up = max(1.0, 1200 / max(ow, oh))   # 2026-09-30: 400 이면 장표에서 키울 때 깨진다(원본 해상도 원칙) → 1200
     W, H = round(ow * up), round(oh * up)
     new = new.resize((max(1, round(new.width * k * up)), max(1, round(new.height * k * up))), Image.LANCZOS)
     canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
