@@ -1,89 +1,104 @@
-"""청주시 4쪽 — 시안(design_ppt 1번) 구성으로 재조립.
+"""청주시 4쪽 — 시안(design_ppt 1번)과 같게 재조립.
 
-생성 그림(노트북·인물·건물 5·도시 풍경)을 원본 크기로 넣고, 글·도형은 PowerPoint 도형으로 그린다.
-문구는 기존 장표 그대로.  사용: py design_s04.py <src.pptx> <dst.pptx> <그림 폴더>
+그림(노트북·인물·건물 타일·도시 풍경·작은 아이콘)은 시안 이미지에서 그대로 오려 쓰고,
+글자·알약·화살표·상자는 시안 픽셀 좌표·색을 읽어 PowerPoint 도형으로 그린다.
+좌표는 시안을 2000×1125 로 본 값(원본 2560×1440 = ×1.28).
+사용: py design_s04.py <src.pptx> <dst.pptx> <시안.png> <작업 폴더>
 """
 import sys, os
-from PIL import Image, ImageDraw
+from lxml import etree
+from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
-from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.dml import MSO_LINE
+from pptx.oxml.ns import qn
 
-src, dst, art = sys.argv[1:4]
-NAVY, BLUE, PINK = RGBColor(0x14, 0x3A, 0x69), RGBColor(0x2F, 0x78, 0xE0), RGBColor(0xEC, 0x1C, 0x68)
-SOFT, PALE, WHITE = RGBColor(0xD0, 0xE6, 0xFA), RGBColor(0xE8, 0xF2, 0xFC), RGBColor(0xFF, 0xFF, 0xFF)
+src, dst, design, work = sys.argv[1:5]
+os.makedirs(work, exist_ok=True)
+D = Image.open(design).convert("RGB")
+Z = D.size[0] / 2000.0            # 2000 기준 좌표 → 원본 픽셀
+K = 10.83 / 2000.0                # 2000 기준 px → inch (가로 맞춤)
 F2, F3 = "a시월구일2", "a시월구일3"
+NAVY, BLUE, PINK, WHITE = RGBColor(0x10, 0x2A, 0x5C), RGBColor(0x2B, 0x6D, 0xE8), RGBColor(0xF2, 0x4F, 0x6E), RGBColor(255, 255, 255)
 
 
-def cutout(name):
-    """가장자리에서 이어진 흰 바탕만 투명하게 (그림 안쪽 흰색은 유지)."""
-    p = os.path.join(art, name + ".png")
-    o = os.path.join(art, name + "_t.png")
-    im = Image.open(p).convert("RGB")
-    w, h = im.size
-    key = (255, 0, 255)
-    for x in range(0, w, 8):
-        for y in (0, h - 1):
-            if min(im.getpixel((x, y))) > 236:
-                ImageDraw.floodfill(im, (x, y), key, thresh=60)
-    for y in range(0, h, 8):
-        for x in (0, w - 1):
-            if min(im.getpixel((x, y))) > 236:
-                ImageDraw.floodfill(im, (x, y), key, thresh=60)
-    rgba = im.convert("RGBA")
-    px = rgba.load()
-    for y in range(h):
-        for x in range(w):
-            if px[x, y][:3] == key:
-                px[x, y] = (255, 255, 255, 0)
-    rgba = rgba.crop(rgba.getbbox())
-    rgba.save(o)
-    return o, rgba.size
+def rgb_at(x, y):
+    return RGBColor(*D.getpixel((int(x * Z), int(y * Z))))
+
+
+def crop(name, x0, y0, x1, y1, fade_top=0):
+    im = D.crop((int(x0 * Z), int(y0 * Z), int(x1 * Z), int(y1 * Z)))
+    if fade_top:
+        im = im.convert("RGBA"); px = im.load(); n = int(fade_top * Z)
+        for y in range(n):
+            a = int(255 * y / n)
+            for x in range(im.size[0]):
+                r, g, b, _ = px[x, y]; px[x, y] = (r, g, b, a)
+    p = os.path.join(work, name + ".png"); im.save(p)
+    return p
+
+
+# 세로: 시안 본문(2:1)을 장표 본문에 맞게 덩어리 중심만 옮긴다(크기는 가로 배율 그대로)
+def cy(y):
+    return 1.5 + (y - 160) * 0.00622
+
+
+class Grp:
+    """시안의 한 덩어리 — 중심 y 만 새 자리로, 안쪽은 같은 배율."""
+    def __init__(self, y0, y1):
+        self.c = (y0 + y1) / 2.0; self.t = cy(self.c)
+
+    def X(self, x): return x * K
+    def Y(self, y): return self.t + (y - self.c) * K
 
 
 prs = Presentation(src)
 s = prs.slides[3]
 tree = s.shapes._spTree
+title_font = None
 for sh in list(s.shapes):
-    if sh.name in ("그룹 90", "그림 89"):
+    if sh.name in ("그룹 90", "그림 89", "직사각형 18"):
+        if sh.name == "직사각형 18":
+            for r in sh.text_frame.paragraphs[0].runs:
+                ea = r._r.find(".//" + qn("a:ea"))
+                title_font = (ea.get("typeface") if ea is not None else None) or r.font.name
         tree.remove(sh._element)
+title_font = title_font or F3
 
 
-def box(shape, l, t, w, h, fill=None, line=None, text=None, size=10, color=NAVY, font=F3, adj=None, dash=False, lw=0.75):
-    b = s.shapes.add_shape(shape, Inches(l), Inches(t), Inches(w), Inches(h))
+def shape(kind, l, t, w, h, fill=None, line=None, lw=0.75, adj=None, dash=False):
+    b = s.shapes.add_shape(kind, Inches(l), Inches(t), Inches(w), Inches(h))
     b.shadow.inherit = False
     if adj is not None:
         b.adjustments[0] = adj
-    if fill is None:
-        b.fill.background()
-    else:
-        b.fill.solid(); b.fill.fore_color.rgb = fill
-    if line is None:
-        b.line.fill.background()
+    if fill is None: b.fill.background()
+    else: b.fill.solid(); b.fill.fore_color.rgb = fill
+    if line is None: b.line.fill.background()
     else:
         b.line.color.rgb = line; b.line.width = Pt(lw)
-        if dash:
-            b.line.dash_style = MSO_LINE.DASH
+        if dash: b.line.dash_style = MSO_LINE.DASH
     tf = b.text_frame
-    tf.margin_left = tf.margin_right = Inches(0.04); tf.margin_top = tf.margin_bottom = Inches(0.02)
-    tf.vertical_anchor = MSO_ANCHOR.MIDDLE; tf.word_wrap = True
-    if text:
-        for i, ln in enumerate(text if isinstance(text, list) else [text]):
-            pg = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-            pg.alignment = PP_ALIGN.CENTER
-            r = pg.add_run(); r.text = ln
+    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE; tf.word_wrap = False
+    return b
+
+
+def write(b, lines, align=PP_ALIGN.CENTER):
+    """lines = [[(글, pt, 색, 서체), …], …]"""
+    tf = b.text_frame
+    for i, runs in enumerate(lines):
+        pg = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        pg.alignment = align
+        for tx, size, color, font in runs:
+            r = pg.add_run(); r.text = tx
             r.font.size = Pt(size); r.font.color.rgb = color; r.font.name = font
             rPr = r._r.get_or_add_rPr()
-            for tag in ("a:ea",):
-                from pptx.oxml.ns import qn
-                ea = rPr.find(qn(tag))
-                if ea is None:
-                    from lxml import etree
-                    ea = etree.SubElement(rPr, qn(tag))
-                ea.set("typeface", font)
+            ea = rPr.find(qn("a:ea"))
+            if ea is None: ea = etree.SubElement(rPr, qn("a:ea"))
+            ea.set("typeface", font)
     return b
 
 
@@ -91,60 +106,72 @@ def pic(path, l, t, w):
     return s.shapes.add_picture(path, Inches(l), Inches(t), width=Inches(w))
 
 
-# 하단 도시 풍경 (위쪽 흰 여백은 자르고, 맨 뒤로)
-city = pic(os.path.join(art, "city.png"), 0, 0, 10.83)
-full_h = city.height
-city.crop_top = 0.45
-city.crop_bottom = 0.18
-city.height = int(full_h * (1 - 0.27 - 0.36))
+def line(x0, y0, x1, y1, color, w=1.0):
+    c = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x0), Inches(y0), Inches(x1), Inches(y1))
+    c.line.color.rgb = color; c.line.width = Pt(w)
+    return c
+
+
+# 0) 본문 바탕(시안의 아주 옅은 파랑) + 하단 도시 풍경 — 맨 뒤
+bg = shape(MSO_SHAPE.RECTANGLE, 0, 0.87, 10.83, 6.63, fill=rgb_at(1000, 270))
+CITY_Y0 = 884
+city = pic(crop("city", 0, CITY_Y0, 2000, 1125, fade_top=70), 0, 0, 10.83)
 city.top = Inches(7.5) - city.height
-tree.remove(city._element); tree.insert(2, city._element)
+for el in (city._element, bg._element):
+    tree.remove(el); tree.insert(2, el)
 
-# 왼쪽: 노트북 + 화면 안 구성
-lp, (lw_, lh_) = cutout("laptop")
-LW = 5.3; LL, LT = 0.35, 2.22
-laptop = pic(lp, LL, LT, LW)
-LH = LW * lh_ / lw_
-im = Image.open(lp); W0, H0 = im.size
-# 화면(흰 면) 범위를 픽셀에서 읽는다: 가운데 세로줄·가로줄에서 흰 구간
-rgb = im.convert("RGB")
-cx = W0 // 2
-ys = [y for y in range(H0) if min(rgb.getpixel((cx, y))) > 245 and im.getpixel((cx, y))[3] > 0]
-y0, y1 = ys[0], [y for i, y in enumerate(ys) if i == len(ys) - 1 or ys[i + 1] != y + 1][0]
-cy = (y0 + y1) // 2
-xs = [x for x in range(W0) if min(rgb.getpixel((x, cy))) > 245 and im.getpixel((x, cy))[3] > 0]
-x0, x1 = xs[0], xs[-1]
-SL, ST = LL + LW * x0 / W0, LT + LH * y0 / H0
-SW, SH = LW * (x1 - x0) / W0, LH * (y1 - y0) / H0
-print("screen", round(SL, 2), round(ST, 2), round(SW, 2), round(SH, 2))
+# 1) 제목
+t = shape(MSO_SHAPE.RECTANGLE, 0, cy(215) - 0.3, 10.83, 0.6)
+write(t, [[("청주시 ", 27, NAVY, title_font), ("업무지원포털시스템", 27, BLUE, title_font)]])
 
-box(MSO_SHAPE.ROUNDED_RECTANGLE, SL + SW / 2 - 0.75, ST + 0.1, 1.5, 0.3, fill=PINK, text="핵심 시스템", size=11, color=WHITE, adj=0.5)
-box(MSO_SHAPE.RECTANGLE, SL, ST + 0.45, SW, 0.3, text="행정포털(굿모닝)", size=12)
-wp, (ww, wh) = cutout("woman")
-WWID = 1.25
-pic(wp, SL + 0.12, ST + SH - WWID * wh / ww - 0.04, WWID)
-CL, CT, CW = SL + SW - 1.62, ST + 0.85, 1.5
-RH = (SH - 0.85 - 0.1) / 2
-box(MSO_SHAPE.ROUNDED_RECTANGLE, CL, CT, CW, RH * 2, fill=PALE, line=SOFT, adj=0.1)
-for i, (k, v) in enumerate((("분야", "5개 분야"), ("업무", "227종"))):
-    box(MSO_SHAPE.RECTANGLE, CL, CT + RH * i, 0.5, RH, text=k, size=8, font=F2)
-    box(MSO_SHAPE.RECTANGLE, CL + 0.45, CT + RH * i, CW - 0.45, RH, text=v, size=13, color=BLUE)
+# 2) 노트북 덩어리
+g = Grp(280, 870)
+pic(crop("laptop", 40, 280, 925, 872), g.X(40), g.Y(280), 885 * K)
+shape(MSO_SHAPE.RECTANGLE, g.X(143), g.Y(312), 687 * K, 443 * K, fill=rgb_at(700, 440))
+shape(MSO_SHAPE.ROUNDED_RECTANGLE, g.X(165), g.Y(405), 645 * K, 340 * K, fill=rgb_at(500, 470), adj=0.08)
+b = shape(MSO_SHAPE.ROUNDED_RECTANGLE, g.X(343), g.Y(328), 310 * K, 67 * K, fill=rgb_at(360, 362), adj=0.5)
+write(b, [[("핵심 시스템", 16, WHITE, F3)]])
+for sx, dx in ((300, 1), (697, -1)):          # 알약 양옆 강조 선
+    for dy in (-14, 0, 14):
+        line(g.X(sx), g.Y(362 + dy * 1.4), g.X(sx + 30 * dx), g.Y(362 + dy * 0.6), PINK, 1.5)
+b = shape(MSO_SHAPE.RECTANGLE, g.X(165), g.Y(415), 645 * K, 56 * K)
+write(b, [[("행정포털", 16.5, NAVY, F3), ("(굿모닝)", 16.5, NAVY, F2)]])
+pic(crop("woman", 165, 488, 562, 747), g.X(165), g.Y(488), 397 * K)
+shape(MSO_SHAPE.ROUNDED_RECTANGLE, g.X(580), g.Y(493), 220 * K, 247 * K, fill=rgb_at(590, 600), line=rgb_at(580, 600), adj=0.1)
+line(g.X(600), g.Y(620), g.X(782), g.Y(620), rgb_at(580, 600), 0.75)
+for iy, lab, big, small in ((527, "분야", "5", "개 분야"), (645, "업무", "227", "종")):
+    pic(crop("ico%d" % iy, 601, iy - 4, 650, iy + 50), g.X(601), g.Y(iy - 4), 49 * K)
+    b = shape(MSO_SHAPE.RECTANGLE, g.X(668), g.Y(iy - 6), 120 * K, 28 * K)
+    write(b, [[(lab, 8, NAVY, F2)]], PP_ALIGN.LEFT)
+    b = shape(MSO_SHAPE.RECTANGLE, g.X(668), g.Y(iy + 24), 125 * K, 60 * K)
+    write(b, [[(big, 18, BLUE, F3), (small, 10, BLUE, F3)]], PP_ALIGN.LEFT)
 
-# 가운데 화살표
-box(MSO_SHAPE.LEFT_RIGHT_ARROW, 5.78, 3.72, 0.9, 0.62, fill=BLUE)
+# 3) 가운데 화살표
+g = Grp(462, 612)
+b = shape(MSO_SHAPE.LEFT_RIGHT_ARROW, g.X(857), g.Y(462), 251 * K, 150 * K, fill=rgb_at(980, 500))
+b.adjustments[0] = 0.62; b.adjustments[1] = 0.38
+write(b, [[("시스템 연계", 10, WHITE, F3)], [("공동 이용", 9.5, WHITE, F2)]])
 
-# 오른쪽: 사용자 조직
-RL, RT, RW, RHH = 6.8, 2.3, 3.75, 3.85
-box(MSO_SHAPE.ROUNDED_RECTANGLE, RL, RT, RW, RHH, fill=WHITE, line=RGBColor(0x78, 0xA8, 0xF0), adj=0.05, dash=True)
-box(MSO_SHAPE.ROUNDED_RECTANGLE, RL + 0.3, RT + 0.18, RW - 0.6, 0.42, fill=BLUE, text="청주시 공무원 (5,000명)", size=13, color=WHITE, adj=0.5)
-rows = ["시 본청", "4개 구청 / 보건소(상당, 서원, 청원, 흥덕)", "43개 읍면동", "16개 도서관 / 평생학습관", "사업본부 / 사업소 / 박물관 / 미술관 등"]
-pitch = 0.6; top0 = RT + 0.78
-for i, tx in enumerate(rows):
-    y = top0 + pitch * i
-    bp, (bw, bh) = cutout("b%d" % (i + 1))
-    k = min(0.6 / bw, 0.52 / bh); iw, ih = bw * k, bh * k
-    p_ = s.shapes.add_picture(bp, Inches(RL + 0.2 + (0.6 - iw) / 2), Inches(y + (0.52 - ih) / 2), height=Inches(ih))
-    box(MSO_SHAPE.ROUNDED_RECTANGLE, RL + 0.88, y + 0.08, RW - 1.06, 0.36, fill=PALE, text=tx, size=9, adj=0.5)
+# 4) 사용자 조직
+g = Grp(305, 820)
+LN = RGBColor(0x8D, 0xB8, 0xF2)
+shape(MSO_SHAPE.ROUNDED_RECTANGLE, g.X(1120), g.Y(305), 835 * K, 515 * K, line=LN, lw=1.0, adj=0.04, dash=True)
+pill = rgb_at(1240, 390)
+b = shape(MSO_SHAPE.ROUNDED_RECTANGLE, g.X(1210), g.Y(347), 660 * K, 86 * K, fill=pill, adj=0.5)
+b = shape(MSO_SHAPE.RECTANGLE, g.X(1358), g.Y(347), 500 * K, 86 * K)
+write(b, [[("청주시 공무원 ", 13, WHITE, F3), ("5,000명", 18, WHITE, F3), (" 대상", 13, WHITE, F3)]], PP_ALIGN.LEFT)
+pic(crop("people", 1262, 356, 1345, 420), g.X(1262), g.Y(356), 83 * K)
+b = shape(MSO_SHAPE.RECTANGLE, g.X(1120), g.Y(452), 835 * K, 56 * K)
+write(b, [[("사용자 조직 구성", 15, NAVY, F3)]])
+xs = [1146, 1308, 1470, 1632, 1794]; TW = 146
+line(g.X(xs[0] + TW / 2), g.Y(533), g.X(xs[-1] + TW / 2), g.Y(533), LN, 0.75)
+labels = ["시본청", "4개구청", "43개읍면동", "16개도서관", "사업소"]
+lab_fill = rgb_at(1160, 738)
+for x, lab in zip(xs, labels):
+    line(g.X(x + TW / 2), g.Y(533), g.X(x + TW / 2), g.Y(567), LN, 0.75)
+    pic(crop("tile%d" % x, x, 566, x + TW, 712), g.X(x), g.Y(566), TW * K)
+    b = shape(MSO_SHAPE.ROUNDED_RECTANGLE, g.X(x + 5), g.Y(716), (TW - 10) * K, 46 * K, fill=lab_fill, adj=0.5)
+    write(b, [[(lab, 8, NAVY, F3)]])
 
 prs.save(dst)
-print("saved", dst)
+print("saved")
