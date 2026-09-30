@@ -51,7 +51,11 @@ for n, sl in enumerate(p.slides, 1):
                 c5.set("val", WHITE); set_line(s, LINE); conv[id(s)] = (x, y, w, h, WHITE)
         for s, x, y, w, h, v in blue:
             if v == DARK and h > E and w > 2 * E:
-                fc(spPr(s)).set("val", WHITE); set_line(s, LINE); conv[id(s)] = (x, y, w, h, WHITE)
+                pass  # stage 3 body stays navy + white (emphasis, as in the reference)
+        for s, x, y, w, h in fs:
+            c5 = fc(spPr(s))
+            if c5 is not None and c5.get("val").upper() == TD and h > 4 * E:
+                c5.set("val", FACE); set_line(s, LINE)
         for s, x, y, w, h in fs:
             ln = spPr(s).find(A + "ln") if spPr(s) is not None else None
             if ln is not None and s.shape_type == 9:
@@ -59,6 +63,12 @@ for n, sl in enumerate(p.slides, 1):
                     if sc.get("val") == "bg1":
                         par = sc.getparent(); par.remove(sc); etree.SubElement(par, A + "srgbClr", val=LINE)
             if s.has_text_frame and s.text_frame.text.startswith("2004"): set_line(s, "EC1C68", 12700)
+            if s.has_text_frame and s.text_frame.text.strip().startswith("(2024"):
+                sp5 = spPr(s)
+                for t in ("solidFill", "gradFill"):
+                    for e in sp5.findall(A + t): sp5.remove(e)
+                if sp5.find(A + "noFill") is None: sp5.insert(list(sp5).index(sp5.find(A + "prstGeom")) + 1 if sp5.find(A + "prstGeom") is not None else 0, etree.Element(A + "noFill"))
+                recolor(s._element, WHITE)
     if not conv: continue
     filled = [(x, y, w, h, id(s)) for s, x, y, w, h in fs if spPr(s) is not None and (spPr(s).find(A + "solidFill") is not None or spPr(s).find(A + "gradFill") is not None)]
     for s, x, y, w, h in fs:
