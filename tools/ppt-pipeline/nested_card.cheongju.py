@@ -1,4 +1,4 @@
-"""v0.57 - a card sitting inside a group card of the same face colour gets lost.
+"""v0.61 (semi-transparent light cards too) / v0.57 - a card sitting inside a group card of the same face colour gets lost.
    inner card -> white face + dark-blue line at 60% transparency. Largest first, so only one level flips. args: src dst"""
 import sys, collections
 from lxml import etree
@@ -24,8 +24,9 @@ def face(s):
     if sp is None: return None
     sf = sp.find(A + "solidFill")
     c = sf.find(A + "srgbClr") if sf is not None else None
-    if c is None or c.find(A + "alpha") is not None: return None
-    v = c.get("val"); return tuple(int(v[i:i + 2], 16) for i in (0, 2, 4))
+    if c is None: return None
+    v = c.get("val"); t = tuple(int(v[i:i + 2], 16) for i in (0, 2, 4))
+    return t + (1,) if c.find(A + "alpha") is not None else t
 for n, sl in enumerate(p.slides, 1):
     if n in SKIP: continue
     it = []
@@ -36,13 +37,17 @@ for n, sl in enumerate(p.slides, 1):
     it.sort(key=lambda t: -t[3] * t[4])
     for i, t in enumerate(it):
         s, x, y, w, h, f, z = t
+        al = len(f) == 4; f = f[:3]
         if min(f) < 215 or f == (255, 255, 255) or w < 0.6 * E or h < 0.3 * E: continue
         best = None; T = 0.03 * E
         for c in it[:i]:
             if c[6] < z and c[1] - T <= x and c[2] - T <= y and c[1] + c[3] + T >= x + w and c[2] + c[4] + T >= y + h and c[3] * c[4] >= 1.5 * w * h:
                 if best is None or c[3] * c[4] < best[3] * best[4]: best = c
-        if best is None or max(abs(a - b) for a, b in zip(f, best[5])) > 10: continue
+        bf = best[5][:3] if best else None
+        if best is None or len(best[5]) == 4 or bf == (255, 255, 255) or min(bf) < 215: continue
+        if not al and max(abs(a - b) for a, b in zip(f, bf)) > 10: continue
         sp = s._element.find(P + "spPr"); c = sp.find(A + "solidFill").find(A + "srgbClr"); c.set("val", "FFFFFF")
+        for e in list(c): c.remove(e)
         ln = sp.find(A + "ln")
         if ln is None:
             ln = etree.Element(A + "ln", w="9525"); sp.insert(list(sp).index(sp.find(A + "solidFill")) + 1, ln)
