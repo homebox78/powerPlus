@@ -231,3 +231,10 @@ PY="C:/Users/hbox7/AppData/Local/Python/pythoncore-3.14-64/python.exe"
 ---
 
 초안을 받아 납품본까지 가는 표준 절차는 `장표제작_표준절차.md`.
+
+### 추가 (2026-09-30, v0.16)
+| 도구 | 하는 일 |
+|---|---|
+| `com_rename_swap.py` | COM 이름(Picture N)과 XML 이름(그림 N)이 달라서, 대상 그림에 고유 이름을 붙이고 set_swap 지정표를 만든다(그룹 유지) |
+| `font_replace_keep_keymsg.py` | 적용 글꼴 기준 서체 바꾸기, 키메시지(위 띠·20pt↑) 제외, 표·그룹 포함 |
+| `fill_add.py` | 허전한 자리에 투명 여백 자른 일러스트·아이콘을 가운데·바닥 좌표로 넣기 |
