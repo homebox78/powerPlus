@@ -8,8 +8,10 @@ from lxml import etree
 sys.stdout.reconfigure(encoding="utf-8")
 A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
 PAL = set("002060 255A7B 3A46A0 0456B6 1973D1 00B0F0 658EBB C0D2E6 DEEBF7 F2F7FC EB696D C00000 FF3370 "
-          "F78E3F 008400 A2AAC2 5FC8F7 404040 4D4D4D 4E5B6F D3D3D3 808080 FFFFFF 000000".split())
-FONTS = {"G마켓 산스 TTF Bold", "a시월구일2", "a시월구일3"}
+          "F78E3F 008400 A2AAC2 5FC8F7 404040 4D4D4D 4E5B6F D3D3D3 808080 FFFFFF 000000 "
+          # 청주 v0.12~v0.15 가이드 확정색(글자 2F3B6F·강조 0B2E6B·333F50·키메시지 103574/D23737·헤더 단계 0071C5→0D47A1→0B2E6B·29508C·1F4E79)
+          "2F3B6F 0B2E6B 333F50 C53030 D23737 1F4E79 103574 0071C5 0D47A1 29508C F71148 222A35".split())
+FONTS = {"G마켓 산스 TTF Bold", "a시월구일2", "a시월구일3", "a시월구일4"}  # v0.16: 키메시지 외 굵은 제목 a시월구일4
 MEMO = {"FFFF00", "FFFFCC", "FFFF99", "FFFF87"}
 p = Presentation(sys.argv[1])
 
