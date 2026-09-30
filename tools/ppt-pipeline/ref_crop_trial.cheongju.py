@@ -20,7 +20,7 @@ def cut(box,name):
     o=Image.fromarray(np.dstack([a.astype(np.uint8),al]),"RGBA"); o=o.crop(o.getbbox()); o.save(name); return o.size
 boxes=[(55,545,215,700),(255,545,445,700),(470,550,645,700),(690,550,835,700),(865,560,1000,690),(1030,550,1150,700),(1185,555,1315,695),(1340,555,1465,700)]
 sz=[cut(b,f"ti{i}.png") for i,b in enumerate(boxes)]
-ps=cut((515,92,935,322),"tpair.png"); print(sz,ps)
+ps=cut((515,104,935,322),"tpair.png"); print(sz,ps)
 p=Presentation("t37.pptx"); sl=p.slides[15]
 for s in list(sl.shapes):
     if s.shape_type==13 and s.left>8.3*E and s.top<3.2*E:
