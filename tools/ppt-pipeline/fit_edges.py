@@ -24,7 +24,13 @@ def flat(c):
     o = []
     for i in range(1, c.Count + 1):
         s = c.Item(i)
-        o += flat(s.GroupItems) if s.Type == 6 else [s]
+        if s.Type == 6:
+            try:
+                o += flat(s.GroupItems)
+            except Exception:
+                pass
+        else:
+            o.append(s)
     return o
 
 

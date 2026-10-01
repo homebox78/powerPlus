@@ -33,7 +33,13 @@ def flat(c):
     o = []
     for i in range(1, c.Count + 1):
         s = c.Item(i)
-        o += flat(s.GroupItems) if s.Type == 6 else [s]
+        if s.Type == 6:
+            try:   # 그룹 안 그룹(원본에서 복사한 것)은 GroupItems 가 오류를 낸다 → 건너뜀
+                o += flat(s.GroupItems)
+            except Exception:
+                pass
+        else:
+            o.append(s)
     return o
 
 
