@@ -438,6 +438,21 @@
       transform:translateY(8px); transition:.22s; max-width:82vw; }
     .toast--show { opacity:1; transform:none; }
     .toast--err { background:var(--bad); }
+    /* ===== MCP 연동 ===== */
+    .mcp-card { background:#fff; border:1px solid var(--s200); border-radius:var(--r); padding:16px 18px; margin-bottom:16px; }
+    .mcp-row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+    .mcp-row > label { width:72px; flex:none; font-size:12.6px; font-weight:600; color:var(--s600); }
+    .mcp-row > input, .mcp-row > .mcp-code, .mcp-row > .btn { height:34px; box-sizing:border-box; }
+    .mcp-row > input { flex:1; }
+    .mcp-code { flex:1; display:flex; align-items:center; padding:0 11px; background:var(--s50); border:1px solid var(--s200);
+      border-radius:var(--r); font:12.6px/1 "JetBrains Mono",ui-monospace,monospace; color:var(--s800); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    .mcp-new { margin-top:12px; padding:12px 14px; border-radius:var(--r); background:#fff7ed; border:1px solid #fed7aa; }
+    .mcp-new b { display:block; font-size:12.6px; color:#9a3412; margin-bottom:4px; }
+    .mcp-sub { font-size:14.1px; font-weight:700; margin-bottom:8px; }
+    .mcp-help { font-size:12.6px; color:var(--s600); margin:12px 0 6px; }
+    .mcp-pre { margin:0; padding:10px 12px; background:var(--s900); color:#e2e8f0; border-radius:var(--r);
+      font:12px/1.6 "JetBrains Mono",ui-monospace,monospace; white-space:pre-wrap; word-break:break-all; }
+    .mcp-off { color:var(--s400); }
   </style>
 </head>
 <body>
@@ -513,6 +528,13 @@
           <button class="side__link tab" data-tab="req">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>
             <span>요청</span><em class="side__n side__n--hot" id="n-req"></em>
+          </button>
+        </div>
+        <div class="side__group">
+          <div class="side__gh">연동</div>
+          <button class="side__link tab" data-tab="mcp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0zM12 16v5"/></svg>
+            <span>MCP 연동</span><em class="side__n" id="n-mcp"></em>
           </button>
         </div>
         <button class="side__fold" id="side-fold" title="메뉴 접기">‹</button>
@@ -656,6 +678,41 @@
       </div>
       <table><thead><tr><th style="width:9%">유형</th><th style="width:34%">제목 · 설명</th><th style="width:16%">요청자</th><th style="width:9%">상태</th><th style="width:12%">등록일</th><th style="width:20%"></th></tr></thead>
         <tbody id="req-rows"></tbody></table>
+    </section>
+
+    <!-- MCP 연동 탭 — 외부 솔루션·AI 클라이언트용 접속 키 -->
+    <section id="tab-mcp" class="hidden">
+      <div class="toolbar">
+        <span style="color:var(--muted);font-size:13px">외부 솔루션이나 AI 도구(Claude·Cursor 등)가 자산을 검색·조회하도록 MCP 키를 발급합니다. 읽기 전용입니다.</span>
+      </div>
+      <div class="mcp-card">
+        <div class="mcp-row">
+          <label>접속 주소</label>
+          <code class="mcp-code" id="mcp-url"></code>
+          <button class="btn btn--ghost" data-copy="mcp-url">복사</button>
+        </div>
+        <div class="mcp-row">
+          <label>새 키</label>
+          <input id="mcp-name" placeholder="연동 이름 (예: 제안서 생성기, 홍길동 Claude)" maxlength="100" />
+          <button class="btn" id="mcp-issue">발급</button>
+        </div>
+        <div class="mcp-new hidden" id="mcp-new">
+          <b>키가 발급되었습니다. 이 화면을 벗어나면 다시 볼 수 없으니 지금 복사해 두세요.</b>
+          <div class="mcp-row"><code class="mcp-code" id="mcp-key"></code><button class="btn" data-copy="mcp-key">복사</button></div>
+        </div>
+      </div>
+      <table><thead><tr><th style="width:22%">연동 이름</th><th style="width:18%">키</th><th style="width:16%">발급자</th><th style="width:11%">발급일</th><th style="width:13%">마지막 사용</th><th style="width:8%">호출</th><th style="width:12%"></th></tr></thead>
+        <tbody id="mcp-rows"></tbody></table>
+      <div class="mcp-card" style="margin-top:20px">
+        <div class="mcp-sub">연결 방법</div>
+        <div class="mcp-help">Claude Code</div>
+        <pre class="mcp-pre" id="mcp-snip-cc"></pre>
+        <div class="mcp-help">Cursor · VS Code · 그 밖의 MCP 클라이언트 (JSON 설정)</div>
+        <pre class="mcp-pre" id="mcp-snip-json"></pre>
+        <div class="mcp-help">자체 솔루션에서 직접 호출 — JSON-RPC 2.0 을 POST 로 보냅니다(무상태, 세션 없음)</div>
+        <pre class="mcp-pre" id="mcp-snip-curl"></pre>
+        <div class="mcp-help">도구: search_assets · get_asset(썸네일 이미지 포함) · similar_assets · style_set · list_categories · list_topics · suggest_keywords</div>
+      </div>
     </section>
 
     <!-- 통계 탭은 대시보드에 통합됨 (2026-07-02) -->
@@ -837,6 +894,8 @@
       $("tab-stats").classList.toggle("hidden", t.dataset.tab !== "stats");
       $("tab-ann").classList.toggle("hidden", t.dataset.tab !== "ann");
       $("tab-req").classList.toggle("hidden", t.dataset.tab !== "req");
+      $("tab-mcp").classList.toggle("hidden", t.dataset.tab !== "mcp");
+      if (t.dataset.tab === "mcp") loadMcp();
       if (t.dataset.tab === "assets") ensureAssets();
       if (t.dataset.tab === "stats") loadStats();
       if (t.dataset.tab === "ann") loadAnns();
@@ -875,6 +934,59 @@
       $("req-rows").querySelectorAll("[data-rrej]").forEach((b) => b.onclick = () => setStatus(b.dataset.rrej, "rejected"));
       $("req-rows").querySelectorAll("[data-rdel]").forEach((b) => b.onclick = async () => { if (!(await askConfirm("이 요청을 삭제할까요?"))) return; try { await api("/admin/requests/" + b.dataset.rdel, { method:"DELETE" }); await loadReqs(); toast("요청을 삭제했습니다."); } catch (e) { toast(e.message, "err"); } });
     }
+
+    /* ── MCP 연동 (외부 솔루션·AI 클라이언트 접속 키) ── */
+    const MCP_URL = new URL(API + "/../mcp", location.href).href; // api 와 같은 폴더의 /mcp (서버를 옮겨도 따라간다)
+    let mcpKeys = [], mcpShownKey = "";
+    function renderMcpSnippets() {
+      const k = mcpShownKey || "pp_mcp_발급받은키";
+      $("mcp-url").textContent = MCP_URL;
+      $("mcp-snip-cc").textContent = `claude mcp add --transport http powerplus ${MCP_URL} \\\n  --header "Authorization: Bearer ${k}"`;
+      $("mcp-snip-json").textContent = JSON.stringify({ mcpServers: { powerplus: { type: "http", url: MCP_URL, headers: { Authorization: "Bearer " + k } } } }, null, 2);
+      $("mcp-snip-curl").textContent =
+        `curl -X POST ${MCP_URL} \\\n  -H "Authorization: Bearer ${k}" -H "Content-Type: application/json" \\\n` +
+        `  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_assets","arguments":{"query":"기후위기","category":"icon","limit":5}}}'`;
+    }
+    async function loadMcp() {
+      renderMcpSnippets();
+      try {
+        mcpKeys = (await api("/admin/mcp-keys")).data || [];
+        renderMcp();
+      } catch (e) { $("mcp-rows").innerHTML = `<tr><td colspan="7" class="msg--err" style="padding:20px">${esc(e.message)}</td></tr>`; }
+    }
+    function renderMcp() {
+      const live = mcpKeys.filter((k) => !k.revoked_at).length;
+      const n = $("n-mcp"); if (n) n.textContent = live ? String(live) : "";
+      const d = (s) => esc((s || "").slice(0, 10));
+      $("mcp-rows").innerHTML = mcpKeys.length ? mcpKeys.map((k) => `<tr class="${k.revoked_at ? "mcp-off" : ""}">
+          <td><b>${esc(k.name)}</b>${k.revoked_at ? ` <span style="font-size:11px">· 폐기됨</span>` : ""}</td>
+          <td class="tc mono" style="font-size:12px">${esc(k.key_hint)}</td>
+          <td class="t-nowrap" style="font-size:12px">${esc(k.created_by || "")}</td>
+          <td class="tc mono" style="font-size:12px">${d(k.created_at)}</td>
+          <td class="tc mono" style="font-size:12px">${k.last_used_at ? esc(k.last_used_at.slice(0, 16)) : "—"}</td>
+          <td class="tc mono" style="text-align:right;font-size:12px">${Number(k.uses).toLocaleString()}</td>
+          <td class="col-actions">${k.revoked_at ? "" : `<button class="btn btn--danger" data-mrev="${k.id}">폐기</button>`}</td></tr>`).join("")
+        : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:36px">발급된 키가 없습니다.</td></tr>`;
+      $("mcp-rows").querySelectorAll("[data-mrev]").forEach((b) => b.onclick = async () => {
+        if (!(await askConfirm("이 키를 폐기할까요? 이 키를 쓰는 연동은 즉시 접속할 수 없게 됩니다."))) return;
+        try { await api("/admin/mcp-keys/" + b.dataset.mrev, { method:"DELETE" }); await loadMcp(); toast("키를 폐기했습니다."); }
+        catch (e) { toast(e.message, "err"); }
+      });
+    }
+    $("mcp-issue").onclick = async () => {
+      const name = $("mcp-name").value.trim();
+      if (!name) { toast("연동 이름을 입력하세요.", "err"); $("mcp-name").focus(); return; }
+      try {
+        const r = (await api("/admin/mcp-keys", { method:"POST", body: JSON.stringify({ name }) })).data;
+        mcpShownKey = r.key; $("mcp-key").textContent = r.key; $("mcp-new").classList.remove("hidden");
+        $("mcp-name").value = ""; await loadMcp();
+      } catch (e) { toast(e.message, "err"); }
+    };
+    $("mcp-name").addEventListener("keydown", (e) => { if (e.key === "Enter") $("mcp-issue").click(); });
+    document.querySelectorAll("[data-copy]").forEach((b) => b.onclick = async () => {
+      try { await navigator.clipboard.writeText($(b.dataset.copy).textContent); toast("복사했습니다."); }
+      catch { toast("복사하지 못했습니다. 직접 선택해 복사하세요.", "err"); }
+    });
 
     /* ── 공지 ── */
     let anns = [], editingAnnId = null;
@@ -1582,7 +1694,7 @@
 <script>
 (function () {
   "use strict";
-  var LABEL = { stats: "대시보드", assets: "자산", ann: "공지", req: "요청" };
+  var LABEL = { stats: "대시보드", assets: "자산", ann: "공지", req: "요청", mcp: "MCP 연동" };
   var now = document.getElementById("crumb-now");
   var side = document.getElementById("side");
   var shell = document.getElementById("shell");

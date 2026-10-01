@@ -179,6 +179,10 @@ if ($hasUsageEmailIdx === 0) {
     $pdo->exec("ALTER TABLE usage_log ADD INDEX idx_email (email, asset_id, used_at)");
 }
 
+// MCP 접속 키 (외부 솔루션·AI 클라이언트 연동) — 원문 대신 sha256 해시만 저장
+require_once $srcDir . '/McpKeyService.php';
+McpKeyService::ensureTable();
+
 echo "migrate OK\n";
 echo "categories:\n";
 foreach ($pdo->query("SELECT `key`,label,sort_order FROM categories ORDER BY sort_order") as $r) {

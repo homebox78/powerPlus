@@ -18,6 +18,8 @@ require_once __DIR__ . '/src/PrefsController.php';
 require_once __DIR__ . '/src/AnnouncementController.php';
 require_once __DIR__ . '/src/RequestController.php';
 require_once __DIR__ . '/src/ImageSearchController.php';
+require_once __DIR__ . '/src/McpServer.php';
+require_once __DIR__ . '/src/McpKeyService.php';
 
 // ── CORS: 알려진 출처만 허용 (운영 도메인 + 로컬 dev). 그 외엔 운영 도메인으로 고정 ──
 $allowedOrigins = array_filter([
@@ -30,7 +32,7 @@ $origin = in_array($reqOrigin, $allowedOrigins, true) ? $reqOrigin : 'https://ho
 header('Access-Control-Allow-Origin: ' . $origin);
 header('Vary: Origin');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, Mcp-Session-Id, Mcp-Protocol-Version');
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(204);
     exit;
@@ -77,6 +79,42 @@ if (preg_match('#/health$#', $path)) {
 }
 
 try {
+    // ── MCP 엔드포인트 (외부 솔루션·AI 클라이언트 연동) — MCP 키(Bearer pp_mcp_…)로 인증 ──
+    if (preg_match('#/mcp$#', $path)) {
+        (new McpServer())->handle($method, bearer_token());
+        exit;
+    }
+
+    // ── 관리자 MCP 키 발급·폐기 ──
+    if (preg_match('#/api/admin/mcp-keys(?:/(\d+))?$#', $path, $m)) {
+        $email = (new AuthService())->validateToken(bearer_token() ?? '');
+        if (!AdminController::isAdmin($email)) {
+            json_out(['error' => '관리자 권한이 필요합니다.', 'code' => 403], 403);
+            exit;
+        }
+        $ks = new McpKeyService();
+        $id = isset($m[1]) ? (int) $m[1] : 0;
+        if ($method === 'GET' && $id === 0) {
+            json_out(['data' => $ks->all()]);
+            exit;
+        }
+        if ($method === 'POST' && $id === 0) {
+            $name = trim((string) (read_json_body()['name'] ?? ''));
+            if ($name === '' || mb_strlen($name) > 100) {
+                json_out(['error' => '연동 이름을 1~100자로 입력하세요.', 'code' => 400], 400);
+                exit;
+            }
+            json_out(['data' => $ks->create($name, $email)], 201);
+            exit;
+        }
+        if ($method === 'DELETE' && $id > 0) {
+            json_out(['ok' => $ks->revoke($id)]);
+            exit;
+        }
+        json_out(['error' => 'Not Found', 'code' => 404], 404);
+        exit;
+    }
+
     // ── 공개 자산 목록/카테고리 (인증 불필요, 읽기 전용) — DeckGen 등 내부 도구 연동용 ──
     // 이미지(image_url/thumb_url)는 이미 공개 정적 파일이라 메타데이터 공개도 안전. 쓰기·삭제는 불가.
     // $public=true → 장표 원본 직링크(slide_url) 제거 + limit 상한 축소 + 검색 로그 미기록 (AssetController 참고)
