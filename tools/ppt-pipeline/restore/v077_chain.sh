@@ -19,3 +19,4 @@ python $T/vcenter_text.py $S/f12.pptx $S/f13.pptx
 python $T/fit_edges.py $S/f13.pptx $S/f14.pptx
 python $T/fit_breaks.py $S/f14.pptx $S/f15.pptx
 python $R/s34b.py $S/f15.pptx $S/f16.pptx
+python $R/s34c.py $S/f16.pptx $S/f17.pptx
