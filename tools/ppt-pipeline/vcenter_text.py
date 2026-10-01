@@ -39,7 +39,7 @@ def flat(c):
 
 def filled(s):
     try:
-        return s.Type in (1, 17) and s.Fill.Visible and s.Fill.Transparency < 0.5 and s.Width > 4 and s.Height > 4 \
+        return s.Type in (1, 17) and ((s.Fill.Visible and s.Fill.Transparency < 0.5) or (s.Line.Visible and s.Line.Weight >= 0.5 and s.Line.Transparency < 0.5)) and s.Width > 4 and s.Height > 4 \
             and not (s.Width > SW * 0.9 and s.Height > SH * 0.4)
     except Exception:
         return False
