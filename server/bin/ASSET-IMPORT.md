@@ -33,3 +33,8 @@
 4. `_retag.json` + `bin/retag-assets.php` 를 웹루트에 scp → `curl localhost/powerPlus/retag-assets.php?key=<import_key>&dry=1` 로 평균 확인 → `dry` 빼고 실적용 → 임시 파일 삭제
    - 기존 tags_ko/tags_en 과 병합(NFC·소문자 dedup, 40개 상한), `tags` = ko∪en
 5. 전후 비교는 `bin/search-audit.php`(같은 방식으로 웹루트 curl) — search_logs 무결과 (query,category) 쌍 재실행 해소율 + 아이콘 태그 밀도 + 샘플 검색
+
+## 대량 등록 뒤 확인 (2026-10-01)
+- **webp 는 건너뛴다**(png·jpg·jpeg 만) — 사진은 JPG, 투명 그림은 PNG 로 바꿔 스테이지에 넣는다.
+- **오타 교정 사전 캐시를 비운다**: 검색이 쓰는 낱말 사전(`sys_get_temp_dir()/pp_tagdict.json`)은 하루 동안 캐시된다. 새 낱말("마스코트")이 사전에 없으면 비슷한 기존 낱말("마스크")로 고쳐 버려 방금 등록한 자산이 안 잡힌다. 웹 SAPI 의 임시 폴더라 셸로는 못 지우므로, import_key 로 막은 임시 PHP 를 웹루트에 올려 `unlink` 후 바로 지운다.
+- 확인은 서버에서 `curl localhost` 로 한글 검색(로컬 git-bash curl 은 한글이 깨진다).
