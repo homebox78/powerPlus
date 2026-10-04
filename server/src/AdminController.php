@@ -9,7 +9,7 @@ require_once __DIR__ . '/Thumb.php';
 /** 관리자용 자산 CRUD. 이미지는 PNG/JPG 파일 업로드, ID는 카테고리별 자동 생성. */
 final class AdminController
 {
-    private const MAX_BYTES = 5 * 1024 * 1024;        // 이미지 5MB
+    private const MAX_BYTES = 20 * 1024 * 1024;       // 이미지 20MB(원본 그대로 저장하므로 넉넉히)
     private const MAX_SLIDE_BYTES = 40 * 1024 * 1024; // 장표(ppt/pptx) 40MB
     private AssetService $service;
     private CategoryService $categories;
@@ -178,7 +178,7 @@ final class AdminController
             return ['error' => '이미지 파일을 올려주세요 (PNG 또는 JPG).'];
         }
         if (($file['size'] ?? 0) > self::MAX_BYTES) {
-            return ['error' => '이미지가 너무 큽니다 (최대 5MB).'];
+            return ['error' => '이미지가 너무 큽니다 (최대 20MB).'];
         }
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime = finfo_file($finfo, $file['tmp_name']);
@@ -197,15 +197,7 @@ final class AdminController
         if (!@move_uploaded_file($file['tmp_name'], $absRoot . $rel)) {
             return ['error' => '파일 저장에 실패했습니다. (서버 권한 확인)'];
         }
-        // 본체도 카테고리별 최대변으로 리사이즈(원본 대용량 업로드 방지, 투명 유지) — Thumb::make 재활용
-        $maxByCat = ['icon' => 512, 'illust' => 700, 'diagram' => 900, 'photo' => 1600, 'ppt' => 900];
-        $max = $maxByCat[$category] ?? 1200;
-        $tmpResized = $absRoot . $rel . '.tmp';
-        if (Thumb::make($absRoot . $rel, $tmpResized, $max)) {
-            @rename($tmpResized, $absRoot . $rel);
-        } else {
-            @unlink($tmpResized);
-        }
+        // 본체는 올린 원본 그대로 둔다(2026-09-30 원칙). 줄여 두면 장표에 넣고 키울 때 깨진다.
         // 목록 표시용 썸네일 생성 (실패해도 원본으로 폴백되므로 치명적 아님)
         $thumbRel = Thumb::pathFor($rel);
         $thumb = Thumb::make($absRoot . $rel, $absRoot . $thumbRel, 360) ? $thumbRel : null;
